@@ -11,6 +11,9 @@
 #include <map>
 #include <string>
 
+#include <script/script.h>  // LitecoinCash: Needed for CScript
+#include <amount.h>         // LitecoinCash: Needed for CAmount
+
 namespace Consensus {
 
 enum DeploymentPos
