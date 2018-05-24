@@ -164,7 +164,7 @@
         <translation>Xác nhận mã hóa ví</translation>
     </message>
     <message>
-        <source>Warning: If you encrypt your wallet and lose your passphrase, you will &lt;b&gt;LOSE ALL OF YOUR LITECOINCASHS&lt;/b&gt;!</source>
+        <source>Warning: If you encrypt your wallet and lose your passphrase, you will &lt;b&gt;LOSE ALL OF YOUR LITECOINCASH&lt;/b&gt;!</source>
         <translation>Cảnh báo: Nếu bạn mã hóa ví và mất cụm mật khẩu, bạn sẽ &lt;b&gt;MẤT TẤT CẢ LITECOINCASH&lt;/b&gt;!</translation>
     </message>
     <message>
@@ -176,8 +176,8 @@
         <translation>Ví đã được mã hóa</translation>
     </message>
     <message>
-        <source>%1 will close now to finish the encryption process. Remember that encrypting your wallet cannot fully protect your litecoincashs from being stolen by malware infecting your computer.</source>
-        <translation>%1 sẽ đóng lúc này để kết thúc quá trình mã hóa. Nhớ rằng việc mã hóa ví không thể bảo vệ hoàn toàn số litecoincashs khỏi việc Malware lây nhiễm đến computer của bạn.</translation>
+        <source>%1 will close now to finish the encryption process. Remember that encrypting your wallet cannot fully protect your litecoincash from being stolen by malware infecting your computer.</source>
+        <translation>%1 sẽ đóng lúc này để kết thúc quá trình mã hóa. Nhớ rằng việc mã hóa ví không thể bảo vệ hoàn toàn số litecoincash khỏi việc Malware lây nhiễm đến computer của bạn.</translation>
     </message>
     <message>
         <source>IMPORTANT: Any previous backups you have made of your wallet file should be replaced with the newly generated, encrypted wallet file. For security reasons, previous backups of the unencrypted wallet file will become useless as soon as you start using the new, encrypted wallet.</source>
@@ -914,8 +914,8 @@
         <translation>Giao dịch gần đây có thể chưa được hiển thị, và vì vậy số dư wallet của bạn có thể không dúng. Thông tin này sẽ được làm đúng khi wallet hoàn thành đồng bộ với litecoincash network, như chi tiết bên dưới.</translation>
     </message>
     <message>
-        <source>Attempting to spend litecoincashs that are affected by not-yet-displayed transactions will not be accepted by the network.</source>
-        <translation>Cố gắng spend các litecoincashs bị ảnh hưởng bởi các giao dịch chưa được hiển thị sẽ không được chấp nhận bởi mạng.</translation>
+        <source>Attempting to spend litecoincash that are affected by not-yet-displayed transactions will not be accepted by the network.</source>
+        <translation>Cố gắng spend các litecoincash bị ảnh hưởng bởi các giao dịch chưa được hiển thị sẽ không được chấp nhận bởi mạng.</translation>
     </message>
     <message>
         <source>Number of blocks left</source>
@@ -2284,8 +2284,8 @@
         <translation>Xóa bỏ entry này</translation>
     </message>
     <message>
-        <source>The fee will be deducted from the amount being sent. The recipient will receive less litecoincashs than you enter in the amount field. If multiple recipients are selected, the fee is split equally.</source>
-        <translation>The fee sẽ được khấu trừ từ số tiền đang gửi. Người nhận sẽ receive ít litecoincashs hơn bạn gõ vào khoảng trống. Nếu nhiều người gửi được chọn, fee sẽ được chia đều.</translation>
+        <source>The fee will be deducted from the amount being sent. The recipient will receive less litecoincash than you enter in the amount field. If multiple recipients are selected, the fee is split equally.</source>
+        <translation>The fee sẽ được khấu trừ từ số tiền đang gửi. Người nhận sẽ receive ít litecoincash hơn bạn gõ vào khoảng trống. Nếu nhiều người gửi được chọn, fee sẽ được chia đều.</translation>
     </message>
     <message>
         <source>S&amp;ubtract fee from amount</source>
@@ -2353,8 +2353,8 @@
         <translation>&amp;Sign Tin nhắn</translation>
     </message>
     <message>
-        <source>You can sign messages/agreements with your addresses to prove you can receive litecoincashs sent to them. Be careful not to sign anything vague or random, as phishing attacks may try to trick you into signing your identity over to them. Only sign fully-detailed statements you agree to.</source>
-        <translation>Bạn có thể ký/đồng ý với địa chỉ chứng minh bạn có thể receive litecoincashs đã gửi đến chúng. Cẩn thận không ký bất cứ không rõ hay random, như các cuộc tấn công lừa đảo có thể cố lừa bạn ký tên vào danh tính của bạn.. Chỉ ký các bản tuyên bố hoàn chỉnh mà bạn đồng ý.</translation>
+        <source>You can sign messages/agreements with your addresses to prove you can receive litecoincash sent to them. Be careful not to sign anything vague or random, as phishing attacks may try to trick you into signing your identity over to them. Only sign fully-detailed statements you agree to.</source>
+        <translation>Bạn có thể ký/đồng ý với địa chỉ chứng minh bạn có thể receive litecoincash đã gửi đến chúng. Cẩn thận không ký bất cứ không rõ hay random, như các cuộc tấn công lừa đảo có thể cố lừa bạn ký tên vào danh tính của bạn.. Chỉ ký các bản tuyên bố hoàn chỉnh mà bạn đồng ý.</translation>
     </message>
     <message>
         <source>The LitecoinCash address to sign the message with</source>

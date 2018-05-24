@@ -63,7 +63,7 @@
     </message>
     <message>
         <source>These are your LitecoinCash addresses for sending payments. Always check the amount and the receiving address before sending coins.</source>
-        <translation>Dies sind Ihre LitecoinCash-Adressen zum Senden von Zahlungen. Überprüfen Sie immer die Menge und die Empfangsadresse, bevor Sie LitecoinCashs senden.</translation>
+        <translation>Dies sind Ihre LitecoinCash-Adressen zum Senden von Zahlungen. Überprüfen Sie immer die Menge und die Empfangsadresse, bevor Sie LitecoinCash senden.</translation>
     </message>
     <message>
         <source>These are your LitecoinCash addresses for receiving payments. It is recommended to use a new receiving address for each transaction.</source>
@@ -164,8 +164,8 @@
         <translation>Brieftaschenverschlüsselung bestätigen</translation>
     </message>
     <message>
-        <source>Warning: If you encrypt your wallet and lose your passphrase, you will &lt;b&gt;LOSE ALL OF YOUR LITECOINCASHS&lt;/b&gt;!</source>
-        <translation>Achtung: Wenn Sie Ihre Wallet verschlüsseln und das Passwort verlieren, gehen &lt;b&gt;alle Ihre LitecoinCashs verloren&lt;/b&gt;!</translation>
+        <source>Warning: If you encrypt your wallet and lose your passphrase, you will &lt;b&gt;LOSE ALL OF YOUR LITECOINCASH&lt;/b&gt;!</source>
+        <translation>Achtung: Wenn Sie Ihre Wallet verschlüsseln und das Passwort verlieren, gehen &lt;b&gt;alle Ihre LitecoinCash verloren&lt;/b&gt;!</translation>
     </message>
     <message>
         <source>Are you sure you wish to encrypt your wallet?</source>

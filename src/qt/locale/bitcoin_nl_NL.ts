@@ -168,8 +168,8 @@
         <translation>Bevestig portemonnee versleuteling</translation>
     </message>
     <message>
-        <source>Warning: If you encrypt your wallet and lose your passphrase, you will &lt;b&gt;LOSE ALL OF YOUR LITECOINCASHS&lt;/b&gt;!</source>
-        <translation>Waarschuwing: Als je je portemonnee versleutelt en je wachtwoord kwijtraakt, raak je &lt;b&gt;AL JE LITECOINCASHS KWIJT&lt;/b&gt;!</translation>
+        <source>Warning: If you encrypt your wallet and lose your passphrase, you will &lt;b&gt;LOSE ALL OF YOUR LITECOINCASH&lt;/b&gt;!</source>
+        <translation>Waarschuwing: Als je je portemonnee versleutelt en je wachtwoord kwijtraakt, raak je &lt;b&gt;AL JE LITECOINCASH KWIJT&lt;/b&gt;!</translation>
     </message>
     <message>
         <source>Are you sure you wish to encrypt your wallet?</source>
@@ -180,8 +180,8 @@
         <translation>Portemonnee versleuteld</translation>
     </message>
     <message>
-        <source>%1 will close now to finish the encryption process. Remember that encrypting your wallet cannot fully protect your litecoincashs from being stolen by malware infecting your computer.</source>
-        <translation>%1 zal nu sluiten om het versleutel proces te voltooien. Onthoudt dat het versleutelen van je portemonnee jouw litecoincashs niet volledig van diefstal via malware kan beschermen.</translation>
+        <source>%1 will close now to finish the encryption process. Remember that encrypting your wallet cannot fully protect your litecoincash from being stolen by malware infecting your computer.</source>
+        <translation>%1 zal nu sluiten om het versleutel proces te voltooien. Onthoudt dat het versleutelen van je portemonnee jouw litecoincash niet volledig van diefstal via malware kan beschermen.</translation>
     </message>
     <message>
         <source>IMPORTANT: Any previous backups you have made of your wallet file should be replaced with the newly generated, encrypted wallet file. For security reasons, previous backups of the unencrypted wallet file will become useless as soon as you start using the new, encrypted wallet.</source>

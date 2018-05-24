@@ -168,7 +168,7 @@
         <translation>Conferma criptaggio portafoglio</translation>
     </message>
     <message>
-        <source>Warning: If you encrypt your wallet and lose your passphrase, you will &lt;b&gt;LOSE ALL OF YOUR LITECOINCASHS&lt;/b&gt;!</source>
+        <source>Warning: If you encrypt your wallet and lose your passphrase, you will &lt;b&gt;LOSE ALL OF YOUR LITECOINCASH&lt;/b&gt;!</source>
         <translation>Attenzione: Se cripti il tuo portafoglio e perdi la password, &lt;b&gt;PERDERAI TUTTI I TUOI LITECOINCASH&lt;/b&gt;!</translation>
     </message>
     <message>
@@ -180,7 +180,7 @@
         <translation>Portafoglio criptato</translation>
     </message>
     <message>
-        <source>%1 will close now to finish the encryption process. Remember that encrypting your wallet cannot fully protect your litecoincashs from being stolen by malware infecting your computer.</source>
+        <source>%1 will close now to finish the encryption process. Remember that encrypting your wallet cannot fully protect your litecoincash from being stolen by malware infecting your computer.</source>
         <translation>%1 ora si chiuderà per concludere il processo di criptaggio. Ricorda che criptare il tuo portafoglio non può definitivamente proteggere i tuoi litecoincash da furti tramite malware che infetta il tuo computer.</translation>
     </message>
     <message>

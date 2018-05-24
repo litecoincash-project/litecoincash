@@ -168,7 +168,7 @@
         <translation>የቢትኮይን ቦርሳዎን ማመስጠር ያረጋግጡ</translation>
     </message>
     <message>
-        <source>Warning: If you encrypt your wallet and lose your passphrase, you will &lt;b&gt;LOSE ALL OF YOUR LITECOINCASHS&lt;/b&gt;!</source>
+        <source>Warning: If you encrypt your wallet and lose your passphrase, you will &lt;b&gt;LOSE ALL OF YOUR LITECOINCASH&lt;/b&gt;!</source>
         <translation>ማስጠንቀቂያ: የቢትኮይን ቦርሳዎን አመስጥረው የይለፍ-ሐረግዎን ካጡት&lt;b&gt;ቢትኮይኖቾን በሙሉ ያጣሉ&lt;/b&gt;!</translation>
     </message>
     <message>
@@ -180,7 +180,7 @@
         <translation>ቦርሳዎ ምስጢር ተደርጓል</translation>
     </message>
     <message>
-        <source>%1 will close now to finish the encryption process. Remember that encrypting your wallet cannot fully protect your litecoincashs from being stolen by malware infecting your computer.</source>
+        <source>%1 will close now to finish the encryption process. Remember that encrypting your wallet cannot fully protect your litecoincash from being stolen by malware infecting your computer.</source>
         <translation>%1 የማመስጠር ሂደቱን ለመጨረስ አሁን ይዘጋል:: ያስታውሱ፣ ኮምፒተርዎ በተንኮል አዘል ሶፍትዌር ከተበከለ ቦርሳዎን ማመስጠር ቢትኮይኖቾን ሙሉበሙሉ እንዳይሰረቁ ሊከላከል አይችልም::</translation>
     </message>
     <message>

@@ -63,7 +63,7 @@
     </message>
     <message>
         <source>These are your LitecoinCash addresses for sending payments. Always check the amount and the receiving address before sending coins.</source>
-        <translation>Detta är dina LitecoinCash adresser för att skicka betalningar. Kolla alltid summan och den mottagande adressen innan du skickar LitecoinCashs.</translation>
+        <translation>Detta är dina LitecoinCash adresser för att skicka betalningar. Kolla alltid summan och den mottagande adressen innan du skickar LitecoinCash.</translation>
     </message>
     <message>
         <source>These are your LitecoinCash addresses for receiving payments. It is recommended to use a new receiving address for each transaction.</source>
@@ -173,7 +173,7 @@ Var vänlig och försök igen.</translation>
         <translation>Bekräfta kryptering av plånbok</translation>
     </message>
     <message>
-        <source>Warning: If you encrypt your wallet and lose your passphrase, you will &lt;b&gt;LOSE ALL OF YOUR LITECOINCASHS&lt;/b&gt;!</source>
+        <source>Warning: If you encrypt your wallet and lose your passphrase, you will &lt;b&gt;LOSE ALL OF YOUR LITECOINCASH&lt;/b&gt;!</source>
         <translation>VARNING: Om du krypterar din plånbok och glömmer ditt lösenord, kommer du att &lt;b&gt;FÖRLORA ALLA DINA LITECOINCASH&lt;/b&gt;!</translation>
     </message>
     <message>
@@ -185,7 +185,7 @@ Var vänlig och försök igen.</translation>
         <translation>Plånbok krypterad</translation>
     </message>
     <message>
-        <source>%1 will close now to finish the encryption process. Remember that encrypting your wallet cannot fully protect your litecoincashs from being stolen by malware infecting your computer.</source>
+        <source>%1 will close now to finish the encryption process. Remember that encrypting your wallet cannot fully protect your litecoincash from being stolen by malware infecting your computer.</source>
         <translation>%1 kommer nu att stänga ner för att färdigställa krypteringen. Tänk på att en krypterad plånbok inte skyddar mot stöld om din dator är infekterad med en keylogger.</translation>
     </message>
     <message>
@@ -344,7 +344,7 @@ Var vänlig och försök igen.</translation>
     </message>
     <message>
         <source>Send coins to a LitecoinCash address</source>
-        <translation>Skicka litecoincashs till en LitecoinCash-adress</translation>
+        <translation>Skicka litecoincash till en LitecoinCash-adress</translation>
     </message>
     <message>
         <source>Backup wallet to another location</source>
@@ -915,8 +915,8 @@ Var vänlig och försök igen.</translation>
         <translation>Nyligen gjorda transaktioner visas inte korrekt och därför kan din plånboks saldo visas felaktigt. Denna information kommer att visas korrekt så snart din plånbok har synkroniserat klart med litecoincash nätverket enligt detaljer nedan.</translation>
     </message>
     <message>
-        <source>Attempting to spend litecoincashs that are affected by not-yet-displayed transactions will not be accepted by the network.</source>
-        <translation>Försöka sig på att spendera litecoincashs som påverkas av transaktioner som ännu inte visas kommer inte bli accepterade av nätverket. </translation>
+        <source>Attempting to spend litecoincash that are affected by not-yet-displayed transactions will not be accepted by the network.</source>
+        <translation>Försöka sig på att spendera litecoincash som påverkas av transaktioner som ännu inte visas kommer inte bli accepterade av nätverket. </translation>
     </message>
     <message>
         <source>Number of blocks left</source>
@@ -2277,8 +2277,8 @@ Var vänlig och försök igen.</translation>
         <translation>Radera denna post</translation>
     </message>
     <message>
-        <source>The fee will be deducted from the amount being sent. The recipient will receive less litecoincashs than you enter in the amount field. If multiple recipients are selected, the fee is split equally.</source>
-        <translation>Avgiften dras från beloppet som skickas. Mottagaren kommer att få mindre litecoincashs än du angivit i belopp-fältet. Om flera mottagare valts kommer avgiften delas jämt.</translation>
+        <source>The fee will be deducted from the amount being sent. The recipient will receive less litecoincash than you enter in the amount field. If multiple recipients are selected, the fee is split equally.</source>
+        <translation>Avgiften dras från beloppet som skickas. Mottagaren kommer att få mindre litecoincash än du angivit i belopp-fältet. Om flera mottagare valts kommer avgiften delas jämt.</translation>
     </message>
     <message>
         <source>S&amp;ubtract fee from amount</source>
@@ -2346,8 +2346,8 @@ Var vänlig och försök igen.</translation>
         <translation>&amp;Signera Meddelande</translation>
     </message>
     <message>
-        <source>You can sign messages/agreements with your addresses to prove you can receive litecoincashs sent to them. Be careful not to sign anything vague or random, as phishing attacks may try to trick you into signing your identity over to them. Only sign fully-detailed statements you agree to.</source>
-        <translation>Du kan underteckna meddelanden/avtal med dina adresser för att bevisa att du kan ta emot litecoincashs som skickats till dem. Var försiktig så du inte undertecknar något oklart eller konstigt, eftersom phishing-angrepp kan försöka få dig att underteckna din identitet till dem. Underteckna endast väldetaljerade meddelanden som du godkänner.</translation>
+        <source>You can sign messages/agreements with your addresses to prove you can receive litecoincash sent to them. Be careful not to sign anything vague or random, as phishing attacks may try to trick you into signing your identity over to them. Only sign fully-detailed statements you agree to.</source>
+        <translation>Du kan underteckna meddelanden/avtal med dina adresser för att bevisa att du kan ta emot litecoincash som skickats till dem. Var försiktig så du inte undertecknar något oklart eller konstigt, eftersom phishing-angrepp kan försöka få dig att underteckna din identitet till dem. Underteckna endast väldetaljerade meddelanden som du godkänner.</translation>
     </message>
     <message>
         <source>The LitecoinCash address to sign the message with</source>
@@ -2958,7 +2958,7 @@ Var vänlig och försök igen.</translation>
     <name>WalletModel</name>
     <message>
         <source>Send Coins</source>
-        <translation>Skicka LitecoinCashs</translation>
+        <translation>Skicka LitecoinCash</translation>
     </message>
     <message>
         <source>Increasing transaction fee failed</source>
@@ -3884,7 +3884,7 @@ Var vänlig och försök igen.</translation>
     </message>
     <message>
         <source>Insufficient funds</source>
-        <translation>Otillräckligt med litecoincashs</translation>
+        <translation>Otillräckligt med litecoincash</translation>
     </message>
     <message>
         <source>Loading block index...</source>
