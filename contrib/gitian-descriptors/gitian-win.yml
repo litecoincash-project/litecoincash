@@ -22,7 +22,7 @@ packages:
 - "ca-certificates"
 - "python"
 remotes:
-- "url": "https://github.com/litecoincash-project/litecoincash.git"
+- "url": "https://github.com/litecoincash-project/litecoincash-0.16.git"
   "dir": "litecoincash"
 files: []
 script: |
