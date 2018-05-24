@@ -188,7 +188,7 @@ Other changed command-line options
 
 Testing changes
 ----------------
-- The default regtest JSON-RPC port has been changed to 19443 to avoid conflict with testnet's default of 19332.
+- The default regtest JSON-RPC port has been changed to 19443 to avoid conflict with testnet's default of 62455.
 - Segwit is now always active in regtest mode by default. Thus, if you upgrade a regtest node you will need to either -reindex or use the old rules by adding `vbparams=segwit:0:999999999999` to your regtest litecoincash.conf. Failure to do this will result in a CheckBlockIndex() assertion failure that will look like: Assertion `(pindexFirstNeverProcessed != nullptr) == (pindex->nChainTx == 0)' failed.
 
 0.16.0 change log
