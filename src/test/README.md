@@ -5,42 +5,42 @@ and tests weren't explicitly disabled.
 
 After configuring, they can be run with `make check`.
 
-To run the litecoind tests manually, launch `src/test/test_litecoin`. To recompile
+To run the litecoincashd tests manually, launch `src/test/test_litecoincash`. To recompile
 after a test file was modified, run `make` and then run the test again. If you
 modify a non-test file, use `make -C src/test` to recompile only what's needed
-to run the litecoind tests.
+to run the litecoincashd tests.
 
-To add more litecoind tests, add `BOOST_AUTO_TEST_CASE` functions to the existing
+To add more litecoincashd tests, add `BOOST_AUTO_TEST_CASE` functions to the existing
 .cpp files in the `test/` directory or add new .cpp files that
 implement new BOOST_AUTO_TEST_SUITE sections.
 
-To run the litecoin-qt tests manually, launch `src/qt/test/test_litecoin-qt`
+To run the litecoincash-qt tests manually, launch `src/qt/test/test_litecoincash-qt`
 
-To add more litecoin-qt tests, add them to the `src/qt/test/` directory and
+To add more litecoincash-qt tests, add them to the `src/qt/test/` directory and
 the `src/qt/test/test_main.cpp` file.
 
 ### Running individual tests
 
-test_litecoin has some built-in command-line arguments; for
+test_litecoincash has some built-in command-line arguments; for
 example, to run just the getarg_tests verbosely:
 
-    test_litecoin --log_level=all --run_test=getarg_tests
+    test_litecoincash --log_level=all --run_test=getarg_tests
 
 ... or to run just the doubledash test:
 
-    test_litecoin --run_test=getarg_tests/doubledash
+    test_litecoincash --run_test=getarg_tests/doubledash
 
-Run `test_litecoin --help` for the full list.
+Run `test_litecoincash --help` for the full list.
 
 ### Note on adding test cases
 
 The sources in this directory are unit test cases.  Boost includes a
-unit testing framework, and since litecoin already uses boost, it makes
+unit testing framework, and since litecoincash already uses boost, it makes
 sense to simply use this framework rather than require developers to
 configure some other framework (we want as few impediments to creating
 unit tests as possible).
 
-The build system is setup to compile an executable called "test_litecoin"
+The build system is setup to compile an executable called "test_litecoincash"
 that runs all of the unit tests.  The main source file is called
 test_bitcoin.cpp, which simply includes other files that contain the
 actual unit tests (outside of a couple required preprocessor

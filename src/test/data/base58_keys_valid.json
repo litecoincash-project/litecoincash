@@ -459,7 +459,7 @@
         }
     ],
     [
-        "ltc1qw508d6qejxtdg4y5r3zarvary0c5xw7kgmn4n9",
+        "lcc1qw508d6qejxtdg4y5r3zarvary0c5xw7kgmn4n9",
         "0014751e76e8199196d454941c45d1b3a323f1433bd6",
         {
             "isPrivkey": false,
@@ -468,7 +468,7 @@
         }
     ],
     [
-        "rltc1qw508d6qejxtdg4y5r3zarvary0c5xw7k693xs3",
+        "rlcc1qw508d6qejxtdg4y5r3zarvary0c5xw7k693xs3",
         "0014751e76e8199196d454941c45d1b3a323f1433bd6",
         {
             "isPrivkey": false,
@@ -477,7 +477,7 @@
         }
     ],
     [
-        "tltc1qrp33g0q5c5txsp9arysrx4k6zdkfs4nce4xj0gdcccefvpysxf3qsnr4fp",
+        "tlcc1qrp33g0q5c5txsp9arysrx4k6zdkfs4nce4xj0gdcccefvpysxf3qsnr4fp",
         "00201863143c14c5166804bd19203356da136c985678cd4d27a1b8c6329604903262",
         {
             "isPrivkey": false,
@@ -486,7 +486,7 @@
         }
     ],
     [
-        "ltc1pw508d6qejxtdg4y5r3zarvary0c5xw7kw508d6qejxtdg4y5r3zarvary0c5xw7k0tul4w",
+        "lcc1pw508d6qejxtdg4y5r3zarvary0c5xw7kw508d6qejxtdg4y5r3zarvary0c5xw7k0tul4w",
         "5128751e76e8199196d454941c45d1b3a323f1433bd6751e76e8199196d454941c45d1b3a323f1433bd6",
         {
             "isPrivkey": false,
@@ -495,7 +495,7 @@
         }
     ],
     [
-        "ltc1sw50qzgydf5",
+        "lcc1sw50qzgydf5",
         "6002751e",
         {
             "isPrivkey": false,
@@ -504,7 +504,7 @@
         }
     ],
     [
-        "ltc1zw508d6qejxtdg4y5r3zarvaryvdzur3w",
+        "lcc1zw508d6qejxtdg4y5r3zarvaryvdzur3w",
         "5210751e76e8199196d454941c45d1b3a323",
         {
             "isPrivkey": false,
@@ -513,7 +513,7 @@
         }
     ],
     [
-        "tltc1qqqqqp399et2xygdj5xreqhjjvcmzhxw4aywxecjdzew6hylgvsesu9tmgm",
+        "tlcc1qqqqqp399et2xygdj5xreqhjjvcmzhxw4aywxecjdzew6hylgvsesu9tmgm",
         "0020000000c4a5cad46221b2a187905e5266362b99d5e91c6ce24d165dab93e86433",
         {
             "isPrivkey": false,
@@ -522,7 +522,7 @@
         }
     ],
     [
-        "rltc1qqqqqp399et2xygdj5xreqhjjvcmzhxw4aywxecjdzew6hylgvsesxuhrdn",
+        "rlcc1qqqqqp399et2xygdj5xreqhjjvcmzhxw4aywxecjdzew6hylgvsesxuhrdn",
         "0020000000c4a5cad46221b2a187905e5266362b99d5e91c6ce24d165dab93e86433",
         {
             "isPrivkey": false,

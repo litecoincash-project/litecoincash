@@ -37,7 +37,7 @@ class BumpFeeTest(BitcoinTestFramework):
                            for i in range(self.num_nodes)]
 
     def run_test(self):
-        raise SkipTest("Litecoin doesn't support RBF.")
+        raise SkipTest("LitecoinCash doesn't support RBF.")
 
         # Encrypt wallet for test_locked_wallet_fails test
         self.nodes[1].node_encrypt_wallet(WALLET_PASSPHRASE)
@@ -50,7 +50,7 @@ class BumpFeeTest(BitcoinTestFramework):
         peer_node, rbf_node = self.nodes
         rbf_node_address = rbf_node.getnewaddress()
 
-        # fund rbf node with 10 coins of 0.1 ltc (10,000,000 satoshis)
+        # fund rbf node with 10 coins of 0.1 lcc (10,000,000 satoshis)
         self.log.info("Mining blocks...")
         peer_node.generate(110)
         self.sync_all()
