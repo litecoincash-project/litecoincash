@@ -1131,14 +1131,26 @@ bool ReadBlockFromDisk(CBlock& block, const CBlockIndex* pindex, const Consensus
 
 CAmount GetBlockSubsidy(int nHeight, const Consensus::Params& consensusParams)
 {
+    // LitecoinCash: Issue premine on 1st post-fork block
+    if (nHeight == consensusParams.lastScryptBlock+1)
+        return consensusParams.premineAmount * COIN * COIN_SCALE;
+
     int halvings = nHeight / consensusParams.nSubsidyHalvingInterval;
-    // Force block reward to zero when right shift is undefined.
-    if (halvings >= 64)
+    // LitecoinCash: Force block reward to zero when right shift is undefined, and don't attempt to issue past total money supply
+    if (halvings >= 64 || nHeight >= 6215968)
         return 0;
 
-    CAmount nSubsidy = 50 * COIN;
+    CAmount nSubsidy = 50 * COIN * COIN_SCALE;
     // Subsidy is cut in half every 210,000 blocks which will occur approximately every 4 years.
     nSubsidy >>= halvings;
+
+    // LitecoinCash: Slow-start the first n blocks to prevent early miners having an unfair advantage
+    int64_t blocksSinceFork = nHeight - consensusParams.lastScryptBlock;
+    if (blocksSinceFork > 0 && blocksSinceFork < consensusParams.slowStartBlocks) {
+        CAmount incrementPerBlock = nSubsidy / consensusParams.slowStartBlocks;
+        nSubsidy = blocksSinceFork * incrementPerBlock;
+    }
+
     return nSubsidy;
 }
 
@@ -1750,6 +1762,11 @@ static unsigned int GetBlockScriptFlags(const CBlockIndex* pindex, const Consens
         flags |= SCRIPT_VERIFY_NULLDUMMY;
     }
 
+    // LitecoinCash: Enforce use of correct fork ID
+    if (pindex->nHeight > consensusparams.lastScryptBlock) {
+        flags |= SCRIPT_VERIFY_STRICTENC;
+        flags |= SCRIPT_ENABLE_SIGHASH_FORKID;
+    }
     return flags;
 }
 
@@ -1965,6 +1982,19 @@ bool CChainState::ConnectBlock(const CBlock& block, CValidationState& state, CBl
                          error("ConnectBlock(): coinbase pays too much (actual=%d vs limit=%d)",
                                block.vtx[0]->GetValueOut(), blockReward),
                                REJECT_INVALID, "bad-cb-amount");
+
+    // LitecoinCash: Ensure that lastScryptBlock+1 coinbase TX pays to the premine address
+    if (pindex->nHeight == chainparams.GetConsensus().lastScryptBlock+1) {
+        if (block.vtx[0]->vout[0].scriptPubKey.size() == 1) {
+            LogPrintf("ConnectBlock(): allowing mine\n");
+        } else if (block.vtx[0]->vout[0].scriptPubKey != chainparams.GetConsensus().premineOutputScript) {
+            return state.DoS(100,
+                error("ConnectBlock(): incorrect pubkey on pm coinbase TX (Got %s, expected %s)",
+                    HexStr(block.vtx[0]->vout[0].scriptPubKey),
+                    HexStr(chainparams.GetConsensus().premineOutputScript)),
+                REJECT_INVALID, "bad-pm-script");
+        }
+    }
 
     if (!control.Wait())
         return state.DoS(100, error("%s: CheckQueue failed", __func__), REJECT_INVALID, "block-validation-failed");
