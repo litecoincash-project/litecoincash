@@ -1,50 +1,41 @@
-Repository Tools
+LitecoinCash Core integration/staging tree
+=====================================
+
+[![Build Status](https://travis-ci.org/litecoincash-project/litecoincash.svg?branch=master)](https://travis-ci.org/litecoincash-project/litecoincash)
+
+https://litecoinca.sh
+
+What is LitecoinCash?
 ---------------------
 
-### [Developer tools](/contrib/devtools) ###
-Specific tools for developers working on this repository.
-Contains the script `github-merge.py` for merging GitHub pull requests securely and signing them using GPG.
+Litecoin Cash is a SHA256 fork of Litecoin. For full details, as well as prebuilt binaries for 
+Windows, Mac and Linux, please visit our website.
 
-### [Verify-Commits](/contrib/verify-commits) ###
-Tool to verify that every merge commit was signed by a developer using the above `github-merge.py` script.
+Litecoin Cash Core is the full node software that makes up the backbone of the LCC network.
 
-### [Linearize](/contrib/linearize) ###
-Construct a linear, no-fork, best version of the blockchain.
+License
+-------
 
-### [Qos](/contrib/qos) ###
+LitecoinCash Core is released under the terms of the MIT license. See [COPYING](COPYING) for more
+information or see https://opensource.org/licenses/MIT.
 
-A Linux bash script that will set up traffic control (tc) to limit the outgoing bandwidth for connections to the LitecoinCash network. This means one can have an always-on litecoincashd instance running, and another local litecoincashd/litecoincash-qt instance which connects to this node and receives blocks from it.
+Development Process
+-------------------
 
-### [Seeds](/contrib/seeds) ###
-Utility to generate the pnSeed[] array that is compiled into the client.
+The `master` branch is regularly built and tested, but is not guaranteed to be
+completely stable. [Tags](https://github.com/litecoincash-project/litecoincash/tags) are created
+regularly to indicate new official, stable release versions of LitecoinCash Core.
 
-Build Tools and Keys
----------------------
+To contact the developers, please use the community channels shown on our website.
 
-### [Debian](/contrib/debian) ###
-Contains files used to package litecoincashd/litecoincash-qt
-for Debian-based Linux systems. If you compile litecoincashd/litecoincash-qt yourself, there are some useful files here.
+Translations
+------------
 
-### [Gitian-descriptors](/contrib/gitian-descriptors) ###
-Files used during the gitian build process. For more information about gitian, see the [the Bitcoin Core documentation repository](https://github.com/bitcoin-core/docs).
+We only accept translation fixes that are submitted through [Bitcoin Core's Transifex page](https://www.transifex.com/projects/p/bitcoin/).
+Translations are converted to LitecoinCash periodically.
 
-### [Gitian-keys](/contrib/gitian-keys)
-PGP keys used for signing LitecoinCash Core [Gitian release](/doc/release-process.md) results.
+Translations are periodically pulled from Transifex and merged into the git repository. See the
+[translation process](doc/translation_process.md) for details on how this works.
 
-### [MacDeploy](/contrib/macdeploy) ###
-Scripts and notes for Mac builds. 
-
-### [RPM](/contrib/rpm) ###
-RPM spec file for building blitecoincash-core on RPM based distributions.
-
-### [Gitian-build](/contrib/gitian-build.sh) ###
-Script for running full Gitian builds.
-
-Test and Verify Tools 
----------------------
-
-### [TestGen](/contrib/testgen) ###
-Utilities to generate test vectors for the data-driven LitecoinCash tests.
-
-### [Verify Binaries](/contrib/verifybinaries) ###
-This script attempts to download and verify the signature file SHA256SUMS.asc from litecoincash.org.
+**Important**: We do not accept translation changes as GitHub pull requests because the next
+pull from Transifex would automatically overwrite them again.

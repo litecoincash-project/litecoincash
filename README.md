@@ -3,7 +3,7 @@ LitecoinCash Core integration/staging tree
 
 [![Build Status](https://travis-ci.org/litecoincash-project/litecoincash.svg?branch=master)](https://travis-ci.org/litecoincash-project/litecoincash)
 
-https://litecoincash.org
+https://litecoinca.sh
 
 What is LitecoinCash?
 ----------------
@@ -15,7 +15,7 @@ out collectively by the network. LitecoinCash Core is the name of open source
 software which enables the use of this currency.
 
 For more information, as well as an immediately useable, binary version of
-the LitecoinCash Core software, see [https://litecoincash.org](https://litecoincash.org).
+the LitecoinCash Core software, see [https://litecoinca.sh](https://litecoinca.sh).
 
 License
 -------
