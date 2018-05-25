@@ -231,7 +231,7 @@ CTxMemPool mempool(&feeEstimator);
 /** Constant stuff for coinbase transactions we create: */
 CScript COINBASE_FLAGS;
 
-const std::string strMessageMagic = "LitecoinCash Signed Message:\n";
+const std::string strMessageMagic = "Litecoin Signed Message:\n";   // LitecoinCash: Should still use LTC's strMessageMagic so that pre-fork sigs validate
 
 // Internal stuff
 namespace {
