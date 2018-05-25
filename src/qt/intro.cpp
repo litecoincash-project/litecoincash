@@ -126,8 +126,8 @@ Intro::Intro(QWidget *parent) :
     ui->lblExplanation1->setText(ui->lblExplanation1->text()
         .arg(tr(PACKAGE_NAME))
         .arg(BLOCK_CHAIN_SIZE)
-        .arg(2009)
-        .arg(tr("LitecoinCash"))
+        .arg(2011)              // LitecoinCash: Fix parent coin year
+        .arg(tr("Litecoin"))    // LitecoinCash: Fix parent coin name
     );
     ui->lblExplanation2->setText(ui->lblExplanation2->text().arg(tr(PACKAGE_NAME)));
 
