@@ -2547,7 +2547,7 @@ void CWallet::SelectStakeQualifiedCoins(const std::vector<COutput>& vAvailableCo
             for (unsigned int i = 0; i < pcoin->tx->vout.size(); i++)
                 if (!(IsSpent(wtxid,i)) && IsMine(pcoin->tx->vout[i]) && pcoin->tx->vout[i].nValue >= consensus.minStakeQualValue) {
                     coinAgeFound += pcoin->tx->vout[i].nValue * nDepth;
-                    vCoins.push_back(COutput(pcoin, i, nDepth, true, (IsMine(pcoin->tx->vout[i]) & (ISMINE_SPENDABLE)) != ISMINE_NO));
+                    vCoins.push_back(COutput(pcoin, i, nDepth, true, (IsMine(pcoin->tx->vout[i]) & (ISMINE_SPENDABLE)) != ISMINE_NO, true));
                 }
         }
     }
