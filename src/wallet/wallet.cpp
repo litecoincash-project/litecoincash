@@ -2522,8 +2522,8 @@ bool CWallet::SelectCoinsMinConf(const CAmount& nTargetValue, const int nConfMin
     return true;
 }
 
- // LitecoinCash: Initial SQPOW
-void CWallet::SelectStakeQualifiedCoins(const std::vector<COutput>& vAvailableCoins) const
+// LitecoinCash: Initial SQPOW
+void CWallet::SelectStakeQualifiedCoins(const std::vector<COutput>& vAvailableCoins, uint64_t coinAgeNeeded) const
 {
     std::vector<COutput> vCoins(vAvailableCoins);
     const Consensus::Params& consensus = Params().GetConsensus();
@@ -2549,6 +2549,9 @@ void CWallet::SelectStakeQualifiedCoins(const std::vector<COutput>& vAvailableCo
                     coinAgeFound += pcoin->tx->vout[i].nValue * nDepth;
                     vCoins.push_back(COutput(pcoin, i, nDepth, true, (IsMine(pcoin->tx->vout[i]) & (ISMINE_SPENDABLE)) != ISMINE_NO, true));
                 }
+
+            if (coinAgeFound > coinAgeNeeded)
+                return true;
         }
     }
 }

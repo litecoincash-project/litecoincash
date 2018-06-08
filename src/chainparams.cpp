@@ -105,13 +105,15 @@ public:
         consensus.vDeployments[Consensus::DEPLOYMENT_SEGWIT].nTimeout = 1517356801; // January 31st, 2018
 
         // LitecoinCash fields
-        consensus.powForkTime = POW_FORK_TIME;              // Time of PoW hash method change
-        consensus.lastScryptBlock = LAST_SCRYPT_BLOCK;      // Height of last scrypt block
+        consensus.powForkTime = POW_FORK_TIME;                              // Time of PoW hash method change
+        consensus.lastScryptBlock = LAST_SCRYPT_BLOCK;                      // Height of last scrypt block
         consensus.powLimitSHA = uint256S("00000000ffffffffffffffffffffffffffffffffffffffffffffffffffffffff");   // Initial hash target at fork
-        consensus.slowStartBlocks = 2000;                    // Scale post-fork block reward up over this many blocks
-        consensus.premineAmount = 550000;                   // Premine amount (less than 1% of issued currency at fork time)
+        consensus.slowStartBlocks = 2000;                                   // Scale post-fork block reward up over this many blocks
+        consensus.premineAmount = 550000;                                   // Premine amount (less than 1% of issued currency at fork time)
         std::vector<unsigned char> vch = ParseHex("76a914c9f3305556963e2976ccf3348b89a6cc736b6a4e88ac");
-        consensus.premineOutputScript = CScript(vch.begin(), vch.end());	// Output script for premine block
+        consensus.premineOutputScript = CScript(vch.begin(), vch.end());    // Output script for premine block
+        consensus.minStakeQualValue = 1 * COIN;                             // SQPOW: Minimum value of an output to be considered as valid stake
+        consensus.minStakeQualDepth = 20;                                   // SQPOW: Minimum depth of a transaction to be considered as valid stake
 
         // The best chain should have at least this much work.
         consensus.nMinimumChainWork = uint256S("0x0000000000000000000000000000000000000000000000401b101e2e526d5821");  // LitecoinCash: At LAST_SCRYPT_BLOCK+1
@@ -228,6 +230,8 @@ public:
         consensus.premineAmount = 550000;                   // Premine amount (less than 1% of issued currency at fork time)
         std::vector<unsigned char> vch = ParseHex("76a914c9f3305556963e2976ccf3348b89a6cc736b6a4e88ac");
         consensus.premineOutputScript = CScript(vch.begin(), vch.end());        // Output script for premine block
+        consensus.minStakeQualValue = 1 * COIN;             // SQPOW: Minimum value of an output to be considered as valid stake
+        consensus.minStakeQualDepth = 4;                    // SQPOW: Minimum depth of a transaction to be considered as valid stake     
         
         // The best chain should have at least this much work.
         consensus.nMinimumChainWork = uint256S("0x00000000000000000000000000000000000000000000003b68f02ca48530a788");  // LitecoinCash: 1366831
