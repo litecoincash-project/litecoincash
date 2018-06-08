@@ -3040,7 +3040,7 @@ UniValue listunspent(const JSONRPCRequest& request)
 }
 
 // LitecoinCash: RPC method to demonstrate generation of legal stake qualifier transaction
-UniValue createstakequaltransaction(const JSONRPCRequest& request)
+UniValue createsqtransaction(const JSONRPCRequest& request)
 {   
     CWallet * const pwallet = GetWalletForJSONRPCRequest(request);
     if (!EnsureWalletIsAvailable(pwallet, request.fHelp)) {
@@ -3569,7 +3569,8 @@ extern UniValue rescanblockchain(const JSONRPCRequest& request);
 
 static const CRPCCommand commands[] =
 { //  category              name                        actor (function)           argNames
-    //  --------------------- ------------------------    -----------------------  ----------
+    //  --------------------- ------------------------  -----------------------  ----------
+    { "rawtransactions",    "createsqtransaction",      &createsqtransaction,      {"coinagerequired", "options"} },  // LitecoinCash: Add new RPC method to array
     { "rawtransactions",    "fundrawtransaction",       &fundrawtransaction,       {"hexstring","options","iswitness"} },
     { "hidden",             "resendwallettransactions", &resendwallettransactions, {} },
     { "wallet",             "abandontransaction",       &abandontransaction,       {"txid"} },
