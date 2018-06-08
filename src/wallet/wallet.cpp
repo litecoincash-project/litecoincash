@@ -2527,7 +2527,8 @@ bool CWallet::GetSQPOWTransaction(uint64_t coinAgeNeeded, CMutableTransaction& t
 {
     txStakeQualifier.vin.clear();
     txStakeQualifier.vout.clear();
-    CScript scriptPubKey = NULL;
+    CScript scriptPubKey;
+    scriptPubKey.SetNull();
     uint64_t coinAgeFound = 0;
     const Consensus::Params& consensus = Params().GetConsensus();
     
@@ -2570,7 +2571,7 @@ bool CWallet::GetSQPOWTransaction(uint64_t coinAgeNeeded, CMutableTransaction& t
                 txStakeQualifier.vin.push_back(CTxIn(txToCheck->tx->GetHash(), i));
 
                 // Consensus rule: Stake qualifier must pay back to the scriptPubKey of the first input used, so set the output if we haven't already.
-                if (scriptPubKey == NULL)
+                if (scriptPubKey.IsNull())
                     txStakeQualifier.vout.push_back(CTxOut(0, txToCheck->tx->vout[i].scriptPubKey));
                 
                 // Stop if we've found enough coin age
