@@ -2529,15 +2529,14 @@ bool CWallet::GetStakeQualifierTransaction(uint64_t coinAgeNeeded, CMutableTrans
     txStakeQualifier.vout.clear();
 
     // Mark tx as a stake qualifier: 1st output is empty
-    /*
     txStakeQualifier.vout.resize(1);
     txStakeQualifier.vout[0].scriptPubKey.clear();
     txStakeQualifier.vout[0].nValue = 0;
-    */
 
     CScript scriptPubKey;
     bool scriptPubKeySet = false;
     uint64_t coinAgeFound = 0;
+    uint64_t coinValueFound = 0;
     const Consensus::Params& consensus = Params().GetConsensus();
     
     {
@@ -2574,19 +2573,23 @@ bool CWallet::GetStakeQualifierTransaction(uint64_t coinAgeNeeded, CMutableTrans
 
                 // Looks good; add its coin age
                 coinAgeFound += txToCheck->tx->vout[i].nValue * nDepth;
+                coinValueFound += txToCheck->tx->vout[i].nValue;
                 
                 // Add it as an input to the stake qualifier tx
                 txStakeQualifier.vin.push_back(CTxIn(txToCheck->tx->GetHash(), i));
 
                 // Consensus rule: Stake qualifier must pay back to the scriptPubKey of the first input used, so set the output if we haven't already.
                 if (!scriptPubKeySet) {
-                    txStakeQualifier.vout.push_back(CTxOut(0, txToCheck->tx->vout[i].scriptPubKey));
+                    scriptPubKey = txToCheck->tx->vout[i].scriptPubKey;
                     scriptPubKeySet = true;
                 }
                 
                 // Stop if we've found enough coin age
-                if (coinAgeFound > coinAgeNeeded)                    
+                if (coinAgeFound > coinAgeNeeded) {
+                    // Send the full value found back to the first input we used
+                    txStakeQualifier.vout.push_back(CTxOut(coinValueFound, scriptPubKey));
                     return true;
+                }
             }
         }
     }
