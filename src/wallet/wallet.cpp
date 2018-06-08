@@ -2523,17 +2523,18 @@ bool CWallet::SelectCoinsMinConf(const CAmount& nTargetValue, const int nConfMin
 }
 
 // LitecoinCash: Initial SQPOW
-bool CWallet::GetSQPOWTransaction(uint64_t coinAgeNeeded, CMutableTransaction& txNew)
+bool CWallet::GetSQPOWTransaction(uint64_t coinAgeNeeded, CMutableTransaction& txStakeQualifier)
 {
-    txNew.vin.clear();
-    txNew.vout.clear();
-
+    txStakeQualifier.vin.clear();
+    txStakeQualifier.vout.clear();
+    CScript scriptPubKey = NULL;
+    uint64_t coinAgeFound = 0;
     const Consensus::Params& consensus = Params().GetConsensus();
     
     {
         LOCK2(cs_main, cs_wallet);
-        
-        uint64_t coinAgeFound = 0;
+
+        // Iterate all wallet transactions looking for usable coin age    
         for (std::map<uint256, CWalletTx>::const_iterator it = mapWallet.begin(); it != mapWallet.end(); ++it)
         {
             const uint256& txHash = it->first;
@@ -2543,30 +2544,38 @@ bool CWallet::GetSQPOWTransaction(uint64_t coinAgeNeeded, CMutableTransaction& t
             if (txToCheck->isAbandoned())
                 continue;
             
-            // Ensure depth is valid
+            // Ensure maturity
             if (txToCheck->GetBlocksToMaturity() > 0)
                 continue;
 
+            // Ensure depth (age) exceeds minimum
             int nDepth = txToCheck->GetDepthInMainChain();
             if (nDepth < consensus.minStakeQualDepth)
                 continue;
 
             // Check each output
             for (unsigned int i = 0; i < txToCheck->tx->vout.size(); i++) {
-                if(IsSpent(txHash,i))
+                // Skip if output isn't viable
+                if(IsSpent(txHash,i))                                               // Already spent?
                     continue;
-                if(!IsMine(txToCheck->tx->vout[i]))
+                if(!IsMine(txToCheck->tx->vout[i]))                                 // Not mine?
                     continue;
-                if(txToCheck->tx->vout[i].nValue < consensus.minStakeQualValue)
+                if(txToCheck->tx->vout[i].nValue < consensus.minStakeQualValue)     // Value too low?
                     continue;
 
+                // Looks good; add its coin age
                 coinAgeFound += txToCheck->tx->vout[i].nValue * nDepth;
+                
+                // Add it as an input to the stake qualifier tx
+                txStakeQualifier.vin.push_back(CTxIn(txToCheck->tx->GetHash(), i));
 
-                txNew.vin.push_back(CTxIn(txToCheck->tx->GetHash(), i));
-                if (coinAgeFound > coinAgeNeeded) {
-                    txNew.vout.push_back(CTxOut(0, scriptPubKeyOut));   // Note: could use first/last txToCheck->tx->vout[i].scriptPubKey we saw...
+                // Consensus rule: Stake qualifier must pay back to the scriptPubKey of the first input used, so set the output if we haven't already.
+                if (scriptPubKey == NULL)
+                    txStakeQualifier.vout.push_back(CTxOut(0, txToCheck->tx->vout[i].scriptPubKey));
+                
+                // Stop if we've found enough coin age
+                if (coinAgeFound > coinAgeNeeded)                    
                     return true;
-                }    
             }
         }
     }
