@@ -2523,9 +2523,11 @@ bool CWallet::SelectCoinsMinConf(const CAmount& nTargetValue, const int nConfMin
 }
 
 // LitecoinCash: Initial SQPOW
-void CWallet::SelectStakeQualifiedCoins(const std::vector<COutput>& vAvailableCoins, uint64_t coinAgeNeeded) const
+bool CWallet::GetSQPOWTransaction(uint64_t coinAgeNeeded, CMutableTransaction& txNew)
 {
-    std::vector<COutput> vCoins(vAvailableCoins);
+    txNew.vin.clear();
+    txNew.vout.clear();
+
     const Consensus::Params& consensus = Params().GetConsensus();
     
     {
@@ -2534,26 +2536,39 @@ void CWallet::SelectStakeQualifiedCoins(const std::vector<COutput>& vAvailableCo
         uint64_t coinAgeFound = 0;
         for (std::map<uint256, CWalletTx>::const_iterator it = mapWallet.begin(); it != mapWallet.end(); ++it)
         {
-            const CWalletTx* pcoin = &it->second;
             const uint256& wtxid = it->first;
-
+            const CWalletTx* tx = &it->second;
+            
+            // Skip abandoned tx
             if (pcoin->isAbandoned())
                 continue;
 
+            // Ensure depth is valid
             int nDepth = pcoin->GetDepthInMainChain();
             if (nDepth < consensus.minStakeQualDepth)
                 continue;
 
-            for (unsigned int i = 0; i < pcoin->tx->vout.size(); i++)
-                if (!(IsSpent(wtxid,i)) && IsMine(pcoin->tx->vout[i]) && pcoin->tx->vout[i].nValue >= consensus.minStakeQualValue) {
-                    coinAgeFound += pcoin->tx->vout[i].nValue * nDepth;
-                    vCoins.push_back(COutput(pcoin, i, nDepth, true, (IsMine(pcoin->tx->vout[i]) & (ISMINE_SPENDABLE)) != ISMINE_NO, true));
-                }
+            // Check each output
+            for (unsigned int i = 0; i < pcoin->tx->vout.size(); i++) {
+                if(IsSpent(wtxid,i))
+                    continue;
+                if(!IsMine(pcoin->tx->vout[i]))
+                    continue;
+                if(pcoin->tx->vout[i].nValue < consensus.minStakeQualValue)
+                    continue;
 
-            if (coinAgeFound > coinAgeNeeded)
-                return true;
+                coinAgeFound += pcoin->tx->vout[i].nValue * nDepth;
+
+                txNew.vin.push_back(CTxIn(pcoin->tx->GetHash(), i));
+                if (coinAgeFound > coinAgeNeeded) {
+                    txNew.vout.push_back(CTxOut(0, scriptPubKeyOut));   // Note: could use first/last pcoin->tx->vout[i].scriptPubKey we saw...
+                    return true;
+                }    
+            }
         }
     }
+
+    return false;
 }
 
 bool CWallet::SelectCoins(const std::vector<COutput>& vAvailableCoins, const CAmount& nTargetValue, std::set<CInputCoin>& setCoinsRet, CAmount& nValueRet, const CCoinControl* coinControl) const
