@@ -2523,7 +2523,7 @@ bool CWallet::SelectCoinsMinConf(const CAmount& nTargetValue, const int nConfMin
 }
 
 // LitecoinCash: Initial SQPOW
-bool CWallet::GetSQPOWTransaction(uint64_t coinAgeNeeded, CMutableTransaction& txStakeQualifier)
+bool CWallet::GetStakeQualifierTransaction(uint64_t coinAgeNeeded, CMutableTransaction& txStakeQualifier)
 {
     txStakeQualifier.vin.clear();
     txStakeQualifier.vout.clear();
