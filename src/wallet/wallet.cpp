@@ -2526,7 +2526,7 @@ bool CWallet::SelectCoinsMinConf(const CAmount& nTargetValue, const int nConfMin
 void CWallet::SelectStakeQualifiedCoins(const std::vector<COutput>& vAvailableCoins) const
 {
     std::vector<COutput> vCoins(vAvailableCoins);
-    const Consensus::Params consensus& = Params().GetConsensus();
+    const Consensus::Params& consensus = Params().GetConsensus();
 
     {
         LOCK2(cs_main, cs_wallet);
