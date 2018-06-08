@@ -2523,7 +2523,7 @@ bool CWallet::SelectCoinsMinConf(const CAmount& nTargetValue, const int nConfMin
 }
 
  // LitecoinCash: Initial SQPOW
-void CWallet::SelectStakeQualifiedCoins(vector<COutput>& vCoins, unsigned int nSpendTime) const
+void CWallet::SelectStakeQualifiedCoins(const std::vector<COutput>& vCoins, unsigned int nSpendTime) const
 {
     vCoins.clear();
 

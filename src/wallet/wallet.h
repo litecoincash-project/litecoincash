@@ -680,7 +680,7 @@ private:
      * if they are not ours
      */
     bool SelectCoins(const std::vector<COutput>& vAvailableCoins, const CAmount& nTargetValue, std::set<CInputCoin>& setCoinsRet, CAmount& nValueRet, const CCoinControl *coinControl = nullptr) const;
-    void IterateCoins(std::vector<COutput>& vCoins, unsigned int nSpendTime) const; // LitecoinCash: Initial SQPOW
+    void SelectStakeQualifiedCoins(const std::vector<COutput>& vCoins, unsigned int nSpendTime) const; // LitecoinCash: Initial SQPOW
 
     CWalletDB *pwalletdbEncryption;
 
