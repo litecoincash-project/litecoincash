@@ -2536,32 +2536,35 @@ bool CWallet::GetSQPOWTransaction(uint64_t coinAgeNeeded, CMutableTransaction& t
         uint64_t coinAgeFound = 0;
         for (std::map<uint256, CWalletTx>::const_iterator it = mapWallet.begin(); it != mapWallet.end(); ++it)
         {
-            const uint256& wtxid = it->first;
-            const CWalletTx* tx = &it->second;
+            const uint256& txHash = it->first;
+            const CWalletTx* txToCheck = &it->second;
             
             // Skip abandoned tx
-            if (pcoin->isAbandoned())
+            if (txToCheck->isAbandoned())
+                continue;
+            
+            // Ensure depth is valid
+            if (txToCheck->GetBlocksToMaturity() > 0)
                 continue;
 
-            // Ensure depth is valid
-            int nDepth = pcoin->GetDepthInMainChain();
+            int nDepth = txToCheck->GetDepthInMainChain();
             if (nDepth < consensus.minStakeQualDepth)
                 continue;
 
             // Check each output
-            for (unsigned int i = 0; i < pcoin->tx->vout.size(); i++) {
-                if(IsSpent(wtxid,i))
+            for (unsigned int i = 0; i < txToCheck->tx->vout.size(); i++) {
+                if(IsSpent(txHash,i))
                     continue;
-                if(!IsMine(pcoin->tx->vout[i]))
+                if(!IsMine(txToCheck->tx->vout[i]))
                     continue;
-                if(pcoin->tx->vout[i].nValue < consensus.minStakeQualValue)
+                if(txToCheck->tx->vout[i].nValue < consensus.minStakeQualValue)
                     continue;
 
-                coinAgeFound += pcoin->tx->vout[i].nValue * nDepth;
+                coinAgeFound += txToCheck->tx->vout[i].nValue * nDepth;
 
-                txNew.vin.push_back(CTxIn(pcoin->tx->GetHash(), i));
+                txNew.vin.push_back(CTxIn(txToCheck->tx->GetHash(), i));
                 if (coinAgeFound > coinAgeNeeded) {
-                    txNew.vout.push_back(CTxOut(0, scriptPubKeyOut));   // Note: could use first/last pcoin->tx->vout[i].scriptPubKey we saw...
+                    txNew.vout.push_back(CTxOut(0, scriptPubKeyOut));   // Note: could use first/last txToCheck->tx->vout[i].scriptPubKey we saw...
                     return true;
                 }    
             }
