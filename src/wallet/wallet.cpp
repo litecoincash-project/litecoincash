@@ -2529,7 +2529,6 @@ bool CWallet::GetSQPOWTransaction(uint64_t coinAgeNeeded, CMutableTransaction& t
     txStakeQualifier.vout.clear();
     CScript scriptPubKey;
     bool scriptPubKeySet = false;
-    scriptPubKey.SetNull();
     uint64_t coinAgeFound = 0;
     const Consensus::Params& consensus = Params().GetConsensus();
     
