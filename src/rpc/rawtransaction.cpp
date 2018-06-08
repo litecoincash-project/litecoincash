@@ -314,6 +314,35 @@ UniValue verifytxoutproof(const JSONRPCRequest& request)
     return res;
 }
 
+UniValue createstakequaltransaction(const JSONRPCRequest& request)
+{
+    if (request.fHelp || request.params.size() != 1)
+        throw std::runtime_error(
+            "createstakequaltransaction \"coinagerequired\"\n"
+            "\nReturn a JSON object representing the serialized, hex-encoded transaction.\n"
+
+            "\nArguments:\n"
+            "1. \"coinagerequired\"       (numeric, required) The required coin age\n"
+            
+            "\nResult:\n"
+            "\"transaction\"              (string) hex string of the transaction\n"
+
+            "\nExamples:\n"
+            + HelpExampleCli("createstakequaltransaction", "\"234854\"")
+        );
+
+    RPCTypeCheck(request.params, {UniValue::VNUM}, true);
+    if (request.params[0].isNull())
+        throw JSONRPCError(RPC_INVALID_PARAMETER, "Invalid parameter, argument 1 must be non-null");
+    uint64_t nLockTime = request.params[0].get_uint64();
+
+    CMutableTransaction rawTx;
+    if (wallet.GetSQPOWTransaction(coinAgeRequired, rawTx));
+        return EncodeHexTx(rawTx);
+    else
+        throw JSONRPCError(RPC_WALLET_INSUFFICIENT_FUNDS, "Insufficient coin age");
+}
+
 UniValue createrawtransaction(const JSONRPCRequest& request)
 {
     if (request.fHelp || request.params.size() < 2 || request.params.size() > 4)
