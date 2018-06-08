@@ -2522,6 +2522,41 @@ bool CWallet::SelectCoinsMinConf(const CAmount& nTargetValue, const int nConfMin
     return true;
 }
 
+ // LitecoinCash: Initial SQPOW
+void CWallet::SelectStakeQualifiedCoins(vector<COutput>& vCoins, unsigned int nSpendTime) const
+{
+    vCoins.clear();
+
+    {
+        LOCK2(cs_main, cs_wallet);
+        for (map<uint256, CWalletTx>::const_iterator it = mapWallet.begin(); it != mapWallet.end(); ++it)
+        {
+            const CWalletTx* pcoin = &(*it).second;
+            const uint256& wtxid = it->first;
+
+            // Filtering by tx timestamp instead of block timestamp may give false positives but never false negatives
+            if (pcoin->nTime + Params().GetConsensus().nStakeMinAge > nSpendTime)
+                continue;
+
+            if (pcoin->GetBlocksToMaturity() > 0)
+                continue;
+
+            if (pcoin->isAbandoned())
+                continue;
+
+            int nDepth = pcoin->GetDepthInMainChain();
+            if (nDepth < 1)
+                continue;
+
+            for (unsigned int i = 0; i < pcoin->vout.size(); i++)
+                if (!(IsSpent(wtxid,i)) && IsMine(pcoin->vout[i]) && pcoin->vout[i].nValue >= nMinimumInputValue){
+                    vCoins.push_back(COutput(pcoin, i, nDepth, true,
+                                           (IsMine(pcoin->vout[i]) & (ISMINE_SPENDABLE)) != ISMINE_NO));
+                }
+        }
+    }
+}
+
 bool CWallet::SelectCoins(const std::vector<COutput>& vAvailableCoins, const CAmount& nTargetValue, std::set<CInputCoin>& setCoinsRet, CAmount& nValueRet, const CCoinControl* coinControl) const
 {
     std::vector<COutput> vCoins(vAvailableCoins);
