@@ -3049,7 +3049,7 @@ UniValue createsqtransaction(const JSONRPCRequest& request)
 
     if (request.fHelp || request.params.size() != 1)
         throw std::runtime_error(
-            "createstakequaltransaction \"coinagerequired\"\n"
+            "createsqtransaction \"coinagerequired\"\n"
             "\nGenerate a stake qualifier transaction that meets required coin age.\nReturn a JSON object representing the serialized, hex-encoded transaction.\n"
 
             "\nArguments:\n"
@@ -3059,12 +3059,12 @@ UniValue createsqtransaction(const JSONRPCRequest& request)
             "\"transaction\"              (string) hex string of the transaction\n"
 
             "\nExamples:\n"
-            + HelpExampleCli("createstakequaltransaction", "\"234854\"")
+            + HelpExampleCli("createsqtransaction", "\"234854\"")
         );
 
-    RPCTypeCheck(request.params, {UniValue::VNUM}, true);
     if (request.params[0].isNull())
         throw JSONRPCError(RPC_INVALID_PARAMETER, "Invalid parameter, argument 1 must be non-null");
+    RPCTypeCheckArgument(request.params[0], UniValue::VNUM);
     uint64_t coinAgeRequired = (uint64_t)request.params[0].get_int64();
 
     CMutableTransaction rawTx;
@@ -3570,7 +3570,7 @@ extern UniValue rescanblockchain(const JSONRPCRequest& request);
 static const CRPCCommand commands[] =
 { //  category              name                        actor (function)           argNames
     //  --------------------- ------------------------  -----------------------  ----------
-    { "rawtransactions",    "createsqtransaction",      &createsqtransaction,      {"coinagerequired", "options"} },  // LitecoinCash: Add new RPC method to array
+    { "rawtransactions",    "createsqtransaction",      &createsqtransaction,      {"coinagerequired"} },  // LitecoinCash: Add new RPC method to array
     { "rawtransactions",    "fundrawtransaction",       &fundrawtransaction,       {"hexstring","options","iswitness"} },
     { "hidden",             "resendwallettransactions", &resendwallettransactions, {} },
     { "wallet",             "abandontransaction",       &abandontransaction,       {"txid"} },
