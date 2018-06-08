@@ -2592,7 +2592,7 @@ bool CWallet::GetStakeQualifierTransaction(uint64_t coinAgeNeeded, CMutableTrans
                 }
                 
                 // Stop if we've found enough coin age
-                if (coinAgeFound > coinAgeNeeded) {
+                if (coinAgeFound >= coinAgeNeeded) {
                     // Send the full value found back to the first input we used
                     // NOTE: A test transaction from createsqtransaction will currently fail to relay. We could include some fees to avoid that.
                     // NOTE: FEE IS CURRENTLY SET FOR TESTING THESE TRANSACTIONS ARE VALID ON THE NETWORK
