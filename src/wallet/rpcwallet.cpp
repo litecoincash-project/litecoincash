@@ -3039,6 +3039,7 @@ UniValue listunspent(const JSONRPCRequest& request)
     return results;
 }
 
+// LitecoinCash: RPC method to demonstrate generation of legal stake qualifier transaction
 UniValue createstakequaltransaction(const JSONRPCRequest& request)
 {   
     CWallet * const pwallet = GetWalletForJSONRPCRequest(request);
