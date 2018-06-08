@@ -2538,7 +2538,7 @@ bool CWallet::GetStakeQualifierTransaction(uint64_t coinAgeNeeded, CMutableTrans
     CScript scriptPubKey;
     bool scriptPubKeySet = false;
     uint64_t coinAgeFound = 0;
-    uint64_t coinValueFound = 0;
+    CAmount coinValueFound = 0;
     const Consensus::Params& consensus = Params().GetConsensus();
     
     {
