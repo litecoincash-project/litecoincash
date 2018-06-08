@@ -3040,7 +3040,12 @@ UniValue listunspent(const JSONRPCRequest& request)
 }
 
 UniValue createstakequaltransaction(const JSONRPCRequest& request)
-{
+{   
+    CWallet * const pwallet = GetWalletForJSONRPCRequest(request);
+    if (!EnsureWalletIsAvailable(pwallet, request.fHelp)) {
+        return NullUniValue;
+    }
+
     if (request.fHelp || request.params.size() != 1)
         throw std::runtime_error(
             "createstakequaltransaction \"coinagerequired\"\n"
