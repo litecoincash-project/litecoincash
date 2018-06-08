@@ -85,6 +85,8 @@ struct Params {
     uint256 powLimitSHA;            // LitecoinCash: Initial hash target at fork
     CAmount premineAmount;          // LitecoinCash: Premine amount
     CScript premineOutputScript;    // LitecoinCash: Premine output script
+    uint64_t minStakeQualValue;     // LitecoinCash: SQPOW: Minimum value of an output to be considered as valid stake
+    int minStakeQualDepth;          // LitecoinCash: SQPOW: Minimum depth of a transaction to be considered as valid stake
 };
 } // namespace Consensus
 

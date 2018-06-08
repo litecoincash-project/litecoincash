@@ -2523,35 +2523,31 @@ bool CWallet::SelectCoinsMinConf(const CAmount& nTargetValue, const int nConfMin
 }
 
  // LitecoinCash: Initial SQPOW
-void CWallet::SelectStakeQualifiedCoins(const std::vector<COutput>& vAvailableCoins, unsigned int nSpendTime) const
+void CWallet::SelectStakeQualifiedCoins(const std::vector<COutput>& vAvailableCoins) const
 {
     std::vector<COutput> vCoins(vAvailableCoins);
+    const Consensus::Params consensus& = Params().GetConsensus();
 
     {
         LOCK2(cs_main, cs_wallet);
+        
+        uint64_t coinAgeFound = 0;
         for (std::map<uint256, CWalletTx>::const_iterator it = mapWallet.begin(); it != mapWallet.end(); ++it)
         {
             const CWalletTx* pcoin = &it->second;
             const uint256& wtxid = it->first;
 
-            // Filtering by tx timestamp instead of block timestamp may give false positives but never false negatives
-            if (pcoin->nTime + Params().GetConsensus().nStakeMinAge > nSpendTime)
-                continue;
-
-            if (pcoin->GetBlocksToMaturity() > 0)
-                continue;
-
             if (pcoin->isAbandoned())
                 continue;
 
             int nDepth = pcoin->GetDepthInMainChain();
-            if (nDepth < 1)
+            if (nDepth < consensus->minStakeQualDepth)
                 continue;
 
             for (unsigned int i = 0; i < pcoin->tx->vout.size(); i++)
-                if (!(IsSpent(wtxid,i)) && IsMine(pcoin->vout[i]) && pcoin->tx->vout[i].nValue >= nMinimumInputValue){
-                    vCoins.push_back(COutput(pcoin, i, nDepth, true,
-                                           (IsMine(pcoin->tx->vout[i]) & (ISMINE_SPENDABLE)) != ISMINE_NO));
+                if (!(IsSpent(wtxid,i)) && IsMine(pcoin->vout[i]) && pcoin->tx->vout[i].nValue >= consensus->minStakeQualValue) {
+                    coinAgeFound += pcoin->tx->vout[i].nValue * nDepth;
+                    vCoins.push_back(COutput(pcoin, i, nDepth, true, (IsMine(pcoin->tx->vout[i]) & (ISMINE_SPENDABLE)) != ISMINE_NO));
                 }
         }
     }
