@@ -92,6 +92,7 @@ static const CRPCConvertParam vRPCConvertParams[] =
     { "createrawtransaction", 2, "locktime" },
     { "createrawtransaction", 3, "replaceable" },
     { "decoderawtransaction", 1, "iswitness" },
+    { "createsqtransaction", 0, "coinagerequired" },        // LitecoinCash: Parameter mapping
     { "signrawtransaction", 1, "prevtxs" },
     { "signrawtransaction", 2, "privkeys" },
     { "sendrawtransaction", 1, "allowhighfees" },

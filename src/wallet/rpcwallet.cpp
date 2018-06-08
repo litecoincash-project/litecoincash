@@ -3062,8 +3062,6 @@ UniValue createsqtransaction(const JSONRPCRequest& request)
             + HelpExampleCli("createsqtransaction", "\"234854\"")
         );
 
-    if (request.params[0].isNull())
-        throw JSONRPCError(RPC_INVALID_PARAMETER, "Invalid parameter, argument 1 must be non-null");
     RPCTypeCheckArgument(request.params[0], UniValue::VNUM);
     uint64_t coinAgeRequired = (uint64_t)request.params[0].get_int64();
 
