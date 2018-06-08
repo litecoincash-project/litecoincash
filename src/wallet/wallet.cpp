@@ -2529,9 +2529,11 @@ bool CWallet::GetStakeQualifierTransaction(uint64_t coinAgeNeeded, CMutableTrans
     txStakeQualifier.vout.clear();
 
     // Mark tx as a stake qualifier: 1st output is empty
+    /*
     txStakeQualifier.vout.resize(1);
     txStakeQualifier.vout[0].scriptPubKey.clear();
     txStakeQualifier.vout[0].nValue = 0;
+    */
 
     CScript scriptPubKey;
     bool scriptPubKeySet = false;
