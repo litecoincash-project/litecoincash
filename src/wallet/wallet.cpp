@@ -2529,6 +2529,7 @@ bool CWallet::GetStakeQualifierTransaction(uint64_t coinAgeNeeded, CMutableTrans
     txStakeQualifier.vout.clear();
 
     // Mark tx as a stake qualifier: 1st output is empty
+    // NOTE: ENABLING THIS MAKES THIS TRANSACTION NON-BROADCASTABLE ON CURRENT NETWORK
     /*
     txStakeQualifier.vout.resize(1);
     txStakeQualifier.vout[0].scriptPubKey.clear();
@@ -2549,7 +2550,7 @@ bool CWallet::GetStakeQualifierTransaction(uint64_t coinAgeNeeded, CMutableTrans
         {
             const uint256& txHash = it->first;
             const CWalletTx* txToCheck = &it->second;
-            
+
             // Skip abandoned tx
             if (txToCheck->isAbandoned())
                 continue;
@@ -2563,17 +2564,21 @@ bool CWallet::GetStakeQualifierTransaction(uint64_t coinAgeNeeded, CMutableTrans
             if (nDepth < consensus.minStakeQualDepth)
                 continue;
 
-            // Check each output
+            // Enforce max depth?
+            // NOTE: See Trello card discussing this
+            /*
+            if (nDepth > consensus.maxStakeQualDepth)
+                nDepth = consensus.maxStakeQualDepth;
+            */
+
+            // Check each output of this tx
             for (unsigned int i = 0; i < txToCheck->tx->vout.size(); i++) {
-                // Skip if output isn't viable
-                if(IsSpent(txHash,i))                                               // Already spent?
-                    continue;
-                if(!IsMine(txToCheck->tx->vout[i]))                                 // Not mine?
-                    continue;
-                if(txToCheck->tx->vout[i].nValue < consensus.minStakeQualValue)     // Value too low?
+                // Skip if already spent, not ours, or value if below hard minimum
+                if(IsSpent(txHash,i) || !IsMine(txToCheck->tx->vout[i]) || txToCheck->tx->vout[i].nValue < consensus.minStakeQualValue)
                     continue;
 
-                // Looks good; add its coin age
+                // Looks good; accumulate its coin age and value
+                // NOTE: coin age granularity here could be in days.
                 coinAgeFound += txToCheck->tx->vout[i].nValue * nDepth;
                 coinValueFound += txToCheck->tx->vout[i].nValue;
                 
@@ -2589,7 +2594,9 @@ bool CWallet::GetStakeQualifierTransaction(uint64_t coinAgeNeeded, CMutableTrans
                 // Stop if we've found enough coin age
                 if (coinAgeFound > coinAgeNeeded) {
                     // Send the full value found back to the first input we used
-                    txStakeQualifier.vout.push_back(CTxOut(coinValueFound, scriptPubKey));
+                    // NOTE: A test transaction from createsqtransaction will currently fail to relay. We could include some fees to avoid that.
+                    // NOTE: FEE IS CURRENTLY SET FOR TESTING THESE TRANSACTIONS ARE VALID ON THE NETWORK
+                    txStakeQualifier.vout.push_back(CTxOut(coinValueFound - 0.05, scriptPubKey));
                     return true;
                 }
             }
