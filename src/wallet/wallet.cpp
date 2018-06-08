@@ -2522,11 +2522,19 @@ bool CWallet::SelectCoinsMinConf(const CAmount& nTargetValue, const int nConfMin
     return true;
 }
 
-// LitecoinCash: Initial SQPOW
+// LitecoinCash: Generate a stake qualifying transaction that meets given required coin age target
 bool CWallet::GetStakeQualifierTransaction(uint64_t coinAgeNeeded, CMutableTransaction& txStakeQualifier)
 {
     txStakeQualifier.vin.clear();
     txStakeQualifier.vout.clear();
+
+    // Mark tx as a stake qualifier: 1st output is empty
+    /*
+    txStakeQualifier.vout.resize(1);
+    txStakeQualifier.vout[0].scriptPubKey.clear();
+    txStakeQualifier.vout[0].nValue = 0;
+    */
+
     CScript scriptPubKey;
     bool scriptPubKeySet = false;
     uint64_t coinAgeFound = 0;

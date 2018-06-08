@@ -113,7 +113,7 @@ public:
         std::vector<unsigned char> vch = ParseHex("76a914c9f3305556963e2976ccf3348b89a6cc736b6a4e88ac");
         consensus.premineOutputScript = CScript(vch.begin(), vch.end());    // Output script for premine block
         consensus.minStakeQualValue = 1 * COIN;                             // SQPOW: Minimum value of an output to be considered as valid stake
-        consensus.minStakeQualDepth = 20;                                   // SQPOW: Minimum depth of a transaction to be considered as valid stake
+        consensus.minStakeQualDepth = 4;                                    // SQPOW: Minimum depth of a transaction to be considered as valid stake
 
         // The best chain should have at least this much work.
         consensus.nMinimumChainWork = uint256S("0x0000000000000000000000000000000000000000000000401b101e2e526d5821");  // LitecoinCash: At LAST_SCRYPT_BLOCK+1
