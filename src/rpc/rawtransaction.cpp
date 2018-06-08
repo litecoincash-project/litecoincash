@@ -334,7 +334,7 @@ UniValue createstakequaltransaction(const JSONRPCRequest& request)
     RPCTypeCheck(request.params, {UniValue::VNUM}, true);
     if (request.params[0].isNull())
         throw JSONRPCError(RPC_INVALID_PARAMETER, "Invalid parameter, argument 1 must be non-null");
-    uint64_t nLockTime = request.params[0].get_uint64();
+    uint64_t coinAgeRequired = (uint64_t)request.params[0].get_int64();
 
     CMutableTransaction rawTx;
     if (wallet.GetSQPOWTransaction(coinAgeRequired, rawTx));
