@@ -2530,13 +2530,10 @@ bool CWallet::GetStakeQualifierTransaction(uint64_t coinAgeNeeded, CMutableTrans
 
     // Mark tx as a stake qualifier: 1st output is empty
     txStakeQualifier.vout.resize(1);
-    txStakeQualifier.vout[0].scriptPubKey.clear();
+    txStakeQualifier.vout[0].scriptPubKey.clear();  // Loxley: Should this be a conensus rule? Is it valid to have blank?
     txStakeQualifier.vout[0].nValue = 0;
 
-    CScript scriptPubKey;
-    bool scriptPubKeySet = false;
     uint64_t coinAgeFound = 0;
-    CAmount coinValueFound = 0;
     const Consensus::Params& consensus = Params().GetConsensus();
     
     {
@@ -2575,23 +2572,16 @@ bool CWallet::GetStakeQualifierTransaction(uint64_t coinAgeNeeded, CMutableTrans
                     continue;
 
                 // Looks good; accumulate its coin age and value
-                // NOTE: coin age granularity here could/should be in days.
-                coinAgeFound += txToCheck->tx->vout[i].nValue * nDepth;
-                coinValueFound += txToCheck->tx->vout[i].nValue;
+                // Loxley: The coinAgeFound is now expressed in terms of coin day granularity
+                float blocksPerDay = 24 * 60 * 60 / consensus.nPowTargetSpacing;
+                coinAgeFound += floor(txToCheck->tx->vout[i].nValue / COIN) * floor(nDepth / blocksPerDay);
                 
                 // Add it as an input to the stake qualifier tx
                 txStakeQualifier.vin.push_back(CTxIn(txToCheck->tx->GetHash(), i));
 
-                // Consensus rule: Stake qualifier must pay back to the scriptPubKey of the first input used, so set the output if we haven't already.
-                if (!scriptPubKeySet) {
-                    scriptPubKey = txToCheck->tx->vout[i].scriptPubKey;
-                    scriptPubKeySet = true;
-                }
-                
+                // Loxley: Removed consensus rule and transaction whereby we pay it back to ourselves...
                 // Stop if we've found enough coin age
                 if (coinAgeFound >= coinAgeNeeded) {
-                    // Send the full value found back to the first input we used
-                    txStakeQualifier.vout.push_back(CTxOut(coinValueFound, scriptPubKey));
                     return true;
                 }
             }
