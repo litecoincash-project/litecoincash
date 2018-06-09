@@ -2529,12 +2529,9 @@ bool CWallet::GetStakeQualifierTransaction(uint64_t coinAgeNeeded, CMutableTrans
     txStakeQualifier.vout.clear();
 
     // Mark tx as a stake qualifier: 1st output is empty
-    // NOTE: ENABLING THIS MAKES THIS TRANSACTION NON-BROADCASTABLE ON CURRENT NETWORK
-    /*
     txStakeQualifier.vout.resize(1);
     txStakeQualifier.vout[0].scriptPubKey.clear();
     txStakeQualifier.vout[0].nValue = 0;
-    */
 
     CScript scriptPubKey;
     bool scriptPubKeySet = false;
@@ -2578,7 +2575,7 @@ bool CWallet::GetStakeQualifierTransaction(uint64_t coinAgeNeeded, CMutableTrans
                     continue;
 
                 // Looks good; accumulate its coin age and value
-                // NOTE: coin age granularity here could be in days.
+                // NOTE: coin age granularity here could/should be in days.
                 coinAgeFound += txToCheck->tx->vout[i].nValue * nDepth;
                 coinValueFound += txToCheck->tx->vout[i].nValue;
                 
@@ -2594,9 +2591,7 @@ bool CWallet::GetStakeQualifierTransaction(uint64_t coinAgeNeeded, CMutableTrans
                 // Stop if we've found enough coin age
                 if (coinAgeFound >= coinAgeNeeded) {
                     // Send the full value found back to the first input we used
-                    // NOTE: A test transaction from createsqtransaction will currently fail to relay. We could include some fees to avoid that.
-                    // NOTE: FEE IS CURRENTLY SET FOR TESTING THESE TRANSACTIONS ARE VALID ON THE NETWORK
-                    txStakeQualifier.vout.push_back(CTxOut(coinValueFound - 0.05, scriptPubKey));
+                    txStakeQualifier.vout.push_back(CTxOut(coinValueFound, scriptPubKey));
                     return true;
                 }
             }
