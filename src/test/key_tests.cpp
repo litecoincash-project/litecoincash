@@ -20,12 +20,12 @@ static const std::string strSecret1 = "6uGFQ4DSW7zh1viHZi6iiVT17CncvoaV4MHvGvJKP
 static const std::string strSecret2 = "6vVo7sPkeLTwVdAntrv4Gbnsyr75H8ChD3P5iyHziwaqe8mCYR5";
 static const std::string strSecret1C = "T3gJYmBuZXsdd65E7NQF88ZmUP2MaUanqnZg9GFS94W7kND4Ebjq";
 static const std::string strSecret2C = "T986ZKRRdnuuXLeDZuKBRrZW1ujotAncU9WTrFU1n7vMgRW75ZtF";
-static const std::string addr1 = "LiUo6Zn39joYJBzPUhssbDwAywhjFcoHE3";
-static const std::string addr2 = "LZJvLSP5SGKcFS13MHgdrVhpFUbEMB5XVC";
-static const std::string addr1C = "Lh2G82Bi33RNuzz4UfSMZbh54jnWHVnmw8";
-static const std::string addr2C = "LWegHWHB5rmaF5rgWYt1YN3StapRdnGJfU";
+static const std::string addr1 = "CfijQPpGx8Y1wXCezKDVtiVSPrYs1TqKcS";
+static const std::string addr2 = "CWYreGRKEf45tmDJru2G9zG5fPSN7JN6T1";
+static const std::string addr1C = "CeGCRrDwqS9rZLCKzGmys6FLUede24ZV4o";
+static const std::string addr2C = "CTtcbLKQtFW3tR4x2ADdqrbiJVfZQD9cFm";
 
-static const std::string strAddressBad = "Lbi6bpMhSwp2CXkivEeUK9wzyQEFzHDfSr";
+static const std::string strAddressBad = "CYx2uePwFLYVqrxzRqz6ceWGPK5PmEWfWD";
 
 
 BOOST_FIXTURE_TEST_SUITE(key_tests, BasicTestingSetup)
