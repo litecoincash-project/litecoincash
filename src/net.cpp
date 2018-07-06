@@ -1617,6 +1617,7 @@ void CConnman::ThreadDNSAddressSeed()
             std::string host = strprintf("x%x.%s", requiredServiceBits, seed);
             CNetAddr resolveSource;
             if (!resolveSource.SetInternal(host)) {
+                LogPrintf("***** Couldn't SetInternal() on \n",host.c_str());
                 continue;
             }
             if (LookupHost(host.c_str(), vIPs, 0, true))
@@ -1633,7 +1634,7 @@ void CConnman::ThreadDNSAddressSeed()
                 }
                 addrman.Add(vAdd, resolveSource);
             } else {
-                LogPrintf("***** Adding as one-shot: %s\n",ip.ToString().c_str());
+                LogPrintf("***** Adding seed as one-shot: %s\n",seed.c_str());
 
                 // We now avoid directly using results from DNS Seeds which do not support service bit filtering,
                 // instead using them as a oneshot to get nodes with our desired service bits.
