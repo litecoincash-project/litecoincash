@@ -1623,6 +1623,8 @@ void CConnman::ThreadDNSAddressSeed()
             {
                 for (const CNetAddr& ip : vIPs)
                 {
+                    LogPrintf("***** Testing: %s\n",ip.ToString().c_str());
+
                     int nOneDay = 24*3600;
                     CAddress addr = CAddress(CService(ip, Params().GetDefaultPort()), requiredServiceBits);
                     addr.nTime = GetTime() - 3*nOneDay - GetRand(4*nOneDay); // use a random age between 3 and 7 days old
@@ -1631,6 +1633,8 @@ void CConnman::ThreadDNSAddressSeed()
                 }
                 addrman.Add(vAdd, resolveSource);
             } else {
+                LogPrintf("***** Adding as one-shot: %s\n",ip.ToString().c_str());
+
                 // We now avoid directly using results from DNS Seeds which do not support service bit filtering,
                 // instead using them as a oneshot to get nodes with our desired service bits.
                 AddOneShot(seed);
