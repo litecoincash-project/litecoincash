@@ -1602,7 +1602,7 @@ void CConnman::ThreadDNSAddressSeed()
     const std::vector<std::string> &vSeeds = Params().DNSSeeds();
     int found = 0;
 
-    LogPrintf("Loading addresses from DNS seeds (could take a while)\n");
+    LogPrintf("***** Loading addresses from DNS seeds (could take a while)\n");
 
     for (const std::string &seed : vSeeds) {
         if (interruptNet) {
@@ -1634,7 +1634,7 @@ void CConnman::ThreadDNSAddressSeed()
                 }
                 addrman.Add(vAdd, resolveSource);
             } else {
-                LogPrintf("***** Adding seed as one-shot: %s\n",seed.c_str());
+                LogPrintf("***** Lookup failed; adding seed as one-shot\n");
 
                 // We now avoid directly using results from DNS Seeds which do not support service bit filtering,
                 // instead using them as a oneshot to get nodes with our desired service bits.
@@ -1643,7 +1643,7 @@ void CConnman::ThreadDNSAddressSeed()
         }
     }
 
-    LogPrintf("%d addresses found from DNS seeds\n", found);
+    LogPrintf("***** %d addresses found from DNS seeds\n", found);
 }
 
 

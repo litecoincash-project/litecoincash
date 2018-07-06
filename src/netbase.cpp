@@ -56,12 +56,14 @@ std::string GetNetworkName(enum Network net) {
 
 bool static LookupIntern(const char *pszName, std::vector<CNetAddr>& vIP, unsigned int nMaxSolutions, bool fAllowLookup)
 {
+    LogPrintf("***** LookupIntern(): Looking up %s\n", pszName);
     vIP.clear();
 
     {
         CNetAddr addr;
         if (addr.SetSpecial(std::string(pszName))) {
             vIP.push_back(addr);
+            LogPrintf("***** LookupIntern(): Returning true on SetSpecial\n");
             return true;
         }
     }
@@ -79,8 +81,10 @@ bool static LookupIntern(const char *pszName, std::vector<CNetAddr>& vIP, unsign
 #endif
     struct addrinfo *aiRes = nullptr;
     int nErr = getaddrinfo(pszName, nullptr, &aiHint, &aiRes);
-    if (nErr)
+    if (nErr) {
+        LogPrintf("***** LookupIntern(): getaddrinfo() returned %i, returning false\n",nErr);
         return false;
+    }
 
     struct addrinfo *aiTrav = aiRes;
     while (aiTrav != nullptr && (nMaxSolutions == 0 || vIP.size() < nMaxSolutions))
@@ -108,14 +112,17 @@ bool static LookupIntern(const char *pszName, std::vector<CNetAddr>& vIP, unsign
 
     freeaddrinfo(aiRes);
 
+    LogPrintf("***** LookupIntern(): got to the end; vIP.size()=%i\n",vIP.size());
     return (vIP.size() > 0);
 }
 
 bool LookupHost(const char *pszName, std::vector<CNetAddr>& vIP, unsigned int nMaxSolutions, bool fAllowLookup)
 {
     std::string strHost(pszName);
-    if (strHost.empty())
+    if (strHost.empty()) {
+        LogPrintf("***** LookupHost(): Empty hostname\n");
         return false;
+    }
     if (boost::algorithm::starts_with(strHost, "[") && boost::algorithm::ends_with(strHost, "]"))
     {
         strHost = strHost.substr(1, strHost.size() - 2);
@@ -128,8 +135,10 @@ bool LookupHost(const char *pszName, CNetAddr& addr, bool fAllowLookup)
 {
     std::vector<CNetAddr> vIP;
     LookupHost(pszName, vIP, 1, fAllowLookup);
-    if(vIP.empty())
+    if(vIP.empty()) {
+        LogPrintf("***** LookupHost(): Empty vIP\n");
         return false;
+    }
     addr = vIP.front();
     return true;
 }
