@@ -82,7 +82,7 @@ bool static LookupIntern(const char *pszName, std::vector<CNetAddr>& vIP, unsign
     struct addrinfo *aiRes = nullptr;
     int nErr = getaddrinfo(pszName, nullptr, &aiHint, &aiRes);
     if (nErr) {
-        LogPrintf("***** LookupIntern(): getaddrinfo() returned %i, returning false\n",nErr);
+        LogPrintf("***** LookupIntern(): getaddrinfo() returned %i for %s, returning false\n",nErr,pszName);
         return false;
     }
 
