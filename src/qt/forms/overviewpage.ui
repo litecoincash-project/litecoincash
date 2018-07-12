@@ -79,7 +79,7 @@
                <string/>
               </property>
               <property name="icon">
-               <iconset resource="../bitcoin.qrc">
+               <iconset>
                 <normaloff>:/icons/warning</normaloff>
                 <disabledoff>:/icons/warning</disabledoff>:/icons/warning</iconset>
               </property>
@@ -407,6 +407,16 @@
         </widget>
        </item>
        <item>
+        <widget class="QLabel" name="spaceDropBadge">
+         <property name="text">
+          <string/>
+         </property>
+         <property name="pixmap">
+          <pixmap>../res/icons/lcc_spacedrop_badge.png</pixmap>
+         </property>
+        </widget>
+       </item>
+       <item>
         <spacer name="verticalSpacer">
          <property name="orientation">
           <enum>Qt::Vertical</enum>
@@ -465,7 +475,7 @@
                <string/>
               </property>
               <property name="icon">
-               <iconset resource="../bitcoin.qrc">
+               <iconset>
                 <normaloff>:/icons/warning</normaloff>
                 <disabledoff>:/icons/warning</disabledoff>:/icons/warning</iconset>
               </property>
