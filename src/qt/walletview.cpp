@@ -113,7 +113,6 @@ void WalletView::setClientModel(ClientModel *_clientModel)
     this->clientModel = _clientModel;
 
     overviewPage->setClientModel(_clientModel);
-    hivePage->setClientModel(_clientModel);         // LitecoinCash: Hive page
     sendCoinsPage->setClientModel(_clientModel);
 }
 
@@ -124,7 +123,7 @@ void WalletView::setWalletModel(WalletModel *_walletModel)
     // Put transaction list in tabs
     transactionView->setModel(_walletModel);
     overviewPage->setWalletModel(_walletModel);
-    hivePage->setWalletModel(_walletModel);         // LitecoinCash: Hive page
+    hivePage->setModel(_walletModel);         // LitecoinCash: Hive page
     receiveCoinsPage->setModel(_walletModel);
     sendCoinsPage->setModel(_walletModel);
     usedReceivingAddressesPage->setModel(_walletModel ? _walletModel->getAddressTableModel() : nullptr);
