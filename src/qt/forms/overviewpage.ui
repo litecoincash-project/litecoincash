@@ -407,19 +407,28 @@
         </widget>
        </item>
        <item>
-        <widget class="QLabel" name="spaceDropBadge">
+        <widget class="QPushButton" name="spaceDropButton">
+         <property name="cursor">
+          <cursorShape>PointingHandCursor</cursorShape>
+         </property>
+         <property name="toolTip">
+          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The first cryptocurrency dropped from Space! Click for more information about our successful SpaceDrop mission&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+         </property>
          <property name="text">
           <string/>
          </property>
-         <property name="pixmap">
-          <pixmap resource="../bitcoin.qrc">:/icons/spacedrop</pixmap>
+         <property name="icon">
+          <iconset resource="../bitcoin.qrc">
+           <normaloff>:/icons/spacedrop</normaloff>:/icons/spacedrop</iconset>
          </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QLabel" name="label">
-         <property name="text">
-          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;First cryptocurrency dropped from space! &lt;/p&gt;&lt;p&gt;&lt;a href=&quot;https://space.litecoinca.sh/&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;Read about our SpaceDrop&lt;/span&gt;&lt;/a&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+         <property name="iconSize">
+          <size>
+           <width>256</width>
+           <height>256</height>
+          </size>
+         </property>
+         <property name="flat">
+          <bool>true</bool>
          </property>
         </widget>
        </item>
