@@ -11,18 +11,10 @@
 #include <QKeyEvent>
 
 class PlatformStyle;
-class TransactionFilterProxy;
 class WalletModel;
 
 QT_BEGIN_NAMESPACE
-class QComboBox;
-class QDateTimeEdit;
 class QFrame;
-class QLineEdit;
-class QMenu;
-class QModelIndex;
-class QSignalMapper;
-class QTableView;
 QT_END_NAMESPACE
 
 // LitecoinCash: Hive page
