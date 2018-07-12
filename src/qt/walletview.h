@@ -6,6 +6,7 @@
 #define BITCOIN_QT_WALLETVIEW_H
 
 #include <amount.h>
+#include <wallet/wallet.h>  // LitecoinCash: Key import helper
 
 #include <QStackedWidget>
 
@@ -54,6 +55,8 @@ public:
     bool handlePaymentRequest(const SendCoinsRecipient& recipient);
 
     void showOutOfSyncWarning(bool fShow);
+    
+    static void doRescan(CWallet* pwallet, int64_t startTime);  // LitecoinCash: Key import helper
 
 private:
     ClientModel *clientModel;
@@ -103,6 +106,9 @@ public Q_SLOTS:
     void changePassphrase();
     /** Ask for passphrase to unlock wallet temporarily */
     void unlockWallet();
+
+    // LitecoinCash: Key import helper
+    void importPrivateKey();
 
     /** Show used sending addresses */
     void usedSendingAddresses();

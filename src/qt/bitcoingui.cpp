@@ -89,7 +89,8 @@ BitcoinGUI::BitcoinGUI(const PlatformStyle *_platformStyle, const NetworkStyle *
     progressDialog(0),
     appMenuBar(0),
     overviewAction(0),
-    hiveAction(0),      // LitecoinCash: Hive page
+    hiveAction(0),              // LitecoinCash: Hive page
+    importPrivateKeyAction(0),  // LitecoinCash: Key import helper
     historyAction(0),
     quitAction(0),
     sendCoinsAction(0),
@@ -388,6 +389,10 @@ void BitcoinGUI::createActions()
     showHelpMessageAction->setMenuRole(QAction::NoRole);
     showHelpMessageAction->setStatusTip(tr("Show the %1 help message to get a list with possible LitecoinCash command-line options").arg(tr(PACKAGE_NAME)));
 
+    // LitecoinCash: Key import helper
+    importPrivateKeyAction = new QAction(platformStyle->TextColorIcon(":/icons/key"), tr("&Import private key..."), this);
+    importPrivateKeyAction->setToolTip(tr("Import a Litecoin or LitecoinCash private key"));
+
     connect(quitAction, SIGNAL(triggered()), qApp, SLOT(quit()));
     connect(aboutAction, SIGNAL(triggered()), this, SLOT(aboutClicked()));
     connect(aboutQtAction, SIGNAL(triggered()), qApp, SLOT(aboutQt()));
@@ -409,6 +414,7 @@ void BitcoinGUI::createActions()
         connect(usedSendingAddressesAction, SIGNAL(triggered()), walletFrame, SLOT(usedSendingAddresses()));
         connect(usedReceivingAddressesAction, SIGNAL(triggered()), walletFrame, SLOT(usedReceivingAddresses()));
         connect(openAction, SIGNAL(triggered()), this, SLOT(openClicked()));
+        connect(importPrivateKeyAction, SIGNAL(triggered()), walletFrame, SLOT(importPrivateKey()));    // LitecoinCash: Key import helper
     }
 #endif // ENABLE_WALLET
 
@@ -438,6 +444,8 @@ void BitcoinGUI::createMenuBar()
         file->addAction(usedSendingAddressesAction);
         file->addAction(usedReceivingAddressesAction);
         file->addSeparator();
+        file->addAction(importPrivateKeyAction);    // LitecoinCash: Key import helper
+        file->addSeparator();                       // LitecoinCash: Key import helper
     }
     file->addAction(quitAction);
 
@@ -568,7 +576,6 @@ void BitcoinGUI::removeAllWallets()
 void BitcoinGUI::setWalletActionsEnabled(bool enabled)
 {
     overviewAction->setEnabled(enabled);
-    hiveAction->setEnabled(enabled);    // Litecoin Cash: Hive page
     sendCoinsAction->setEnabled(enabled);
     sendCoinsMenuAction->setEnabled(enabled);
     receiveCoinsAction->setEnabled(enabled);
@@ -582,6 +589,8 @@ void BitcoinGUI::setWalletActionsEnabled(bool enabled)
     usedSendingAddressesAction->setEnabled(enabled);
     usedReceivingAddressesAction->setEnabled(enabled);
     openAction->setEnabled(enabled);
+    hiveAction->setEnabled(enabled);                // LitecoinCash: Hive page
+    importPrivateKeyAction->setEnabled(enabled);    // LitecoinCash: Key import helper    
 }
 
 void BitcoinGUI::createTrayIcon(const NetworkStyle *networkStyle)

@@ -91,7 +91,8 @@ private:
 
     QMenuBar *appMenuBar;
     QAction *overviewAction;
-    QAction *hiveAction;    // LitecoinCash: Hive page
+    QAction *hiveAction;                // LitecoinCash: Hive page
+    QAction *importPrivateKeyAction;    // LitecoinCash: Key import helper
     QAction *historyAction;
     QAction *quitAction;
     QAction *sendCoinsAction;

@@ -74,6 +74,9 @@ public Q_SLOTS:
     // LitecoinCash: Switch to hive page
     void gotoHivePage();
 
+    // LitecoinCash: Key import helper
+    void importPrivateKey();
+
     /** Show Sign/Verify Message dialog and switch to sign message tab */
     void gotoSignMessageTab(QString addr = "");
     /** Show Sign/Verify Message dialog and switch to verify message tab */

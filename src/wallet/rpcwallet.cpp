@@ -52,6 +52,12 @@ CWallet *GetWalletForJSONRPCRequest(const JSONRPCRequest& request)
     return ::vpwallets.size() == 1 || (request.fHelp && ::vpwallets.size() > 0) ? ::vpwallets[0] : nullptr;
 }
 
+// LitecoinCash: Key import helper
+CWallet *GetWalletForQTKeyImport()
+{
+    return ::vpwallets.size() > 0 ? ::vpwallets[0] : nullptr;
+}
+
 std::string HelpRequiringPassphrase(CWallet * const pwallet)
 {
     return pwallet && pwallet->IsCrypted()

@@ -125,6 +125,14 @@ void WalletFrame::gotoHivePage()
         i.value()->gotoHivePage();
 }
 
+// LitecoinCash: Key import helper
+void WalletFrame::importPrivateKey()
+{
+    WalletView *walletView = currentWalletView();
+    if(walletView)
+        walletView->importPrivateKey();
+}
+
 void WalletFrame::gotoHistoryPage()
 {
     QMap<QString, WalletView*>::const_iterator i;
