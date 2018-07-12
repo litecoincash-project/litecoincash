@@ -17,6 +17,7 @@
 
 #include <QAbstractItemDelegate>
 #include <QPainter>
+#include <QDesktopServices>     // LitecoinCash: For SpaceDrop button handler
 
 #define DECORATION_SIZE 54
 #define NUM_ITEMS 5
