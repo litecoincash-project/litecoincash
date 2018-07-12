@@ -150,7 +150,7 @@ OverviewPage::OverviewPage(const PlatformStyle *platformStyle, QWidget *parent) 
 // LitecoinCash: SpaceDrop button handler
 void OverviewPage::handleSpaceDropButtonClicked()
 {
-    QDesktopServices::openUrl("https://space.litecoinca.sh");
+    QDesktopServices::openUrl(QUrl("https://space.litecoinca.sh"));
 }
 
 void OverviewPage::handleTransactionClicked(const QModelIndex &index)
