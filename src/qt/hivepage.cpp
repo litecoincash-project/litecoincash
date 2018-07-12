@@ -22,7 +22,7 @@ HivePage::HivePage(const PlatformStyle *platformStyle, QWidget *parent) :
     QWidget(parent),
     ui(new Ui::HivePage),
     clientModel(0),
-    walletModel(0))
+    walletModel(0)
 {
     ui->setupUi(this);
 }
