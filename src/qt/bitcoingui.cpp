@@ -89,6 +89,7 @@ BitcoinGUI::BitcoinGUI(const PlatformStyle *_platformStyle, const NetworkStyle *
     progressDialog(0),
     appMenuBar(0),
     overviewAction(0),
+    hiveAction(0),      // LitecoinCash: Hive page
     historyAction(0),
     quitAction(0),
     sendCoinsAction(0),
@@ -313,11 +314,21 @@ void BitcoinGUI::createActions()
     historyAction->setShortcut(QKeySequence(Qt::ALT + Qt::Key_4));
     tabGroup->addAction(historyAction);
 
+    // LitecoinCash: Hive page
+    hiveAction = new QAction(platformStyle->SingleColorIcon(":/icons/overview"), tr("The &Hive"), this);
+    hiveAction->setStatusTip(tr("Show general overview of wallet"));
+    hiveAction->setToolTip(hiveAction->statusTip());
+    hiveAction->setCheckable(true);
+    hiveAction->setShortcut(QKeySequence(Qt::ALT + Qt::Key_1));
+    tabGroup->addAction(hiveAction);
+
 #ifdef ENABLE_WALLET
     // These showNormalIfMinimized are needed because Send Coins and Receive Coins
     // can be triggered from the tray menu, and need to show the GUI to be useful.
     connect(overviewAction, SIGNAL(triggered()), this, SLOT(showNormalIfMinimized()));
     connect(overviewAction, SIGNAL(triggered()), this, SLOT(gotoOverviewPage()));
+    connect(hiveAction, SIGNAL(triggered()), this, SLOT(showNormalIfMinimized()));  // LitecoinCash: Hive page
+    connect(hiveAction, SIGNAL(triggered()), this, SLOT(gotoHivePage()));           // LitecoinCash: Hive page
     connect(sendCoinsAction, SIGNAL(triggered()), this, SLOT(showNormalIfMinimized()));
     connect(sendCoinsAction, SIGNAL(triggered()), this, SLOT(gotoSendCoinsPage()));
     connect(sendCoinsMenuAction, SIGNAL(triggered()), this, SLOT(showNormalIfMinimized()));
@@ -462,6 +473,7 @@ void BitcoinGUI::createToolBars()
         toolbar->addAction(sendCoinsAction);
         toolbar->addAction(receiveCoinsAction);
         toolbar->addAction(historyAction);
+        toolbar->addAction(hiveAction);     // LitecoinCash: Hive page
         overviewAction->setChecked(true);
     }
 }
@@ -556,6 +568,7 @@ void BitcoinGUI::removeAllWallets()
 void BitcoinGUI::setWalletActionsEnabled(bool enabled)
 {
     overviewAction->setEnabled(enabled);
+    hiveAction->setEnabled(enabled);    // Litecoin Cash: Hive page
     sendCoinsAction->setEnabled(enabled);
     sendCoinsMenuAction->setEnabled(enabled);
     receiveCoinsAction->setEnabled(enabled);
@@ -683,6 +696,13 @@ void BitcoinGUI::gotoOverviewPage()
 {
     overviewAction->setChecked(true);
     if (walletFrame) walletFrame->gotoOverviewPage();
+}
+
+// LitecoinCash: Switch to hive page
+void BitcoinGUI::gotoHivePage()
+{
+    hiveAction->setChecked(true);
+    if (walletFrame) walletFrame->gotoHivePage();
 }
 
 void BitcoinGUI::gotoHistoryPage()
