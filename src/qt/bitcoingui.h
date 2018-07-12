@@ -91,6 +91,7 @@ private:
 
     QMenuBar *appMenuBar;
     QAction *overviewAction;
+    QAction *hiveAction;    // LitecoinCash: Hive page
     QAction *historyAction;
     QAction *quitAction;
     QAction *sendCoinsAction;
@@ -199,6 +200,9 @@ private Q_SLOTS:
     void gotoReceiveCoinsPage();
     /** Switch to send coins page */
     void gotoSendCoinsPage(QString addr = "");
+
+    // LitecoinCash: Switch to hive page
+    void gotoHivePage();
 
     /** Show Sign/Verify Message dialog and switch to sign message tab */
     void gotoSignMessageTab(QString addr = "");
