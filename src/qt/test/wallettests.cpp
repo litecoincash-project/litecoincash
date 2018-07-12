@@ -14,6 +14,7 @@
 #include <validation.h>
 #include <wallet/wallet.h>
 #include <qt/overviewpage.h>
+#include <qt/hivepage.h>    // Litecoin Cash: Hive page
 #include <qt/receivecoinsdialog.h>
 #include <qt/recentrequeststablemodel.h>
 #include <qt/receiverequestdialog.h>
