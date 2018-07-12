@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>ReceiveCoinsDialog</class>
- <widget class="QWidget" name="ReceiveCoinsDialog">
+ <class>HivePageForm</class>
+ <widget class="QWidget" name="HivePageForm">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -29,6 +29,9 @@
       <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt;The Hive: Agent-Based Mining in Litecoin Cash&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Soon, a brand new method of mining will be added to Litecoin Cash. Worker bee agents which live on the blockchain can be created by any Litecoin Cash holder.&lt;/p&gt;&lt;p&gt;Worker bees secure the blockchain while earning rewards for their owner.&lt;/p&gt;&lt;p&gt;Existing SHA256 miners and pools will continue to work exactly as before, while The Hive will both alleviate the risk of 51% attacks on the network, and allow democratisation of the mining process.&lt;/p&gt;&lt;p&gt;&lt;a href=&quot;https://hive.litecoinca.sh/whitepaper.pdf&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;Read our whitepaper&lt;/span&gt;&lt;/a&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
      </property>
      <property name="wordWrap">
+      <bool>true</bool>
+     </property>
+     <property name="openExternalLinks">
       <bool>true</bool>
      </property>
     </widget>

@@ -6,10 +6,13 @@
 #include <qt/guiutil.h>
 
 #include <QWidget>
-#include <QKeyEvent>
 
 class PlatformStyle;
 class WalletModel;
+
+namespace Ui {
+    class HivePageForm;
+}
 
 QT_BEGIN_NAMESPACE
 class QFrame;
@@ -21,21 +24,14 @@ class HivePage : public QWidget
 
 public:
     explicit HivePage(const PlatformStyle *platformStyle, QWidget *parent = 0);
+    ~HivePage();
 
     void setModel(WalletModel *model);
 
 private:
+    Ui::HivePageForm *ui;
     WalletModel *model;
-
-private Q_SLOTS:
-
-Q_SIGNALS:
-
-    /**  Fired when a message should be reported to the user */
-    void message(const QString &title, const QString &message, unsigned int style);
-
-public Q_SLOTS:
-
+    const PlatformStyle *platformStyle;
 };
 
 #endif // BITCOIN_QT_HIVEPAGE_H
