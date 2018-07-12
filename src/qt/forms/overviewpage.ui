@@ -409,11 +409,11 @@
        <item>
         <widget class="QLabel" name="spaceDropBadge">
          <property name="text">
-          <string>TEST</string>
+          <string/>
          </property>
          <property name="pixmap">
-          <pixmap>../res/icons/lcc_spacedrop_badge.png</pixmap>
-         </property>
+          <pixmap resource="../bitcoin.qrc">:/icons/spacedrop</pixmap>
+         </property>         
         </widget>
        </item>
        <item>
