@@ -9,7 +9,7 @@
 #include <qt/walletmodel.h>
 
 HivePage::HivePage(const PlatformStyle *_platformStyle, QWidget *parent) :
-    QDialog(parent),
+    QWidget(parent),
     ui(new Ui::HivePageForm),
     model(0),
     platformStyle(_platformStyle)
