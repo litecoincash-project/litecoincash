@@ -123,6 +123,9 @@ OverviewPage::OverviewPage(const PlatformStyle *platformStyle, QWidget *parent) 
 {
     ui->setupUi(this);
 
+    // LitecoinCash: Set up SpaceDrop button handler
+    connect(ui->spaceDropButton, SIGNAL(released()), this, SLOT(handleSpaceDropButtonClicked()));
+
     // use a SingleColorIcon for the "out of sync warning" icon
     QIcon icon = platformStyle->SingleColorIcon(":/icons/warning");
     icon.addPixmap(icon.pixmap(QSize(64,64), QIcon::Normal), QIcon::Disabled); // also set the disabled icon because we are using a disabled QPushButton to work around missing HiDPI support of QLabel (https://bugreports.qt.io/browse/QTBUG-42503)
@@ -141,6 +144,12 @@ OverviewPage::OverviewPage(const PlatformStyle *platformStyle, QWidget *parent) 
     showOutOfSyncWarning(true);
     connect(ui->labelWalletStatus, SIGNAL(clicked()), this, SLOT(handleOutOfSyncWarningClicks()));
     connect(ui->labelTransactionsStatus, SIGNAL(clicked()), this, SLOT(handleOutOfSyncWarningClicks()));
+}
+
+// LitecoinCash: SpaceDrop button handler
+void OverviewPage::handleSpaceDropButtonClicked()
+{
+    QDesktopServices::openUrl("https://space.litecoinca.sh");
 }
 
 void OverviewPage::handleTransactionClicked(const QModelIndex &index)
