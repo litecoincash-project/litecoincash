@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>596</width>
-    <height>342</height>
+    <height>359</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -409,7 +409,7 @@
        <item>
         <widget class="QLabel" name="spaceDropBadge">
          <property name="text">
-          <string/>
+          <string>TEST</string>
          </property>
          <property name="pixmap">
           <pixmap>../res/icons/lcc_spacedrop_badge.png</pixmap>
