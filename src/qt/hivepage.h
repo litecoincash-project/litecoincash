@@ -5,42 +5,118 @@
 #ifndef BITCOIN_QT_HIVEPAGE_H
 #define BITCOIN_QT_HIVEPAGE_H
 
-#include <QWidget>
+#include <qt/guiutil.h>
 
-class ClientModel;
+#include <QWidget>
+#include <QKeyEvent>
+
 class PlatformStyle;
+class TransactionFilterProxy;
 class WalletModel;
 
-namespace Ui {
-    class HivePage;
-}
-
 QT_BEGIN_NAMESPACE
+class QComboBox;
+class QDateTimeEdit;
+class QFrame;
+class QLineEdit;
+class QMenu;
 class QModelIndex;
+class QSignalMapper;
+class QTableView;
 QT_END_NAMESPACE
 
-// LitecoinCash: Hive page widget
+/** Widget showing the transaction list for a wallet, including a filter row.
+    Using the filter row, the user can view or export a subset of the transactions.
+  */
 class HivePage : public QWidget
 {
     Q_OBJECT
 
 public:
     explicit HivePage(const PlatformStyle *platformStyle, QWidget *parent = 0);
-    ~HivePage();
 
-    void setClientModel(ClientModel *clientModel);
-    void setWalletModel(WalletModel *walletModel);
+    void setModel(WalletModel *model);
 
-public Q_SLOTS:
+    // Date ranges for filter
+    enum DateEnum
+    {
+        All,
+        Today,
+        ThisWeek,
+        ThisMonth,
+        LastMonth,
+        ThisYear,
+        Range
+    };
 
-Q_SIGNALS:
+    enum ColumnWidths {
+        STATUS_COLUMN_WIDTH = 30,
+        WATCHONLY_COLUMN_WIDTH = 23,
+        DATE_COLUMN_WIDTH = 120,
+        TYPE_COLUMN_WIDTH = 113,
+        AMOUNT_MINIMUM_COLUMN_WIDTH = 120,
+        MINIMUM_COLUMN_WIDTH = 23
+    };
 
 private:
-    Ui::HivePage *ui;
-    ClientModel *clientModel;
-    WalletModel *walletModel;
+    WalletModel *model;
+    TransactionFilterProxy *transactionProxyModel;
+    QTableView *transactionView;
+
+    QComboBox *dateWidget;
+    QComboBox *typeWidget;
+    QComboBox *watchOnlyWidget;
+    QLineEdit *search_widget;
+    QLineEdit *amountWidget;
+
+    QMenu *contextMenu;
+    QSignalMapper *mapperThirdPartyTxUrls;
+
+    QFrame *dateRangeWidget;
+    QDateTimeEdit *dateFrom;
+    QDateTimeEdit *dateTo;
+    QAction *abandonAction;
+    QAction *bumpFeeAction;
+
+    QWidget *createDateRangeWidget();
+
+    GUIUtil::TableViewLastColumnResizingFixer *columnResizingFixer;
+
+    virtual void resizeEvent(QResizeEvent* event);
+
+    bool eventFilter(QObject *obj, QEvent *event);
 
 private Q_SLOTS:
+    void contextualMenu(const QPoint &);
+    void dateRangeChanged();
+    void showDetails();
+    void copyAddress();
+    void editLabel();
+    void copyLabel();
+    void copyAmount();
+    void copyTxID();
+    void copyTxHex();
+    void copyTxPlainText();
+    void openThirdPartyTxUrl(QString url);
+    void updateWatchOnlyColumn(bool fHaveWatchOnly);
+    void abandonTx();
+    void bumpFee();
+
+Q_SIGNALS:
+    void doubleClicked(const QModelIndex&);
+
+    /**  Fired when a message should be reported to the user */
+    void message(const QString &title, const QString &message, unsigned int style);
+
+public Q_SLOTS:
+    void chooseDate(int idx);
+    void chooseType(int idx);
+    void chooseWatchonly(int idx);
+    void changedAmount();
+    void changedSearch();
+    void exportClicked();
+    void focusTransaction(const QModelIndex&);
+
 };
 
 #endif // BITCOIN_QT_HIVEPAGE_H
