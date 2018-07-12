@@ -5,14 +5,9 @@
 #ifndef BITCOIN_QT_HIVEPAGE_H
 #define BITCOIN_QT_HIVEPAGE_H
 
-#include <amount.h>
-
 #include <QWidget>
-#include <memory>
 
 class ClientModel;
-class TransactionFilterProxy;
-class TxViewDelegate;
 class PlatformStyle;
 class WalletModel;
 
