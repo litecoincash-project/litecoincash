@@ -315,8 +315,8 @@ void BitcoinGUI::createActions()
     tabGroup->addAction(historyAction);
 
     // LitecoinCash: Hive page
-    hiveAction = new QAction(platformStyle->SingleColorIcon(":/icons/overview"), tr("The &Hive"), this);
-    hiveAction->setStatusTip(tr("Show general overview of wallet"));
+    hiveAction = new QAction(platformStyle->SingleColorIcon(":/icons/bee"), tr("The &Hive"), this);
+    hiveAction->setStatusTip(tr("Hive Mining center"));
     hiveAction->setToolTip(hiveAction->statusTip());
     hiveAction->setCheckable(true);
     hiveAction->setShortcut(QKeySequence(Qt::ALT + Qt::Key_1));
