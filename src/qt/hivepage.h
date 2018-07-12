@@ -1,6 +1,4 @@
-// Copyright (c) 2011-2017 The Bitcoin Core developers
-// Distributed under the MIT software license, see the accompanying
-// file COPYING or http://www.opensource.org/licenses/mit-license.php.
+// LitecoinCash: The Hive page
 
 #ifndef BITCOIN_QT_HIVEPAGE_H
 #define BITCOIN_QT_HIVEPAGE_H
@@ -17,7 +15,6 @@ QT_BEGIN_NAMESPACE
 class QFrame;
 QT_END_NAMESPACE
 
-// LitecoinCash: Hive page
 class HivePage : public QWidget
 {
     Q_OBJECT
