@@ -368,7 +368,7 @@ Var vänlig och försök igen.</translation>
     </message>
     <message>
         <source>LitecoinCash</source>
-        <translation>LitecoinCash</translation>
+        <translation>Litecoin Cash</translation>
     </message>
     <message>
         <source>Wallet</source>
@@ -869,7 +869,7 @@ Var vänlig och försök igen.</translation>
     </message>
     <message>
         <source>LitecoinCash</source>
-        <translation>LitecoinCash</translation>
+        <translation>Litecoin Cash</translation>
     </message>
     <message>
         <source>At least %1 GB of data will be stored in this directory, and it will grow over time.</source>
@@ -2258,7 +2258,7 @@ Var vänlig och försök igen.</translation>
     </message>
     <message>
         <source>The LitecoinCash address to send the payment to</source>
-        <translation>LitecoinCashadress att sända betalning till</translation>
+        <translation>Litecoin Cashadress att sända betalning till</translation>
     </message>
     <message>
         <source>Alt+A</source>
@@ -2351,7 +2351,7 @@ Var vänlig och försök igen.</translation>
     </message>
     <message>
         <source>The LitecoinCash address to sign the message with</source>
-        <translation>LitecoinCashadress att signera meddelandet med</translation>
+        <translation>Litecoin Cashadress att signera meddelandet med</translation>
     </message>
     <message>
         <source>Choose previously used address</source>
@@ -2407,7 +2407,7 @@ Var vänlig och försök igen.</translation>
     </message>
     <message>
         <source>The LitecoinCash address the message was signed with</source>
-        <translation>LitecoinCashadressen som meddelandet signerades med</translation>
+        <translation>Litecoin Cashadressen som meddelandet signerades med</translation>
     </message>
     <message>
         <source>Verify the message to ensure it was signed with the specified LitecoinCash address</source>
@@ -3087,8 +3087,8 @@ Var vänlig och försök igen.</translation>
         <translation>Kunde inte starta HTTP-server. Se avlusningsloggen för detaljer.</translation>
     </message>
     <message>
-        <source>LitecoinCash Core</source>
-        <translation>LitecoinCash Core</translation>
+        <source>Litecoin Cash Core</source>
+        <translation>Litecoin Cash Core</translation>
     </message>
     <message>
         <source>The %s developers</source>

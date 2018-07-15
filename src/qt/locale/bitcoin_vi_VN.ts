@@ -340,7 +340,7 @@ Ví của bạn chưa được mã hóa.</translation>
     </message>
     <message>
         <source>LitecoinCash</source>
-        <translation>LitecoinCash</translation>
+        <translation>Litecoin Cash</translation>
     </message>
     <message>
         <source>Wallet</source>
@@ -637,7 +637,7 @@ Ví của bạn chưa được mã hóa.</translation>
     </message>
     <message>
         <source>LitecoinCash</source>
-        <translation>LitecoinCash</translation>
+        <translation>Litecoin Cash</translation>
     </message>
     <message>
         <source>Error</source>
@@ -1207,8 +1207,8 @@ Ví của bạn chưa được mã hóa.</translation>
         <translation>Lựa chọn:</translation>
     </message>
     <message>
-        <source>LitecoinCash Core</source>
-        <translation>LitecoinCash Core</translation>
+        <source>Litecoin Cash Core</source>
+        <translation>Litecoin Cash Core</translation>
     </message>
     <message>
         <source>(default: %u)</source>

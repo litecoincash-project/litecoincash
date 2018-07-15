@@ -167,7 +167,7 @@
     </message>
     <message>
         <source>LitecoinCash</source>
-        <translation>LitecoinCash</translation>
+        <translation>Litecoin Cash</translation>
     </message>
     <message>
         <source>Wallet</source>
@@ -319,7 +319,7 @@
     </message>
     <message>
         <source>LitecoinCash</source>
-        <translation>LitecoinCash</translation>
+        <translation>Litecoin Cash</translation>
     </message>
     <message>
         <source>Error</source>
@@ -776,8 +776,8 @@
 </translation>
     </message>
     <message>
-        <source>LitecoinCash Core</source>
-        <translation>litecoincash core</translation>
+        <source>Litecoin Cash Core</source>
+        <translation>Litecoin Cash core</translation>
     </message>
     <message>
         <source>Error loading block database</source>

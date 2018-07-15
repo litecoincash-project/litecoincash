@@ -311,7 +311,7 @@
     </message>
     <message>
         <source>LitecoinCash</source>
-        <translation>LitecoinCash</translation>
+        <translation>Litecoin Cash</translation>
     </message>
     <message>
         <source>Wallet</source>
@@ -614,7 +614,7 @@
     </message>
     <message>
         <source>LitecoinCash</source>
-        <translation>LitecoinCash</translation>
+        <translation>Litecoin Cash</translation>
     </message>
     <message>
         <source>At least %1 GB of data will be stored in this directory, and it will grow over time.</source>
@@ -1136,8 +1136,8 @@
 <context>
     <name>bitcoin-core</name>
     <message>
-        <source>LitecoinCash Core</source>
-        <translation>LitecoinCash Core</translation>
+        <source>Litecoin Cash Core</source>
+        <translation>Litecoin Cash Core</translation>
     </message>
     <message>
         <source>Upgrading UTXO database</source>

@@ -187,7 +187,7 @@
     </message>
     <message>
         <source>LitecoinCash</source>
-        <translation>LitecoinCash</translation>
+        <translation>Litecoin Cash</translation>
     </message>
     <message>
         <source>Wallet</source>
@@ -384,7 +384,7 @@
     </message>
     <message>
         <source>LitecoinCash</source>
-        <translation>LitecoinCash</translation>
+        <translation>Litecoin Cash</translation>
     </message>
     <message>
         <source>Error</source>
@@ -970,8 +970,8 @@
         <translation>Dirbti fone kaip šešėlyje ir priimti komandas</translation>
     </message>
     <message>
-        <source>LitecoinCash Core</source>
-        <translation>LitecoinCash branduolys</translation>
+        <source>Litecoin Cash Core</source>
+        <translation>Litecoin Cash branduolys</translation>
     </message>
     <message>
         <source>Error opening block database</source>

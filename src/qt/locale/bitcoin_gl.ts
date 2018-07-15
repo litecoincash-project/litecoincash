@@ -155,7 +155,7 @@
     </message>
     <message>
         <source>LitecoinCash</source>
-        <translation>LitecoinCash</translation>
+        <translation>Litecoin Cash</translation>
     </message>
     <message>
         <source>Wallet</source>
@@ -406,7 +406,7 @@
     </message>
     <message>
         <source>LitecoinCash</source>
-        <translation>LitecoinCash</translation>
+        <translation>Litecoin Cash</translation>
     </message>
     <message>
         <source>Error</source>
@@ -1020,7 +1020,7 @@
         <translation>Executar no fondo como un demo e aceptar comandos</translation>
     </message>
     <message>
-        <source>LitecoinCash Core</source>
+        <source>Litecoin Cash Core</source>
         <translation>Core de LitecoinCash</translation>
     </message>
     <message>

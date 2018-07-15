@@ -139,7 +139,7 @@
     </message>
     <message>
         <source>LitecoinCash</source>
-        <translation>LitecoinCash</translation>
+        <translation>Litecoin Cash</translation>
     </message>
     <message>
         <source>Wallet</source>
@@ -302,7 +302,7 @@
     <name>Intro</name>
     <message>
         <source>LitecoinCash</source>
-        <translation>LitecoinCash</translation>
+        <translation>Litecoin Cash</translation>
     </message>
     <message>
         <source>Error</source>
@@ -772,8 +772,8 @@
         <translation>Operare infere sicut daemon et mandata accipe</translation>
     </message>
     <message>
-        <source>LitecoinCash Core</source>
-        <translation>LitecoinCash Nucleus</translation>
+        <source>Litecoin Cash Core</source>
+        <translation>Litecoin Cash Nucleus</translation>
     </message>
     <message>
         <source>Bind to given address and always listen on it. Use [host]:port notation for IPv6</source>

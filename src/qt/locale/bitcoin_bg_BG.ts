@@ -894,8 +894,8 @@
 <context>
     <name>bitcoin-core</name>
     <message>
-        <source>LitecoinCash Core</source>
-        <translation>LitecoinCash ядро</translation>
+        <source>Litecoin Cash Core</source>
+        <translation>Litecoin Cash ядро</translation>
     </message>
     <message>
         <source>Information</source>

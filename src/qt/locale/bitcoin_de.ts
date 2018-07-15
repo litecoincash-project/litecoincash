@@ -343,7 +343,7 @@
     </message>
     <message>
         <source>Send coins to a LitecoinCash address</source>
-        <translation>LitecoinCash an eine LitecoinCash-Adresse überweisen</translation>
+        <translation>Litecoin Cash an eine LitecoinCash-Adresse überweisen</translation>
     </message>
     <message>
         <source>Backup wallet to another location</source>
@@ -367,7 +367,7 @@
     </message>
     <message>
         <source>LitecoinCash</source>
-        <translation>LitecoinCash</translation>
+        <translation>Litecoin Cash</translation>
     </message>
     <message>
         <source>Wallet</source>
@@ -876,7 +876,7 @@
     </message>
     <message>
         <source>LitecoinCash</source>
-        <translation>LitecoinCash</translation>
+        <translation>Litecoin Cash</translation>
     </message>
     <message>
         <source>At least %1 GB of data will be stored in this directory, and it will grow over time.</source>
@@ -1441,7 +1441,7 @@
     </message>
     <message>
         <source>Enter a LitecoinCash address (e.g. %1)</source>
-        <translation>LitecoinCash-Adresse eingeben (z.B. %1)</translation>
+        <translation>Litecoin Cash-Adresse eingeben (z.B. %1)</translation>
     </message>
     <message>
         <source>%1 d</source>
@@ -2026,7 +2026,7 @@
     <name>SendCoinsDialog</name>
     <message>
         <source>Send Coins</source>
-        <translation>LitecoinCash überweisen</translation>
+        <translation>Litecoin Cash überweisen</translation>
     </message>
     <message>
         <source>Coin Control Features</source>
@@ -3037,7 +3037,7 @@
     <name>WalletModel</name>
     <message>
         <source>Send Coins</source>
-        <translation>LitecoinCash überweisen</translation>
+        <translation>Litecoin Cash überweisen</translation>
     </message>
     <message>
         <source>Fee bump error</source>

@@ -343,7 +343,7 @@
     </message>
     <message>
         <source>Send coins to a LitecoinCash address</source>
-        <translation>LitecoinCash アドレスにコインを送る</translation>
+        <translation>Litecoin Cash アドレスにコインを送る</translation>
     </message>
     <message>
         <source>Backup wallet to another location</source>
@@ -367,7 +367,7 @@
     </message>
     <message>
         <source>LitecoinCash</source>
-        <translation>LitecoinCash</translation>
+        <translation>Litecoin Cash</translation>
     </message>
     <message>
         <source>Wallet</source>
@@ -431,7 +431,7 @@
     </message>
     <message>
         <source>Open a litecoincash: URI or payment request</source>
-        <translation>litecoincash: URIまたは支払いリクエストを開く</translation>
+        <translation>Litecoin Cash: URIまたは支払いリクエストを開く</translation>
     </message>
     <message>
         <source>&amp;Command-line options</source>
@@ -876,7 +876,7 @@
     </message>
     <message>
         <source>LitecoinCash</source>
-        <translation>LitecoinCash</translation>
+        <translation>Litecoin Cash</translation>
     </message>
     <message>
         <source>At least %1 GB of data will be stored in this directory, and it will grow over time.</source>
@@ -1327,7 +1327,7 @@
     </message>
     <message>
         <source>Cannot start litecoincash: click-to-pay handler</source>
-        <translation>LitecoinCash を起動できません: click-to-pay handler</translation>
+        <translation>Litecoin Cash を起動できません: click-to-pay handler</translation>
     </message>
     <message>
         <source>URI handling</source>
@@ -1445,7 +1445,7 @@
     </message>
     <message>
         <source>Enter a LitecoinCash address (e.g. %1)</source>
-        <translation>LitecoinCashアドレスを入力してください (例 %1)</translation>
+        <translation>Litecoin Cashアドレスを入力してください (例 %1)</translation>
     </message>
     <message>
         <source>%1 d</source>
@@ -2377,7 +2377,7 @@
     </message>
     <message>
         <source>A message that was attached to the litecoincash: URI which will be stored with the transaction for your reference. Note: This message will not be sent over the LitecoinCash network.</source>
-        <translation>litecoincash: URIに添付されていたメッセージです。これは参照用としてトランザクションとともに保存されます。注意：このメッセージはLitecoinCashネットワークを通して送信されるわけではありません。</translation>
+        <translation>Litecoin Cash: URIに添付されていたメッセージです。これは参照用としてトランザクションとともに保存されます。注意：このメッセージはLitecoinCashネットワークを通して送信されるわけではありません。</translation>
     </message>
     <message>
         <source>Pay To:</source>
@@ -3178,8 +3178,8 @@
         <translation>HTTPサーバを開始できませんでした。詳細はデバッグログをご確認ください。</translation>
     </message>
     <message>
-        <source>LitecoinCash Core</source>
-        <translation>LitecoinCash のコア</translation>
+        <source>Litecoin Cash Core</source>
+        <translation>Litecoin Cash のコア</translation>
     </message>
     <message>
         <source>The %s developers</source>

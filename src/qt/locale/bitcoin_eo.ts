@@ -295,7 +295,7 @@
     </message>
     <message>
         <source>LitecoinCash</source>
-        <translation>LitecoinCash</translation>
+        <translation>Litecoin Cash</translation>
     </message>
     <message>
         <source>Wallet</source>
@@ -600,7 +600,7 @@
     </message>
     <message>
         <source>LitecoinCash</source>
-        <translation>LitecoinCash</translation>
+        <translation>Litecoin Cash</translation>
     </message>
     <message>
         <source>Error</source>
@@ -1890,7 +1890,7 @@
         <translation>Ruli fone kiel demono kaj akcepti komandojn</translation>
     </message>
     <message>
-        <source>LitecoinCash Core</source>
+        <source>Litecoin Cash Core</source>
         <translation>Kerno de LitecoinCash</translation>
     </message>
     <message>

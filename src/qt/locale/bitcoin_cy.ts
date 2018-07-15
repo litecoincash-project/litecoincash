@@ -355,7 +355,7 @@
     </message>
     <message>
         <source>LitecoinCash</source>
-        <translation>LitecoinCash</translation>
+        <translation>Litecoin Cash</translation>
     </message>
     <message>
         <source>Wallet</source>
@@ -636,7 +636,7 @@
     </message>
     <message>
         <source>LitecoinCash</source>
-        <translation>LitecoinCash</translation>
+        <translation>Litecoin Cash</translation>
     </message>
     <message>
         <source>Error</source>
@@ -1042,7 +1042,7 @@
         <translation>Opsiynau:</translation>
     </message>
     <message>
-        <source>LitecoinCash Core</source>
+        <source>Litecoin Cash Core</source>
         <translation>Craidd LitecoinCash</translation>
     </message>
     <message>

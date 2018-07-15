@@ -367,7 +367,7 @@
     </message>
     <message>
         <source>LitecoinCash</source>
-        <translation>LitecoinCash</translation>
+        <translation>Litecoin Cash</translation>
     </message>
     <message>
         <source>Wallet</source>
@@ -876,7 +876,7 @@
     </message>
     <message>
         <source>LitecoinCash</source>
-        <translation>LitecoinCash</translation>
+        <translation>Litecoin Cash</translation>
     </message>
     <message>
         <source>At least %1 GB of data will be stored in this directory, and it will grow over time.</source>
@@ -2427,7 +2427,7 @@
     </message>
     <message>
         <source>The LitecoinCash address to sign the message with</source>
-        <translation>LitecoinCash adresa pre podpísanie správy s</translation>
+        <translation>Litecoin Cash adresa pre podpísanie správy s</translation>
     </message>
     <message>
         <source>Choose previously used address</source>
@@ -3179,8 +3179,8 @@
         <translation>Nepodarilo sa spustiť HTTP server. Pre viac detailov zobrazte debug log.</translation>
     </message>
     <message>
-        <source>LitecoinCash Core</source>
-        <translation>LitecoinCash Core</translation>
+        <source>Litecoin Cash Core</source>
+        <translation>Litecoin Cash Core</translation>
     </message>
     <message>
         <source>The %s developers</source>

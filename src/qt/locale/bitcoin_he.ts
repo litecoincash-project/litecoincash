@@ -2922,7 +2922,7 @@
         <translation>ריצה כסוכן ברקע וקבלת פקודות</translation>
     </message>
     <message>
-        <source>LitecoinCash Core</source>
+        <source>Litecoin Cash Core</source>
         <translation>ליבת לייטקוין</translation>
     </message>
     <message>

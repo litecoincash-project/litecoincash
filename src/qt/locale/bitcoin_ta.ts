@@ -91,7 +91,7 @@
     </message>
     <message>
         <source>LitecoinCash</source>
-        <translation>LitecoinCash</translation>
+        <translation>Litecoin Cash</translation>
     </message>
     <message>
         <source>Wallet</source>
@@ -226,7 +226,7 @@
     </message>
     <message>
         <source>LitecoinCash</source>
-        <translation>LitecoinCash</translation>
+        <translation>Litecoin Cash</translation>
     </message>
     <message>
         <source>Error</source>
@@ -708,8 +708,8 @@
 <context>
     <name>bitcoin-core</name>
     <message>
-        <source>LitecoinCash Core</source>
-        <translation>LitecoinCash மையம்</translation>
+        <source>Litecoin Cash Core</source>
+        <translation>Litecoin Cash மையம்</translation>
     </message>
     <message>
         <source>(default: %u)</source>

@@ -15,7 +15,7 @@
     <name>BitcoinGUI</name>
     <message>
         <source>LitecoinCash</source>
-        <translation>LitecoinCash</translation>
+        <translation>Litecoin Cash</translation>
     </message>
     </context>
 <context>
@@ -34,7 +34,7 @@
     <name>Intro</name>
     <message>
         <source>LitecoinCash</source>
-        <translation>LitecoinCash</translation>
+        <translation>Litecoin Cash</translation>
     </message>
     </context>
 <context>
@@ -160,8 +160,8 @@
 <context>
     <name>bitcoin-core</name>
     <message>
-        <source>LitecoinCash Core</source>
-        <translation>LitecoinCash Jezrga</translation>
+        <source>Litecoin Cash Core</source>
+        <translation>Litecoin Cash Jezrga</translation>
     </message>
     </context>
 </TS>

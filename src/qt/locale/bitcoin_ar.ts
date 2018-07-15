@@ -2040,7 +2040,7 @@
         <translation>حدد مجلد المعلومات</translation>
     </message>
     <message>
-        <source>LitecoinCash Core</source>
+        <source>Litecoin Cash Core</source>
         <translation>جوهر LitecoinCash</translation>
     </message>
     <message>

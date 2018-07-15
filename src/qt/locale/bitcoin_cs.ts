@@ -367,7 +367,7 @@
     </message>
     <message>
         <source>LitecoinCash</source>
-        <translation>LitecoinCash</translation>
+        <translation>Litecoin Cash</translation>
     </message>
     <message>
         <source>Wallet</source>
@@ -876,7 +876,7 @@
     </message>
     <message>
         <source>LitecoinCash</source>
-        <translation>LitecoinCash</translation>
+        <translation>Litecoin Cash</translation>
     </message>
     <message>
         <source>At least %1 GB of data will be stored in this directory, and it will grow over time.</source>
@@ -2285,7 +2285,7 @@
     </message>
     <message>
         <source>The LitecoinCash address to send the payment to</source>
-        <translation>LitecoinCashová adresa příjemce</translation>
+        <translation>Litecoin Cashová adresa příjemce</translation>
     </message>
     <message>
         <source>Alt+A</source>
@@ -2378,7 +2378,7 @@
     </message>
     <message>
         <source>The LitecoinCash address to sign the message with</source>
-        <translation>LitecoinCashová adresa, kterou se zpráva podepíše</translation>
+        <translation>Litecoin Cashová adresa, kterou se zpráva podepíše</translation>
     </message>
     <message>
         <source>Choose previously used address</source>
@@ -2434,7 +2434,7 @@
     </message>
     <message>
         <source>The LitecoinCash address the message was signed with</source>
-        <translation>LitecoinCashová adresa, kterou je zpráva podepsána</translation>
+        <translation>Litecoin Cashová adresa, kterou je zpráva podepsána</translation>
     </message>
     <message>
         <source>Verify the message to ensure it was signed with the specified LitecoinCash address</source>
@@ -3126,8 +3126,8 @@
         <translation>Nemohu spustit HTTP server. Detaily viz v debug.log.</translation>
     </message>
     <message>
-        <source>LitecoinCash Core</source>
-        <translation>LitecoinCash Core</translation>
+        <source>Litecoin Cash Core</source>
+        <translation>Litecoin Cash Core</translation>
     </message>
     <message>
         <source>The %s developers</source>

@@ -466,7 +466,7 @@
     <message>
         <location line="+517"/>
         <source>LitecoinCash</source>
-        <translation>LitecoinCash</translation>
+        <translation>Litecoin Cash</translation>
     </message>
     <message>
         <location line="-743"/>
@@ -4101,8 +4101,8 @@
     </message>
     <message>
         <location line="-397"/>
-        <source>LitecoinCash Core</source>
-        <translation type="unfinished">LitecoinCash Core</translation>
+        <source>Litecoin Cash Core</source>
+        <translation type="unfinished">Litecoin Cash Core</translation>
     </message>
     <message>
         <location line="+1"/>
