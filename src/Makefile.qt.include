@@ -326,6 +326,7 @@ RES_ICONS = \
   qt/res/icons/tx_mined.png \
   qt/res/icons/warning.png \
   qt/res/icons/spacedrop.png \
+  qt/res/icons/hiveicon.png \
   qt/res/icons/verify.png
 
 BITCOIN_QT_BASE_CPP = \
