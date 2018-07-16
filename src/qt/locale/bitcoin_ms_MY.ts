@@ -364,7 +364,7 @@ Alihkan fail data ke dalam tab semasa</translation>
     </message>
     <message>
         <source>LitecoinCash</source>
-        <translation>LitecoinCash</translation>
+        <translation>Litecoin Cash</translation>
     </message>
     <message>
         <source>Wallet</source>
@@ -439,7 +439,7 @@ Alihkan fail data ke dalam tab semasa</translation>
     <name>Intro</name>
     <message>
         <source>LitecoinCash</source>
-        <translation>LitecoinCash</translation>
+        <translation>Litecoin Cash</translation>
     </message>
     </context>
 <context>

@@ -6,12 +6,14 @@
 #define BITCOIN_QT_WALLETVIEW_H
 
 #include <amount.h>
+#include <wallet/wallet.h>  // LitecoinCash: Key import helper
 
 #include <QStackedWidget>
 
 class BitcoinGUI;
 class ClientModel;
 class OverviewPage;
+class HivePage;     // LitecoinCash: Hive page
 class PlatformStyle;
 class ReceiveCoinsDialog;
 class SendCoinsDialog;
@@ -53,12 +55,15 @@ public:
     bool handlePaymentRequest(const SendCoinsRecipient& recipient);
 
     void showOutOfSyncWarning(bool fShow);
+    
+    static void doRescan(CWallet* pwallet, int64_t startTime);  // LitecoinCash: Key import helper
 
 private:
     ClientModel *clientModel;
     WalletModel *walletModel;
 
     OverviewPage *overviewPage;
+    HivePage *hivePage;     // LitecoinCash: Hive page
     QWidget *transactionsPage;
     ReceiveCoinsDialog *receiveCoinsPage;
     SendCoinsDialog *sendCoinsPage;
@@ -80,6 +85,9 @@ public Q_SLOTS:
     /** Switch to send coins page */
     void gotoSendCoinsPage(QString addr = "");
 
+    // LitecoinCash: Switch to hive page
+    void gotoHivePage();
+
     /** Show Sign/Verify Message dialog and switch to sign message tab */
     void gotoSignMessageTab(QString addr = "");
     /** Show Sign/Verify Message dialog and switch to verify message tab */
@@ -98,6 +106,9 @@ public Q_SLOTS:
     void changePassphrase();
     /** Ask for passphrase to unlock wallet temporarily */
     void unlockWallet();
+
+    // LitecoinCash: Key import helper
+    void importPrivateKey();
 
     /** Show used sending addresses */
     void usedSendingAddresses();

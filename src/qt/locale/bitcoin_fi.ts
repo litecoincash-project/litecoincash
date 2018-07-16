@@ -367,7 +367,7 @@
     </message>
     <message>
         <source>LitecoinCash</source>
-        <translation>LitecoinCash</translation>
+        <translation>Litecoin Cash</translation>
     </message>
     <message>
         <source>Wallet</source>
@@ -868,7 +868,7 @@
     </message>
     <message>
         <source>LitecoinCash</source>
-        <translation>LitecoinCash</translation>
+        <translation>Litecoin Cash</translation>
     </message>
     <message>
         <source>At least %1 GB of data will be stored in this directory, and it will grow over time.</source>
@@ -1287,7 +1287,7 @@
     </message>
     <message>
         <source>Cannot start litecoincash: click-to-pay handler</source>
-        <translation>LitecoinCashia ei voi käynnistää: klikkaa-maksaaksesi -käsittelijän virhe</translation>
+        <translation>Litecoin Cashia ei voi käynnistää: klikkaa-maksaaksesi -käsittelijän virhe</translation>
     </message>
     <message>
         <source>URI handling</source>
@@ -2225,7 +2225,7 @@
     </message>
     <message>
         <source>The LitecoinCash address to send the payment to</source>
-        <translation>LitecoinCash-osoite johon maksu lähetetään</translation>
+        <translation>Litecoin Cash-osoite johon maksu lähetetään</translation>
     </message>
     <message>
         <source>Alt+A</source>
@@ -2318,7 +2318,7 @@
     </message>
     <message>
         <source>The LitecoinCash address to sign the message with</source>
-        <translation>LitecoinCash-osoite jolla viesti allekirjoitetaan</translation>
+        <translation>Litecoin Cash-osoite jolla viesti allekirjoitetaan</translation>
     </message>
     <message>
         <source>Choose previously used address</source>
@@ -2374,7 +2374,7 @@
     </message>
     <message>
         <source>The LitecoinCash address the message was signed with</source>
-        <translation>LitecoinCash-osoite jolla viesti on allekirjoitettu</translation>
+        <translation>Litecoin Cash-osoite jolla viesti on allekirjoitettu</translation>
     </message>
     <message>
         <source>Verify the message to ensure it was signed with the specified LitecoinCash address</source>
@@ -3034,8 +3034,8 @@
         <translation>HTTP-palvelinta ei voitu käynnistää. Katso debug-lokista lisätietoja.</translation>
     </message>
     <message>
-        <source>LitecoinCash Core</source>
-        <translation>LitecoinCash-ydin</translation>
+        <source>Litecoin Cash Core</source>
+        <translation>Litecoin Cash-ydin</translation>
     </message>
     <message>
         <source>The %s developers</source>

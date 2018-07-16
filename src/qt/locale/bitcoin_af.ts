@@ -359,7 +359,7 @@
     </message>
     <message>
         <source>LitecoinCash</source>
-        <translation>LitecoinCash</translation>
+        <translation>Litecoin Cash</translation>
     </message>
     <message>
         <source>Wallet</source>
@@ -824,7 +824,7 @@
     </message>
     <message>
         <source>LitecoinCash</source>
-        <translation>LitecoinCash</translation>
+        <translation>Litecoin Cash</translation>
     </message>
     <message>
         <source>The wallet will also be stored in this directory.</source>
@@ -1918,8 +1918,8 @@
         <translation>Opsies:</translation>
     </message>
     <message>
-        <source>LitecoinCash Core</source>
-        <translation>LitecoinCash Kern</translation>
+        <source>Litecoin Cash Core</source>
+        <translation>Litecoin Cash Kern</translation>
     </message>
     <message>
         <source>Connection options:</source>

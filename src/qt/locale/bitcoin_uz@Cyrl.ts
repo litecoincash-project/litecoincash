@@ -171,7 +171,7 @@
     </message>
     <message>
         <source>LitecoinCash</source>
-        <translation>LitecoinCash</translation>
+        <translation>Litecoin Cash</translation>
     </message>
     <message>
         <source>Wallet</source>
@@ -199,7 +199,7 @@
     </message>
     <message>
         <source>Sign messages with your LitecoinCash addresses to prove you own them</source>
-        <translation>LitecoinCash манзилидан унинг эгаси эканлигингизни исботлаш учун хабарлар ёзинг</translation>
+        <translation>Litecoin Cash манзилидан унинг эгаси эканлигингизни исботлаш учун хабарлар ёзинг</translation>
     </message>
     <message>
         <source>Verify messages to ensure they were signed with specified LitecoinCash addresses</source>
@@ -235,7 +235,7 @@
     </message>
     <message>
         <source>Open a litecoincash: URI or payment request</source>
-        <translation>LitecoinCash’ни очиш: URI ёки тўлов сўрови</translation>
+        <translation>Litecoin Cash’ни очиш: URI ёки тўлов сўрови</translation>
     </message>
     <message>
         <source>&amp;Command-line options</source>
@@ -438,7 +438,7 @@
     </message>
     <message>
         <source>LitecoinCash</source>
-        <translation>LitecoinCash</translation>
+        <translation>Litecoin Cash</translation>
     </message>
     <message>
         <source>Error: Specified data directory "%1" cannot be created.</source>
@@ -679,7 +679,7 @@
     </message>
     <message>
         <source>Enter a LitecoinCash address (e.g. %1)</source>
-        <translation>LitecoinCash манзилини киритинг (масалан.  %1)</translation>
+        <translation>Litecoin Cash манзилини киритинг (масалан.  %1)</translation>
     </message>
     <message>
         <source>%1 m</source>
@@ -1184,8 +1184,8 @@
         <translation>Демон сифатида орқа фонда ишга туширинг ва буйруқларга рози бўлинг</translation>
     </message>
     <message>
-        <source>LitecoinCash Core</source>
-        <translation>LitecoinCash Core</translation>
+        <source>Litecoin Cash Core</source>
+        <translation>Litecoin Cash Core</translation>
     </message>
     <message>
         <source>Connection options:</source>

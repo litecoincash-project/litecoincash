@@ -1095,7 +1095,7 @@
     </message>
     <message>
         <source>Cannot start litecoincash: click-to-pay handler</source>
-        <translation>LitecoinCash не можe да се стартира: click-to-pay handler</translation>
+        <translation>Litecoin Cash не можe да се стартира: click-to-pay handler</translation>
     </message>
     <message>
         <source>URI handling</source>
@@ -2366,8 +2366,8 @@
         <translation>Въведете Ваш публичен адрес</translation>
     </message>
     <message>
-        <source>LitecoinCash Core</source>
-        <translation>LitecoinCash ядро</translation>
+        <source>Litecoin Cash Core</source>
+        <translation>Litecoin Cash ядро</translation>
     </message>
     <message>
         <source>&lt;category&gt; can be:</source>

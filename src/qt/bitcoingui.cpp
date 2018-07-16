@@ -89,6 +89,8 @@ BitcoinGUI::BitcoinGUI(const PlatformStyle *_platformStyle, const NetworkStyle *
     progressDialog(0),
     appMenuBar(0),
     overviewAction(0),
+    hiveAction(0),              // LitecoinCash: Hive page
+    importPrivateKeyAction(0),  // LitecoinCash: Key import helper
     historyAction(0),
     quitAction(0),
     sendCoinsAction(0),
@@ -313,11 +315,21 @@ void BitcoinGUI::createActions()
     historyAction->setShortcut(QKeySequence(Qt::ALT + Qt::Key_4));
     tabGroup->addAction(historyAction);
 
+    // LitecoinCash: Hive page
+    hiveAction = new QAction(platformStyle->SingleColorIcon(":/icons/bee"), tr("The &Hive"), this);
+    hiveAction->setStatusTip(tr("Hive Mining center"));
+    hiveAction->setToolTip(hiveAction->statusTip());
+    hiveAction->setCheckable(true);
+    hiveAction->setShortcut(QKeySequence(Qt::ALT + Qt::Key_1));
+    tabGroup->addAction(hiveAction);
+
 #ifdef ENABLE_WALLET
     // These showNormalIfMinimized are needed because Send Coins and Receive Coins
     // can be triggered from the tray menu, and need to show the GUI to be useful.
     connect(overviewAction, SIGNAL(triggered()), this, SLOT(showNormalIfMinimized()));
     connect(overviewAction, SIGNAL(triggered()), this, SLOT(gotoOverviewPage()));
+    connect(hiveAction, SIGNAL(triggered()), this, SLOT(showNormalIfMinimized()));  // LitecoinCash: Hive page
+    connect(hiveAction, SIGNAL(triggered()), this, SLOT(gotoHivePage()));           // LitecoinCash: Hive page
     connect(sendCoinsAction, SIGNAL(triggered()), this, SLOT(showNormalIfMinimized()));
     connect(sendCoinsAction, SIGNAL(triggered()), this, SLOT(gotoSendCoinsPage()));
     connect(sendCoinsMenuAction, SIGNAL(triggered()), this, SLOT(showNormalIfMinimized()));
@@ -377,6 +389,10 @@ void BitcoinGUI::createActions()
     showHelpMessageAction->setMenuRole(QAction::NoRole);
     showHelpMessageAction->setStatusTip(tr("Show the %1 help message to get a list with possible LitecoinCash command-line options").arg(tr(PACKAGE_NAME)));
 
+    // LitecoinCash: Key import helper
+    importPrivateKeyAction = new QAction(platformStyle->TextColorIcon(":/icons/key"), tr("&Import private key..."), this);
+    importPrivateKeyAction->setToolTip(tr("Import a Litecoin or LitecoinCash private key"));
+
     connect(quitAction, SIGNAL(triggered()), qApp, SLOT(quit()));
     connect(aboutAction, SIGNAL(triggered()), this, SLOT(aboutClicked()));
     connect(aboutQtAction, SIGNAL(triggered()), qApp, SLOT(aboutQt()));
@@ -398,6 +414,7 @@ void BitcoinGUI::createActions()
         connect(usedSendingAddressesAction, SIGNAL(triggered()), walletFrame, SLOT(usedSendingAddresses()));
         connect(usedReceivingAddressesAction, SIGNAL(triggered()), walletFrame, SLOT(usedReceivingAddresses()));
         connect(openAction, SIGNAL(triggered()), this, SLOT(openClicked()));
+        connect(importPrivateKeyAction, SIGNAL(triggered()), walletFrame, SLOT(importPrivateKey()));    // LitecoinCash: Key import helper
     }
 #endif // ENABLE_WALLET
 
@@ -427,6 +444,8 @@ void BitcoinGUI::createMenuBar()
         file->addAction(usedSendingAddressesAction);
         file->addAction(usedReceivingAddressesAction);
         file->addSeparator();
+        file->addAction(importPrivateKeyAction);    // LitecoinCash: Key import helper
+        file->addSeparator();                       // LitecoinCash: Key import helper
     }
     file->addAction(quitAction);
 
@@ -462,6 +481,7 @@ void BitcoinGUI::createToolBars()
         toolbar->addAction(sendCoinsAction);
         toolbar->addAction(receiveCoinsAction);
         toolbar->addAction(historyAction);
+        toolbar->addAction(hiveAction);     // LitecoinCash: Hive page
         overviewAction->setChecked(true);
     }
 }
@@ -569,6 +589,8 @@ void BitcoinGUI::setWalletActionsEnabled(bool enabled)
     usedSendingAddressesAction->setEnabled(enabled);
     usedReceivingAddressesAction->setEnabled(enabled);
     openAction->setEnabled(enabled);
+    hiveAction->setEnabled(enabled);                // LitecoinCash: Hive page
+    importPrivateKeyAction->setEnabled(enabled);    // LitecoinCash: Key import helper    
 }
 
 void BitcoinGUI::createTrayIcon(const NetworkStyle *networkStyle)
@@ -683,6 +705,13 @@ void BitcoinGUI::gotoOverviewPage()
 {
     overviewAction->setChecked(true);
     if (walletFrame) walletFrame->gotoOverviewPage();
+}
+
+// LitecoinCash: Switch to hive page
+void BitcoinGUI::gotoHivePage()
+{
+    hiveAction->setChecked(true);
+    if (walletFrame) walletFrame->gotoHivePage();
 }
 
 void BitcoinGUI::gotoHistoryPage()

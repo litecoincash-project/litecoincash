@@ -65,6 +65,7 @@ private Q_SLOTS:
     void updateAlerts(const QString &warnings);
     void updateWatchOnlyLabels(bool showWatchOnly);
     void handleOutOfSyncWarningClicks();
+    void handleSpaceDropButtonClicked();    // LitecoinCash: SpaceDrop button handler
 };
 
 #endif // BITCOIN_QT_OVERVIEWPAGE_H

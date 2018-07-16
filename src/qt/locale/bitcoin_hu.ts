@@ -336,7 +336,7 @@ Kérem a kulcsmondatban használjon &lt;b&gt; tíz vagy több véletlenszerű ka
     </message>
     <message>
         <source>Send coins to a LitecoinCash address</source>
-        <translation>LitecoinCash küldése megadott címre</translation>
+        <translation>Litecoin Cash küldése megadott címre</translation>
     </message>
     <message>
         <source>Backup wallet to another location</source>
@@ -360,7 +360,7 @@ Kérem a kulcsmondatban használjon &lt;b&gt; tíz vagy több véletlenszerű ka
     </message>
     <message>
         <source>LitecoinCash</source>
-        <translation>LitecoinCash</translation>
+        <translation>Litecoin Cash</translation>
     </message>
     <message>
         <source>Wallet</source>
@@ -865,7 +865,7 @@ Kérem a kulcsmondatban használjon &lt;b&gt; tíz vagy több véletlenszerű ka
     </message>
     <message>
         <source>LitecoinCash</source>
-        <translation>LitecoinCash</translation>
+        <translation>Litecoin Cash</translation>
     </message>
     <message>
         <source>At least %1 GB of data will be stored in this directory, and it will grow over time.</source>
@@ -2287,7 +2287,7 @@ Kérem a kulcsmondatban használjon &lt;b&gt; tíz vagy több véletlenszerű ka
     </message>
     <message>
         <source>The LitecoinCash address to sign the message with</source>
-        <translation>LitecoinCash cím, amivel alá kívánja írni az üzenetet</translation>
+        <translation>Litecoin Cash cím, amivel alá kívánja írni az üzenetet</translation>
     </message>
     <message>
         <source>Choose previously used address</source>
@@ -2335,7 +2335,7 @@ Kérem a kulcsmondatban használjon &lt;b&gt; tíz vagy több véletlenszerű ka
     </message>
     <message>
         <source>The LitecoinCash address the message was signed with</source>
-        <translation>LitecoinCash cím, amivel aláírta az üzenetet</translation>
+        <translation>Litecoin Cash cím, amivel aláírta az üzenetet</translation>
     </message>
     <message>
         <source>Verify the message to ensure it was signed with the specified LitecoinCash address</source>
@@ -2915,8 +2915,8 @@ Kérem a kulcsmondatban használjon &lt;b&gt; tíz vagy több véletlenszerű ka
 </translation>
     </message>
     <message>
-        <source>LitecoinCash Core</source>
-        <translation>LitecoinCash Core</translation>
+        <source>Litecoin Cash Core</source>
+        <translation>Litecoin Cash Core</translation>
     </message>
     <message>
         <source>The %s developers</source>

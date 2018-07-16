@@ -11,6 +11,7 @@
 #include <qt/guiutil.h>
 #include <qt/optionsmodel.h>
 #include <qt/overviewpage.h>
+#include <qt/hivepage.h>        // LitecoinCash: Hive page
 #include <qt/platformstyle.h>
 #include <qt/receivecoinsdialog.h>
 #include <qt/sendcoinsdialog.h>
@@ -18,6 +19,10 @@
 #include <qt/transactiontablemodel.h>
 #include <qt/transactionview.h>
 #include <qt/walletmodel.h>
+#include <boost/thread.hpp>     // LitecoinCash: Key import helper
+#include <wallet/rpcwallet.h>   // LitecoinCash: Key import helper
+#include <wallet/wallet.h>      // LitecoinCash: Key import helper
+#include <validation.h>         // LitecoinCash: Key import helper
 
 #include <ui_interface.h>
 
@@ -28,6 +33,7 @@
 #include <QProgressDialog>
 #include <QPushButton>
 #include <QVBoxLayout>
+#include <QInputDialog>         // LitecoinCash: Key import helper
 
 WalletView::WalletView(const PlatformStyle *_platformStyle, QWidget *parent):
     QStackedWidget(parent),
@@ -37,6 +43,7 @@ WalletView::WalletView(const PlatformStyle *_platformStyle, QWidget *parent):
 {
     // Create tabs
     overviewPage = new OverviewPage(platformStyle);
+    hivePage = new HivePage(platformStyle); // LitecoinCash: Hive page
 
     transactionsPage = new QWidget(this);
     QVBoxLayout *vbox = new QVBoxLayout();
@@ -63,6 +70,7 @@ WalletView::WalletView(const PlatformStyle *_platformStyle, QWidget *parent):
     addWidget(transactionsPage);
     addWidget(receiveCoinsPage);
     addWidget(sendCoinsPage);
+    addWidget(hivePage);   // LitecoinCash: Hive page
 
     // Clicking on a transaction on the overview pre-selects the transaction on the transaction history page
     connect(overviewPage, SIGNAL(transactionClicked(QModelIndex)), transactionView, SLOT(focusTransaction(QModelIndex)));
@@ -120,6 +128,7 @@ void WalletView::setWalletModel(WalletModel *_walletModel)
     // Put transaction list in tabs
     transactionView->setModel(_walletModel);
     overviewPage->setWalletModel(_walletModel);
+    hivePage->setModel(_walletModel);         // LitecoinCash: Hive page
     receiveCoinsPage->setModel(_walletModel);
     sendCoinsPage->setModel(_walletModel);
     usedReceivingAddressesPage->setModel(_walletModel ? _walletModel->getAddressTableModel() : nullptr);
@@ -172,6 +181,12 @@ void WalletView::processNewTransaction(const QModelIndex& parent, int start, int
 void WalletView::gotoOverviewPage()
 {
     setCurrentWidget(overviewPage);
+}
+
+// LitecoinCash: Hive page
+void WalletView::gotoHivePage()
+{
+    setCurrentWidget(hivePage);
 }
 
 void WalletView::gotoHistoryPage()
@@ -327,4 +342,86 @@ void WalletView::showProgress(const QString &title, int nProgress)
 void WalletView::requestedSyncWarningInfo()
 {
     Q_EMIT outOfSyncWarningClicked();
+}
+
+// LitecoinCash: Key import helper
+void WalletView::doRescan(CWallet* pwallet, int64_t startTime)
+{
+    WalletRescanReserver reserver(pwallet);
+    if (!reserver.reserve()) {
+        QMessageBox::critical(0, tr(PACKAGE_NAME), tr("Wallet is currently rescanning. Abort existing rescan or wait."));
+        return;
+    }
+	pwallet->RescanFromTime(TIMESTAMP_MIN, reserver, true);
+	QMessageBox::information(0, tr(PACKAGE_NAME), tr("Rescan complete."));
+}
+
+// LitecoinCash: Key import helper
+void WalletView::importPrivateKey()
+{
+    bool ok;
+    QString privKey = QInputDialog::getText(0, tr(PACKAGE_NAME), tr("Enter a Litecoin/LitecoinCash private key to import into your wallet."), QLineEdit::Normal, "", &ok);
+    if (ok && !privKey.isEmpty()) {
+        CWallet* pwallet = GetWalletForQTKeyImport();
+
+        if(!pwallet) {
+            QMessageBox::critical(0, tr(PACKAGE_NAME), tr("Couldn't select valid wallet."));
+            return;
+        }
+
+        if (!EnsureWalletIsAvailable(pwallet, false)) {
+            QMessageBox::critical(0, tr(PACKAGE_NAME), tr("Wallet isn't open."));
+            return;
+        }
+
+        LOCK2(cs_main, pwallet->cs_wallet);
+
+        WalletModel::UnlockContext ctx(walletModel->requestUnlock());
+        if(!ctx.isValid())  // Unlock wallet was cancelled
+            return;
+
+        CBitcoinSecret vchSecret;
+        if (!vchSecret.SetString(privKey.toStdString())) {
+            QMessageBox::critical(0, tr(PACKAGE_NAME), tr("This doesn't appear to be a Litecoin/LitecoinCash private key."));
+            return;
+        }
+
+        CKey key = vchSecret.GetKey();
+        if (!key.IsValid()) {
+            QMessageBox::critical(0, tr(PACKAGE_NAME), tr("Private key outside allowed range."));
+            return;
+        }
+
+        CPubKey pubkey = key.GetPubKey();
+        assert(key.VerifyPubKey(pubkey));
+        CKeyID vchAddress = pubkey.GetID();
+        {
+            pwallet->MarkDirty();
+            pwallet->SetAddressBook(vchAddress, "", "receive");
+
+            if (pwallet->HaveKey(vchAddress)) {
+                QMessageBox::critical(0, tr(PACKAGE_NAME), tr("This key has already been added."));
+                return;
+            }
+
+            pwallet->mapKeyMetadata[vchAddress].nCreateTime = 1;
+
+            if (!pwallet->AddKeyPubKey(key, pubkey)) {
+                QMessageBox::critical(0, tr(PACKAGE_NAME), tr("Error adding key to wallet."));
+                return;
+            }
+
+            pwallet->UpdateTimeFirstKey(1); // Mark as rescan needed, even if we don't do it now (it'll happen next restart if not before)
+            
+            QMessageBox msgBox;
+            msgBox.setText(tr("Key successfully added to wallet."));
+            msgBox.setInformativeText("Rescan now? (Select No if you have more keys to import)");
+            msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+            msgBox.setDefaultButton(QMessageBox::No);
+            
+            if (msgBox.exec() == QMessageBox::Yes)
+                boost::thread t{WalletView::doRescan, pwallet, TIMESTAMP_MIN};                
+        }
+        return;
+    }
 }

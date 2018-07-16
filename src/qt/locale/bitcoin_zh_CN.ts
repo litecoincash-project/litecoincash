@@ -2258,7 +2258,7 @@
     </message>
     <message>
         <source>A message that was attached to the litecoincash: URI which will be stored with the transaction for your reference. Note: This message will not be sent over the LitecoinCash network.</source>
-        <translation>litecoincash:URI 附带的备注信息，将会和交易一起存储，备查。 注意：该消息不会通过莱特币网络传输。</translation>
+        <translation>Litecoin Cash:URI 附带的备注信息，将会和交易一起存储，备查。 注意：该消息不会通过莱特币网络传输。</translation>
     </message>
     <message>
         <source>Pay To:</source>
@@ -3036,8 +3036,8 @@
         <translation>无法启动HTTP服务，查看日志获取更多信息</translation>
     </message>
     <message>
-        <source>LitecoinCash Core</source>
-        <translation>LitecoinCash Core</translation>
+        <source>Litecoin Cash Core</source>
+        <translation>Litecoin Cash Core</translation>
     </message>
     <message>
         <source>The %s developers</source>

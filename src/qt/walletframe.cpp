@@ -117,6 +117,22 @@ void WalletFrame::gotoOverviewPage()
         i.value()->gotoOverviewPage();
 }
 
+// Litecoin Cash: Hive page
+void WalletFrame::gotoHivePage()
+{
+    QMap<QString, WalletView*>::const_iterator i;
+    for (i = mapWalletViews.constBegin(); i != mapWalletViews.constEnd(); ++i)
+        i.value()->gotoHivePage();
+}
+
+// LitecoinCash: Key import helper
+void WalletFrame::importPrivateKey()
+{
+    WalletView *walletView = currentWalletView();
+    if(walletView)
+        walletView->importPrivateKey();
+}
+
 void WalletFrame::gotoHistoryPage()
 {
     QMap<QString, WalletView*>::const_iterator i;

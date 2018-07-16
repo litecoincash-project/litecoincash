@@ -315,7 +315,7 @@
     </message>
     <message>
         <source>LitecoinCash</source>
-        <translation>LitecoinCash</translation>
+        <translation>Litecoin Cash</translation>
     </message>
     <message>
         <source>Wallet</source>
@@ -684,7 +684,7 @@
     </message>
     <message>
         <source>LitecoinCash</source>
-        <translation>LitecoinCash</translation>
+        <translation>Litecoin Cash</translation>
     </message>
     <message>
         <source>Error</source>
@@ -761,7 +761,7 @@
     </message>
     <message>
         <source>Automatically open the LitecoinCash client port on the router. This only works when your router supports UPnP and it is enabled.</source>
-        <translation>LitecoinCashi kliendi pordi automaatne avamine ruuteris. Toimib, kui sinu ruuter aktsepteerib UPnP ühendust.</translation>
+        <translation>Litecoin Cashi kliendi pordi automaatne avamine ruuteris. Toimib, kui sinu ruuter aktsepteerib UPnP ühendust.</translation>
     </message>
     <message>
         <source>Map port using &amp;UPnP</source>
@@ -1446,7 +1446,7 @@
     </message>
     <message>
         <source>The LitecoinCash address to sign the message with</source>
-        <translation>LitecoinCash aadress millega sõnum allkirjastada</translation>
+        <translation>Litecoin Cash aadress millega sõnum allkirjastada</translation>
     </message>
     <message>
         <source>Choose previously used address</source>
@@ -1498,7 +1498,7 @@
     </message>
     <message>
         <source>The LitecoinCash address the message was signed with</source>
-        <translation>LitecoinCash aadress millega sõnum on allkirjastatud</translation>
+        <translation>Litecoin Cash aadress millega sõnum on allkirjastatud</translation>
     </message>
     <message>
         <source>Verify the message to ensure it was signed with the specified LitecoinCash address</source>
@@ -1970,8 +1970,8 @@
         <translation>Tööta taustal ning aktsepteeri käsklusi</translation>
     </message>
     <message>
-        <source>LitecoinCash Core</source>
-        <translation>LitecoinCashi tuumik</translation>
+        <source>Litecoin Cash Core</source>
+        <translation>Litecoin Cashi tuumik</translation>
     </message>
     <message>
         <source>Bind to given address and always listen on it. Use [host]:port notation for IPv6</source>

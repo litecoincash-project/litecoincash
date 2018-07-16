@@ -227,7 +227,7 @@
     </message>
     <message>
         <source>LitecoinCash</source>
-        <translation>LitecoinCash</translation>
+        <translation>Litecoin Cash</translation>
     </message>
     <message>
         <source>Wallet</source>
@@ -466,7 +466,7 @@
     </message>
     <message>
         <source>LitecoinCash</source>
-        <translation>LitecoinCash</translation>
+        <translation>Litecoin Cash</translation>
     </message>
     <message>
         <source>Error</source>
@@ -920,7 +920,7 @@
     </message>
     <message>
         <source>Coin Control Features</source>
-        <translation>LitecoinCash Kontroles Funkcijas</translation>
+        <translation>Litecoin Cash Kontroles Funkcijas</translation>
     </message>
     <message>
         <source>Inputs...</source>
@@ -1216,8 +1216,8 @@
         <translation>Darbināt fonā kā servisu un pieņemt komandas</translation>
     </message>
     <message>
-        <source>LitecoinCash Core</source>
-        <translation>LitecoinCash Core</translation>
+        <source>Litecoin Cash Core</source>
+        <translation>Litecoin Cash Core</translation>
     </message>
     <message>
         <source>&lt;category&gt; can be:</source>
