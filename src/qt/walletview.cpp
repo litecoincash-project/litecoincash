@@ -360,7 +360,7 @@ void WalletView::doRescan(CWallet* pwallet, int64_t startTime)
 void WalletView::importPrivateKey()
 {
     bool ok;
-    QString privKey = QInputDialog::getText(0, tr(PACKAGE_NAME), tr("Enter a Litecoin/LitecoinCash private key to import into your wallet."), QLineEdit::Normal, "", &ok);
+    QString privKey = QInputDialog::getText(0, tr(PACKAGE_NAME), tr("Enter a Litecoin/Litecoin Cash private key to import into your wallet."), QLineEdit::Normal, "", &ok);
     if (ok && !privKey.isEmpty()) {
         CWallet* pwallet = GetWalletForQTKeyImport();
 

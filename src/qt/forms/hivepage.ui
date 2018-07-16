@@ -18,36 +18,51 @@
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
-    <widget class="QLabel" name="hiveMiningBlurb">
-     <property name="sizePolicy">
-      <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-       <horstretch>0</horstretch>
-       <verstretch>0</verstretch>
-      </sizepolicy>
-     </property>
-     <property name="text">
-      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt;The Hive: Agent-Based Mining in Litecoin Cash&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Soon, a brand new method of mining will be added to Litecoin Cash. Worker bee agents which live on the blockchain can be created by any Litecoin Cash holder.&lt;/p&gt;&lt;p&gt;Worker bees secure the blockchain while earning rewards for their owner.&lt;/p&gt;&lt;p&gt;Existing SHA256 miners and pools will continue to work exactly as before, while The Hive will both alleviate the risk of 51% attacks on the network, and allow democratisation of the mining process.&lt;/p&gt;&lt;p&gt;&lt;a href=&quot;https://hive.litecoinca.sh/whitepaper.pdf&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;Read our whitepaper&lt;/span&gt;&lt;/a&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-     </property>
-     <property name="wordWrap">
-      <bool>true</bool>
-     </property>
-     <property name="openExternalLinks">
-      <bool>true</bool>
-     </property>
-    </widget>
-   </item>
-   <item>
-    <spacer name="verticalSpacer">
-     <property name="orientation">
-      <enum>Qt::Vertical</enum>
-     </property>
-     <property name="sizeHint" stdset="0">
-      <size>
-       <width>20</width>
-       <height>40</height>
-      </size>
-     </property>
-    </spacer>
+    <layout class="QVBoxLayout" name="verticalLayout_2">
+     <item>
+      <widget class="QLabel" name="label">
+       <property name="maximumSize">
+        <size>
+         <width>16777215</width>
+         <height>20</height>
+        </size>
+       </property>
+       <property name="text">
+        <string>&lt;p&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt;The Hive: Agent-Based Mining in Litecoin Cash&lt;/span&gt;&lt;/p&gt;</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <layout class="QHBoxLayout" name="horizontalLayout_3">
+       <item>
+        <widget class="QLabel" name="label_3">
+         <property name="text">
+          <string/>
+         </property>
+         <property name="pixmap">
+          <pixmap resource="../bitcoin.qrc">:/icons/presentationlogo</pixmap>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignCenter</set>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLabel" name="label_2">
+         <property name="text">
+          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Soon, a brand new method of mining will be added to Litecoin Cash. Worker bee agents which live on the blockchain can be created by any Litecoin Cash holder.&lt;/p&gt;&lt;p&gt;Worker bees secure the blockchain while earning rewards for their owner.&lt;/p&gt;&lt;p&gt;Existing SHA256 miners and pools will continue to work exactly as before, while The Hive will both alleviate the risk of 51% attacks on the network, and allow democratisation of the mining process.&lt;/p&gt;&lt;p&gt;&lt;a href=&quot;https://hive.litecoinca.sh/whitepaper.pdf&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;Read our whitepaper&lt;/span&gt;&lt;/a&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+         </property>
+         <property name="wordWrap">
+          <bool>true</bool>
+         </property>
+         <property name="openExternalLinks">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </item>
+    </layout>
    </item>
   </layout>
  </widget>

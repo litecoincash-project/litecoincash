@@ -16,8 +16,8 @@ BEGIN
     BEGIN
         BLOCK "040904E4" // U.S. English - multilingual (hex)
         BEGIN
-            VALUE "CompanyName",        "LitecoinCash"
-            VALUE "FileDescription",    "litecoincash-tx (CLI LitecoinCash transaction editor utility)"
+            VALUE "CompanyName",        "Litecoin Cash"
+            VALUE "FileDescription",    "litecoincash-tx (CLI Litecoin Cash transaction editor utility)"
             VALUE "FileVersion",        VER_FILEVERSION_STR
             VALUE "InternalName",       "litecoincash-tx"
             VALUE "LegalCopyright",     COPYRIGHT_STR
