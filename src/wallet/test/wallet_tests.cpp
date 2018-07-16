@@ -387,7 +387,7 @@ BOOST_FIXTURE_TEST_CASE(rescan, TestChain100Setup)
         WalletRescanReserver reserver(&wallet);
         reserver.reserve();
         BOOST_CHECK_EQUAL(nullBlock, wallet.ScanForWalletTransactions(oldTip, nullptr, reserver));
-        BOOST_CHECK_EQUAL(wallet.GetImmatureBalance(), 100 * COIN);
+        BOOST_CHECK_EQUAL(wallet.GetImmatureBalance(), 100 * COIN * COIN_SCALE);
     }
 
     // Prune the older block file.
@@ -402,7 +402,7 @@ BOOST_FIXTURE_TEST_CASE(rescan, TestChain100Setup)
         WalletRescanReserver reserver(&wallet);
         reserver.reserve();
         BOOST_CHECK_EQUAL(oldTip, wallet.ScanForWalletTransactions(oldTip, nullptr, reserver));
-        BOOST_CHECK_EQUAL(wallet.GetImmatureBalance(), 50 * COIN);
+        BOOST_CHECK_EQUAL(wallet.GetImmatureBalance(), 50 * COIN * COIN_SCALE);
     }
 
     // Verify importmulti RPC returns failure for a key whose creation time is
@@ -530,7 +530,7 @@ BOOST_FIXTURE_TEST_CASE(coin_mark_dirty_immature_credit, TestChain100Setup)
     // credit amount is calculated.
     wtx.MarkDirty();
     wallet.AddKeyPubKey(coinbaseKey, coinbaseKey.GetPubKey());
-    BOOST_CHECK_EQUAL(wtx.GetImmatureCredit(), 50*COIN);
+    BOOST_CHECK_EQUAL(wtx.GetImmatureCredit(), 50*COIN*COIN_SCALE); // LitecoinCash: Coinscale
 }
 
 static int64_t AddTx(CWallet& wallet, uint32_t lockTime, int64_t mockTime, int64_t blockTime)
@@ -666,7 +666,7 @@ BOOST_FIXTURE_TEST_CASE(ListCoins, ListCoinsTestingSetup)
     BOOST_CHECK_EQUAL(list.begin()->second.size(), 1);
 
     // Check initial balance from one mature coinbase transaction.
-    BOOST_CHECK_EQUAL(50 * COIN, wallet->GetAvailableBalance());
+    BOOST_CHECK_EQUAL(50 * COIN * COIN_SCALE, wallet->GetAvailableBalance());   // Litecoin Cash: Coinscale
 
     // Add a transaction creating a change address, and confirm ListCoins still
     // returns the coin associated with the change address underneath the
