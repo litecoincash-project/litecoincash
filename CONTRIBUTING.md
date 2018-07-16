@@ -1,5 +1,5 @@
-Contributing to LitecoinCash Core
-============================
+Contributing to Litecoin Cash Core
+==================================
 
 The LitecoinCash Core project operates an open contributor model where anyone is
 welcome to contribute towards development in the form of peer review, testing

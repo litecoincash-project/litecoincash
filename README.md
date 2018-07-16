@@ -1,26 +1,17 @@
-LitecoinCash Core integration/staging tree
-=====================================
+Litecoin Cash Core integration/staging tree
+===========================================
 
-[![Build Status](https://travis-ci.org/litecoincash-project/litecoincash.svg?branch=master)](https://travis-ci.org/litecoincash-project/litecoincash)
+What is Litecoin Cash?
+----------------------
 
-https://litecoinca.sh
+Litecoin Cash is a SHA256 fork of Litecoin. For full details, as well as prebuilt binaries for Windows, Mac and Linux, please visit our website at https://litecoinca.sh.
 
-What is LitecoinCash?
-----------------
-
-LitecoinCash is an experimental digital currency that enables instant payments to
-anyone, anywhere in the world. LitecoinCash uses peer-to-peer technology to operate
-with no central authority: managing transactions and issuing money are carried
-out collectively by the network. LitecoinCash Core is the name of open source
-software which enables the use of this currency.
-
-For more information, as well as an immediately useable, binary version of
-the LitecoinCash Core software, see [https://litecoinca.sh](https://litecoinca.sh).
+Litecoin Cash Core is the full node software that makes up the backbone of the LCC network.
 
 License
 -------
 
-LitecoinCash Core is released under the terms of the MIT license. See [COPYING](COPYING) for more
+Litecoin Cash Core is released under the terms of the MIT license. See [COPYING](COPYING) for more
 information or see https://opensource.org/licenses/MIT.
 
 Development Process
@@ -28,7 +19,7 @@ Development Process
 
 The `master` branch is regularly built and tested, but is not guaranteed to be
 completely stable. [Tags](https://github.com/litecoincash-project/litecoincash/tags) are created
-regularly to indicate new official, stable release versions of LitecoinCash Core.
+regularly to indicate new official, stable release versions of Litecoin Cash Core.
 
 The contribution workflow is described in [CONTRIBUTING.md](CONTRIBUTING.md).
 
@@ -70,7 +61,7 @@ Translations
 ------------
 
 We only accept translation fixes that are submitted through [Bitcoin Core's Transifex page](https://www.transifex.com/projects/p/bitcoin/).
-Translations are converted to LitecoinCash periodically.
+Translations are converted to Litecoin Cash periodically.
 
 Translations are periodically pulled from Transifex and merged into the git repository. See the
 [translation process](doc/translation_process.md) for details on how this works.
