@@ -415,7 +415,7 @@ void WalletView::importPrivateKey()
             
             QMessageBox msgBox;
             msgBox.setText(tr("Key successfully added to wallet."));
-            msgBox.setInformativeText("Rescan now? (Select No if you have more keys to import)");
+            msgBox.setInformativeText(tr("Rescan now? (Select No if you have more keys to import)"));
             msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
             msgBox.setDefaultButton(QMessageBox::No);
             
