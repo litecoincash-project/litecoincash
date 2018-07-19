@@ -1323,7 +1323,7 @@
     </message>
     <message>
         <source>Cannot start litecoincash: click-to-pay handler</source>
-        <translation>Не удаётся запустить litecoincash: обработчик click-to-pay<**/translation>
+        <translation>Не удаётся запустить litecoincash: обработчик click-to-pay</translation>
     </message>
     <message>
         <source>URI handling</source>
