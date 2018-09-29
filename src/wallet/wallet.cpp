@@ -2697,6 +2697,251 @@ OutputType CWallet::TransactionChangeType(OutputType change_type, const std::vec
     return g_address_type;
 }
 
+// LitecoinCash: Hive: Return all BCTs known by this wallet, optionally including dead bees and optionally scanning for blocks minted by bees from each BCT
+std::vector<CBeeCreationTransactionInfo> CWallet::GetBCTs(bool includeDead, bool scanRewards, const Consensus::Params& consensusParams) {
+    std::vector<CBeeCreationTransactionInfo> bcts;
+
+    if (chainActive.Height() == 0)  // Don't continue if chainActive is invalid; we may be reindexing
+        return bcts;
+
+    int maxDepth = consensusParams.beeGestationBlocks + consensusParams.beeLifespanBlocks;
+
+    CScript scriptPubKeyBCF = GetScriptForDestination(DecodeDestination(consensusParams.beeCreationAddress));
+    CScript scriptPubKeyCF = GetScriptForDestination(DecodeDestination(consensusParams.hiveCommunityAddress));
+
+    for (const std::pair<uint256, CWalletTx>& pairWtx : mapWallet) {
+        const CWalletTx& wtx = pairWtx.second;
+
+        // Skip unconfirmed transactions and orphans
+        if (wtx.GetDepthInMainChain() < 1)
+            continue;
+
+        // Skip CBTs
+        if (wtx.IsCoinBase())
+            continue;
+
+        // Check it's actually our BCT (otherwise comm fund keyholder for example would see all BCTs as wallet txs)
+        if (!IsAllFromMe(*wtx.tx, ISMINE_SPENDABLE))
+            continue;
+
+        // Skip non-BCT txs
+        CAmount beeFeePaid;
+        CScript scriptPubKeyHoney;
+        if (!wtx.tx->IsBCT(consensusParams, scriptPubKeyBCF, &beeFeePaid, &scriptPubKeyHoney))
+            continue;
+
+        // Grab honey address
+        CTxDestination honeyDestination;
+        if (!ExtractDestination(scriptPubKeyHoney, honeyDestination)) {
+            LogPrintf ("** Couldn't extract destination from BCT %s (dest=%s)\n", wtx.GetHash().GetHex(), HexStr(scriptPubKeyHoney));
+            continue;
+        }
+        std::string honeyAddress = EncodeDestination(honeyDestination);
+
+        // Check lifespan & maturity
+        int depth = wtx.GetDepthInMainChain();
+        int blocksLeft = maxDepth - depth;
+        blocksLeft++;   // Bee life starts at zero immediately AFTER the BCT appears in a block.
+        bool isMature = false;
+        std::string status = "immature";
+        if (blocksLeft < 1) {
+            if (!includeDead)   // Skip dead bees unless explicitly including them
+                continue;
+            blocksLeft = 0;
+            status = "dead";
+            isMature = true;    // We still want to calc rewards
+        } else {
+            if (depth > consensusParams.beeGestationBlocks) {
+                status = "mature";
+                isMature = true;
+            }
+        }
+
+        // Find bee count & community donation status
+        int height = chainActive.Height() - depth;
+        CAmount beeCost = GetBeeCost(height, consensusParams);
+        bool communityContrib = false;
+        if (wtx.tx->vout.size() > 1 && wtx.tx->vout[1].scriptPubKey == scriptPubKeyCF) {
+            beeFeePaid += wtx.tx->vout[1].nValue;            // Add any community fund contribution back to the total paid
+            communityContrib = true;
+        }
+        int beeCount = beeFeePaid / beeCost;
+
+        // If mature, check for coinbase transactions from blocks minted by a bee from this BCT
+        std::string bctTxid = wtx.GetHash().GetHex();
+        int blocksFound = 0;
+        CAmount rewardsPaid = 0;
+        if (isMature && scanRewards) {
+            for (const std::pair<uint256, CWalletTx>& pairWtx2 : mapWallet) {
+                const CWalletTx& wtx2 = pairWtx2.second;
+
+                // Skip non-CBTs
+                if (!wtx2.IsHiveCoinBase())
+                    continue;
+
+                // Skip unconfirmed transactions and orphans
+                if (wtx2.GetDepthInMainChain() < 1)
+                    continue;
+
+                // Grab the txid (bytes 14-78)
+                std::vector<unsigned char> blockTxid(&wtx2.tx->vout[0].scriptPubKey[14], &wtx2.tx->vout[0].scriptPubKey[14 + 64]);
+                std::string blockTxidStr = std::string(blockTxid.begin(), blockTxid.end());
+
+                // Check it
+                if (bctTxid!=blockTxidStr)
+                    continue;
+
+                blocksFound++;
+                rewardsPaid += wtx2.tx->vout[1].nValue;
+            }
+        }
+
+        int64_t time = 0;
+        if (mapBlockIndex[wtx.hashBlock])
+            time = mapBlockIndex[wtx.hashBlock]->GetBlockTime();
+
+        CBeeCreationTransactionInfo bct;
+        bct.txid = bctTxid;
+        bct.time = time;
+        bct.beeCount = beeCount;
+        bct.beeFeePaid = beeFeePaid;
+        bct.communityContrib = communityContrib;
+        bct.beeStatus = status;
+        bct.honeyAddress = honeyAddress;
+        bct.rewardsPaid = rewardsPaid;
+        bct.blocksFound = blocksFound;
+        bct.blocksLeft = blocksLeft;
+        bct.profit = rewardsPaid - beeFeePaid;
+
+        bcts.push_back(bct);
+    }
+
+    return bcts;
+}
+
+// LitecoinCash: Hive: Create, sign and broadcast a BCT to gestate given number of bees
+bool CWallet::CreateBeeTransaction(int beeCount, CWalletTx& wtxNew, std::string honeyAddress, bool communityContrib, std::string& strFailReason, const Consensus::Params& consensusParams) {
+    CBlockIndex* pindexPrev = chainActive.Tip();
+    assert(pindexPrev != nullptr);
+
+    if (!IsHiveEnabled(pindexPrev, consensusParams)) {
+        strFailReason = "Error: The Hive has not yet been activated on the network";
+        return false;
+    }
+
+    // Sanity check beeCount
+    if (beeCount < 1) {
+        strFailReason = "Error: At least 1 bee must be created";
+        return false;
+    }
+
+    // Check available balance (note: can't check fee at this point because we don't know the tx size)
+    CAmount beeCost = GetBeeCost(chainActive.Height(), consensusParams);
+    CAmount curBalance = GetAvailableBalance();
+    CAmount totalBeeCost = beeCost * beeCount;
+    if (totalBeeCost > curBalance) {
+        strFailReason = "Error: Insufficient balance to pay bee creation fee";
+        return false;
+    }
+
+    // Don't spend more than potential rewards in a single BCT
+    CAmount totalPotentialReward = (consensusParams.beeLifespanBlocks * GetBlockSubsidy(pindexPrev->nHeight, consensusParams)) / consensusParams.hiveBlockSpacingTarget;
+    if (totalPotentialReward < beeCost) {
+        strFailReason = "Error: Bee creation would cost more than possible rewards";
+        return false;
+    }
+
+    // Create a new honey address for future coinbase rewards if needed
+    CTxDestination destinationFCA;
+    if (honeyAddress.empty()) {
+        if (IsLocked())
+            TopUpKeyPool();
+
+        CPubKey newKey;
+        if (!GetKeyFromPool(newKey)) {
+            strFailReason = "Error: Couldn't create a new pubkey";
+            return false;
+        }
+
+        std::string strLabel = "Hivemined Honey";
+        OutputType output_type = OUTPUT_TYPE_LEGACY;
+        LearnRelatedScripts(newKey, output_type);
+        destinationFCA = GetDestinationForKey(newKey, output_type);
+        SetAddressBook(destinationFCA, strLabel, "receive");
+    } else {
+        // If a honey address was passed in, make sure it decodes
+        destinationFCA = DecodeDestination(honeyAddress);
+        if (!IsValidDestination(destinationFCA)) {
+            strFailReason = "Error: Invalid honey address specified";
+            return false;
+        }
+
+        // Make sure it's legacy format (TX_PUBKEYHASH)
+        std::vector<std::vector<unsigned char>> vSolutions;
+        txnouttype whichType;
+        if (!Solver(GetScriptForDestination(destinationFCA), whichType, vSolutions)) {
+            strFailReason = "Error: Couldn't solve scriptPubKey for honey address";
+            return false;
+        }
+        if (whichType != TX_PUBKEYHASH) {
+            strFailReason = "Error: If specifying a honey address, it must be legacy format (TX_PUBKEYHASH)";
+            return false;
+        }
+
+        // Make sure it's a wallet address (otherwise bees won't be able to mint)
+        CKeyID keyid = GetKeyForDestination(*this, destinationFCA);
+        if (keyid.IsNull()) {
+            strFailReason = "Error: Wallet doesn't contain the private key for the honey address specified";
+            return false;
+        }
+    }
+
+    // Create the unspendable bee creation fee output (vout[0])
+    std::vector<CRecipient> vecSend;
+    CTxDestination destinationBCF = DecodeDestination(consensusParams.beeCreationAddress);
+    CScript scriptPubKeyBCF = GetScriptForDestination(destinationBCF);
+    CScript scriptPubKeyFCA = GetScriptForDestination(destinationFCA);
+    scriptPubKeyBCF << OP_RETURN << OP_BEE;
+    scriptPubKeyBCF += scriptPubKeyFCA;
+    CAmount beeCreationValue = totalBeeCost;
+    CAmount donationValue = (CAmount)(totalBeeCost / consensusParams.communityContribFactor);
+    if(communityContrib)
+        beeCreationValue -= donationValue;
+    CRecipient recipientBCF = {scriptPubKeyBCF, beeCreationValue, false};
+    vecSend.push_back(recipientBCF);
+
+    // Add optional community fund output (vout[1] if present)
+    if (communityContrib) {
+        CTxDestination destinationCF = DecodeDestination(consensusParams.hiveCommunityAddress);
+        CScript scriptPubKeyCF = GetScriptForDestination(destinationCF);
+        CRecipient recipientCF = {scriptPubKeyCF, donationValue, false};
+        vecSend.push_back(recipientCF);
+    }
+
+    // Create the BCT with our specified outputs
+    CReserveKey reservekey(this);
+    CAmount feeRequired;
+    int changePos = communityContrib ? 2 : 1;      // Always put any change in the last output
+    std::string strError;
+    CCoinControl coinControl;
+    if (!CreateTransaction(vecSend, wtxNew, reservekey, feeRequired, changePos, strError, coinControl, true)) {
+        if (totalBeeCost + feeRequired > curBalance)   // Now we know fee requirement, check balance fail again
+            strFailReason = "Error: Insufficient balance to cover bee creation fee and transaction fee";
+        else
+            strFailReason = "Error: Couldn't create BCT: " + strError;
+        return false;
+    }
+
+    // Send the BCT
+    CValidationState state;
+    if (!CommitTransaction(wtxNew, reservekey, g_connman.get(), state)) {
+        strFailReason = "Error: Bee creation transaction was rejected. Reason given: " + state.GetRejectReason();
+        return false;
+    }
+
+    return true;
+}
+
 bool CWallet::CreateTransaction(const std::vector<CRecipient>& vecSend, CWalletTx& wtxNew, CReserveKey& reservekey, CAmount& nFeeRet,
                                 int& nChangePosInOut, std::string& strFailReason, const CCoinControl& coin_control, bool sign)
 {
@@ -2846,6 +3091,7 @@ bool CWallet::CreateTransaction(const std::vector<CRecipient>& vecSend, CWalletT
                             strFailReason = _("Transaction amount too small");
                         return false;
                     }
+
                     txNew.vout.push_back(txout);
                 }
 

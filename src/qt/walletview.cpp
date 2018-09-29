@@ -11,7 +11,7 @@
 #include <qt/guiutil.h>
 #include <qt/optionsmodel.h>
 #include <qt/overviewpage.h>
-#include <qt/hivepage.h>        // LitecoinCash: Hive page
+#include <qt/hivedialog.h>      // LitecoinCash: Hive page
 #include <qt/platformstyle.h>
 #include <qt/receivecoinsdialog.h>
 #include <qt/sendcoinsdialog.h>
@@ -43,7 +43,7 @@ WalletView::WalletView(const PlatformStyle *_platformStyle, QWidget *parent):
 {
     // Create tabs
     overviewPage = new OverviewPage(platformStyle);
-    hivePage = new HivePage(platformStyle); // LitecoinCash: Hive page
+    hivePage = new HiveDialog(platformStyle); // LitecoinCash: Hive page
 
     transactionsPage = new QWidget(this);
     QVBoxLayout *vbox = new QVBoxLayout();
@@ -99,6 +99,9 @@ void WalletView::setBitcoinGUI(BitcoinGUI *gui)
         // Clicking on a transaction on the overview page simply sends you to transaction history page
         connect(overviewPage, SIGNAL(transactionClicked(QModelIndex)), gui, SLOT(gotoHistoryPage()));
 
+        // LitecoinCash: Go to hive page if bee button on overview clicked
+        connect(overviewPage, SIGNAL(beeButtonClicked()), gui, SLOT(gotoHivePage()));
+
         // Receive and report messages
         connect(this, SIGNAL(message(QString,QString,unsigned int)), gui, SLOT(message(QString,QString,unsigned int)));
 
@@ -119,6 +122,7 @@ void WalletView::setClientModel(ClientModel *_clientModel)
 
     overviewPage->setClientModel(_clientModel);
     sendCoinsPage->setClientModel(_clientModel);
+    hivePage->setClientModel(_clientModel); // LitecoinCash: Hive page
 }
 
 void WalletView::setWalletModel(WalletModel *_walletModel)
@@ -186,6 +190,7 @@ void WalletView::gotoOverviewPage()
 // LitecoinCash: Hive page
 void WalletView::gotoHivePage()
 {
+    hivePage->updateData();
     setCurrentWidget(hivePage);
 }
 

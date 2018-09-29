@@ -47,6 +47,9 @@
 #include <boost/algorithm/string/join.hpp>
 #include <boost/thread.hpp>
 
+#include <miner.h>  // LitecoinCash: Hive
+#include <merkleblock.h> // LitecoinCash: Hive for merkle transaction check in block
+
 #if defined(NDEBUG)
 # error "LitecoinCash cannot be compiled without assertions."
 #endif
@@ -351,7 +354,7 @@ bool CheckSequenceLocks(const CTransaction &tx, int flags, LockPoints* lp, bool 
 
     CBlockIndex* tip = chainActive.Tip();
     assert(tip != nullptr);
-    
+
     CBlockIndex index;
     index.pprev = tip;
     // CheckSequenceLocks() uses chainActive.Height()+1 to evaluate
@@ -1060,9 +1063,6 @@ bool GetTransaction(const uint256& hash, CTransactionRef& txOut, const Consensus
 
 
 
-
-
-
 //////////////////////////////////////////////////////////////////////////////
 //
 // CBlock and CBlockIndex
@@ -1106,9 +1106,14 @@ bool ReadBlockFromDisk(CBlock& block, const CDiskBlockPos& pos, const Consensus:
         return error("%s: Deserialize or I/O error - %s at %s", __func__, e.what(), pos.ToString());
     }
 
-    // Check the header
-    if (!CheckProofOfWork(block.GetPoWHash(), block.nBits, consensusParams))
-        return error("ReadBlockFromDisk: Errors in block header at %s", pos.ToString());
+    // LitecoinCash: Hive: Check PoW or Hive work depending on blocktype
+    if (block.IsHiveMined(consensusParams)) {
+        if (!CheckHiveProof(&block, consensusParams))
+            return error("ReadBlockFromDisk: Errors in Hive block header at %s", pos.ToString());
+    } else {
+        if (!CheckProofOfWork(block.GetPoWHash(), block.nBits, consensusParams))
+            return error("ReadBlockFromDisk: Errors in PoW block header at %s", pos.ToString());
+    }
 
     return true;
 }
@@ -1137,7 +1142,7 @@ CAmount GetBlockSubsidy(int nHeight, const Consensus::Params& consensusParams)
 
     int halvings = nHeight / consensusParams.nSubsidyHalvingInterval;
     // LitecoinCash: Force block reward to zero when right shift is undefined, and don't attempt to issue past total money supply
-    if (halvings >= 64 || nHeight >= 6215968)
+    if (halvings >= 64 || nHeight >= consensusParams.totalMoneySupplyHeight)
         return 0;
 
     CAmount nSubsidy = 50 * COIN * COIN_SCALE;
@@ -1152,6 +1157,17 @@ CAmount GetBlockSubsidy(int nHeight, const Consensus::Params& consensusParams)
     }
 
     return nSubsidy;
+}
+
+// LitecoinCash: Hive: Return the current cost for a single worker bee
+CAmount GetBeeCost(int nHeight, const Consensus::Params& consensusParams)
+{
+    if(nHeight >= consensusParams.totalMoneySupplyHeight)
+        return consensusParams.minBeeCost;
+
+    CAmount blockReward = GetBlockSubsidy(nHeight, consensusParams);
+    CAmount beeCost = blockReward / consensusParams.beeCostFactor;
+    return beeCost <= consensusParams.minBeeCost ? consensusParams.minBeeCost : beeCost;
 }
 
 bool IsInitialBlockDownload()
@@ -2193,7 +2209,8 @@ void static UpdateTip(const CBlockIndex *pindexNew, const CChainParams& chainPar
         for (int i = 0; i < 100 && pindex != nullptr; i++)
         {
             int32_t nExpectedVersion = ComputeBlockVersion(pindex->pprev, chainParams.GetConsensus());
-            if (pindex->nVersion > VERSIONBITS_LAST_OLD_BLOCK_VERSION && (pindex->nVersion & ~nExpectedVersion) != 0)
+            // LitecoinCash: Hive: Don't warn about unexpected version in Hivemined blocks
+            if (pindex->nVersion > VERSIONBITS_LAST_OLD_BLOCK_VERSION && (pindex->nVersion & ~nExpectedVersion) != 0 && !pindex->GetBlockHeader().IsHiveMined(chainParams.GetConsensus()))
                 ++nUpgraded;
             pindex = pindex->pprev;
         }
@@ -2214,7 +2231,6 @@ void static UpdateTip(const CBlockIndex *pindexNew, const CChainParams& chainPar
     if (!warningMessages.empty())
         LogPrintf(" warning='%s'", boost::algorithm::join(warningMessages, ", "));
     LogPrintf("\n");
-
 }
 
 /** Disconnect chainActive's tip.
@@ -2978,9 +2994,11 @@ static bool FindUndoPos(CValidationState &state, int nFile, CDiskBlockPos &pos, 
 
 static bool CheckBlockHeader(const CBlockHeader& block, CValidationState& state, const Consensus::Params& consensusParams, bool fCheckPOW = true)
 {
-    // Check proof of work matches claimed amount
-    if (fCheckPOW && !CheckProofOfWork(block.GetPoWHash(), block.nBits, consensusParams))
-        return state.DoS(50, false, REJECT_INVALID, "high-hash", false, "proof of work failed");
+    // LitecoinCash: Hive: Check PoW or Hive work depending on blocktype
+    if (fCheckPOW && !block.IsHiveMined(consensusParams)) {
+        if (!CheckProofOfWork(block.GetPoWHash(), block.nBits, consensusParams))
+            return state.DoS(50, false, REJECT_INVALID, "high-hash", false, "proof of work failed");
+    }
 
     return true;
 }
@@ -2996,6 +3014,11 @@ bool CheckBlock(const CBlock& block, CValidationState& state, const Consensus::P
     // redundant with the call in AcceptBlockHeader.
     if (!CheckBlockHeader(block, state, consensusParams, fCheckPOW))
         return false;
+
+    // LitecoinCash: Hive: Check Hive proof
+    if (block.IsHiveMined(consensusParams))
+        if (!CheckHiveProof(&block, consensusParams))
+            return state.DoS(100, false, REJECT_INVALID, "bad-hive-proof", false, "proof of hive failed");
 
     // Check the merkle root.
     if (fCheckMerkleRoot) {
@@ -3052,6 +3075,71 @@ bool IsWitnessEnabled(const CBlockIndex* pindexPrev, const Consensus::Params& pa
 {
     LOCK(cs_main);
     return (VersionBitsState(pindexPrev, params, Consensus::DEPLOYMENT_SEGWIT, versionbitscache) == THRESHOLD_ACTIVE);
+}
+
+// LitecoinCash: Hive: Check if Hive is activated at given point
+bool IsHiveEnabled(const CBlockIndex* pindexPrev, const Consensus::Params& params)
+{
+    LOCK(cs_main);
+    return (VersionBitsState(pindexPrev, params, Consensus::DEPLOYMENT_HIVE, versionbitscache) == THRESHOLD_ACTIVE);
+}
+
+// LitecoinCash: Hive: Get the well-rooted deterministic random string (see whitepaper section 4.1)
+std::string GetDeterministicRandString(const CBlockIndex* pindexPrev) {
+    //LOCK(cs_main);  // Lock maybe not needed
+
+    std::string deterministicRandString = "";
+    int heights[] = { 0, 13, 173, 471, 1363, 12103 };
+    int hits = 0, steps = 0;
+    while (hits < 6) {
+        if (steps == heights[hits]) {
+            assert(pindexPrev->phashBlock);
+            deterministicRandString += pindexPrev->phashBlock->GetHex();
+            hits++;
+        }
+
+        if (!pindexPrev->pprev)
+            break;
+
+        pindexPrev = pindexPrev->pprev;
+        steps++;
+    }
+    return deterministicRandString;
+}
+
+// LitecoinCash: Hive: Get tx by given hash, from a block at given chain height
+bool GetTxByHashAndHeight(const uint256 txHash, const int nHeight, CTransactionRef& txNew, CBlockIndex& foundAtOut, CBlockIndex* pindex, const Consensus::Params& consensusParams) {
+    // Check that we are stepping back from a point AFTER the requested height
+    if (pindex->nHeight < nHeight)
+        return false;
+
+    while(pindex->nHeight > nHeight) {
+        assert(pindex->pprev);
+        pindex = pindex->pprev;
+    }
+
+    CBlock block;
+    std::set<uint256> txids;
+    txids.insert(txHash);
+
+    if (fHavePruned && !(pindex->nStatus & BLOCK_HAVE_DATA) && pindex->nTx > 0)
+        throw std::runtime_error(std::string(__func__) + ": Block not available (pruned data)");
+    if (!ReadBlockFromDisk(block, pindex, consensusParams))
+        throw std::runtime_error(std::string(__func__) + ": Block not found on disk");
+
+    CMerkleBlock merkleBlock(block, txids);
+    std::vector<uint256> vMatched;
+    std::vector<unsigned int> vIndex;
+
+    if (block.vtx.size() > 0 && merkleBlock.txn.ExtractMatches(vMatched, vIndex).GetHex() == block.hashMerkleRoot.GetHex() && vMatched.size() == 1 && vMatched[0].ToString() == txHash.ToString())
+        for(const auto& tx : block.vtx)
+            if (txHash == tx->GetHash()) {
+                txNew = tx;
+                foundAtOut = *pindex;
+                return true;
+            }
+
+    return false;
 }
 
 // Compute at which vout of the block's coinbase transaction the witness
@@ -3124,10 +3212,15 @@ static bool ContextualCheckBlockHeader(const CBlockHeader& block, CValidationSta
     assert(pindexPrev != nullptr);
     const int nHeight = pindexPrev->nHeight + 1;
 
-    // Check proof of work
+    // LitecoinCash: Hive: Check appropriate Hive or PoW target
     const Consensus::Params& consensusParams = params.GetConsensus();
-    if (block.nBits != GetNextWorkRequired(pindexPrev, &block, consensusParams))
-        return state.DoS(100, false, REJECT_INVALID, "bad-diffbits", false, "incorrect proof of work");
+    if (block.IsHiveMined(consensusParams)) {
+        if (block.nBits != GetNextHiveWorkRequired(pindexPrev, consensusParams))
+            return state.DoS(100, false, REJECT_INVALID, "bad-hive-diffbits", false, "incorrect hive difficulty in block");
+    } else {
+        if (block.nBits != GetNextWorkRequired(pindexPrev, &block, consensusParams))
+            return state.DoS(100, false, REJECT_INVALID, "bad-diffbits", false, "incorrect pow difficulty in block");
+    }
 
     // Check against checkpoints
     if (fCheckpointsEnabled) {

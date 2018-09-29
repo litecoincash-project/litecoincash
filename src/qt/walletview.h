@@ -13,7 +13,7 @@
 class BitcoinGUI;
 class ClientModel;
 class OverviewPage;
-class HivePage;     // LitecoinCash: Hive page
+class HiveDialog;     // LitecoinCash: Hive page
 class PlatformStyle;
 class ReceiveCoinsDialog;
 class SendCoinsDialog;
@@ -63,7 +63,7 @@ private:
     WalletModel *walletModel;
 
     OverviewPage *overviewPage;
-    HivePage *hivePage;     // LitecoinCash: Hive page
+    HiveDialog *hivePage;     // LitecoinCash: Hive page
     QWidget *transactionsPage;
     ReceiveCoinsDialog *receiveCoinsPage;
     SendCoinsDialog *sendCoinsPage;

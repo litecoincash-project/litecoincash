@@ -11,6 +11,7 @@
 #include <script/script.h>
 #include <serialize.h>
 #include <uint256.h>
+#include <consensus/params.h>   // LitecoinCash: Hive
 
 static const int SERIALIZE_TRANSACTION_NO_WITNESS = 0x40000000;
 
@@ -334,6 +335,19 @@ public:
     {
         return (vin.size() == 1 && vin[0].prevout.IsNull());
     }
+
+    // LitecoinCash: Hive: Check if this transaction is a Hivemined coinbase transaction
+    // Helper for QT wallet; not used for validation
+    bool IsHiveCoinBase() const {
+        return (IsCoinBase() && vout[0].nValue == 0 
+            && vout[0].scriptPubKey.size() > 1 
+            && vout[0].scriptPubKey[0] == OP_RETURN
+            && vout[0].scriptPubKey[1] == OP_BEE
+        );
+    }
+
+    // LitecoinCash: Hive: Check if this transaction is a Bee Creation Transaction, and if so return the total bee fee paid via beeFeePaid and honey scriptPubKey via scriptPubKeyHoney
+    bool IsBCT(const Consensus::Params& consensusParams, CScript scriptPubKeyBCF, CAmount* beeFeePaid = nullptr, CScript* scriptPubKeyHoney = nullptr) const;
 
     friend bool operator==(const CTransaction& a, const CTransaction& b)
     {

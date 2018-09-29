@@ -79,7 +79,10 @@ public:
         SendToOther,
         RecvWithAddress,
         RecvFromOther,
-        SendToSelf
+        SendToSelf,
+        HiveBeeCreation,    // LitecoinCash: Hive
+        HiveCommunityFund,  // LitecoinCash: Hive
+        HiveHoney           // LitecoinCash: Hive
     };
 
     /** Number of confirmation recommended for accepting a transaction */

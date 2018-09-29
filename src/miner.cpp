@@ -31,6 +31,11 @@
 #include <queue>
 #include <utility>
 
+#include <wallet/wallet.h>  // LitecoinCash: Hive
+#include <rpc/server.h>     // LitecoinCash: Hive
+#include <base58.h>         // LitecoinCash: Hive
+#include <sync.h>         // LitecoinCash: Hive
+
 //////////////////////////////////////////////////////////////////////////////
 //
 // BitcoinMiner
@@ -54,8 +59,11 @@ int64_t UpdateTime(CBlockHeader* pblock, const Consensus::Params& consensusParam
         pblock->nTime = nNewTime;
 
     // Updating time can change work required on testnet:
+    // LitecoinCash: Hive: Don't do this
+    /*
     if (consensusParams.fPowAllowMinDifficultyBlocks)
         pblock->nBits = GetNextWorkRequired(pindexPrev, pblock, consensusParams);
+    */
 
     return nNewTime - nOldTime;
 }
@@ -100,13 +108,15 @@ void BlockAssembler::resetBlock()
     nBlockWeight = 4000;
     nBlockSigOpsCost = 400;
     fIncludeWitness = false;
+    fIncludeBCTs = true;    // LitecoinCash: Hive
 
     // These counters do not include coinbase tx
     nBlockTx = 0;
     nFees = 0;
 }
 
-std::unique_ptr<CBlockTemplate> BlockAssembler::CreateNewBlock(const CScript& scriptPubKeyIn, bool fMineWitnessTx)
+// LitecoinCash: Hive: If hiveProofScript is passed, create a Hive block instead of a PoW block
+std::unique_ptr<CBlockTemplate> BlockAssembler::CreateNewBlock(const CScript& scriptPubKeyIn, bool fMineWitnessTx, const CScript* hiveProofScript)
 {
     int64_t nTimeStart = GetTimeMicros();
 
@@ -126,6 +136,13 @@ std::unique_ptr<CBlockTemplate> BlockAssembler::CreateNewBlock(const CScript& sc
     LOCK2(cs_main, mempool.cs);
     CBlockIndex* pindexPrev = chainActive.Tip();
     assert(pindexPrev != nullptr);
+
+    // LitecoinCash: Hive: Make sure Hive is enabled if a Hive block is requested
+    if (hiveProofScript && !IsHiveEnabled(pindexPrev, chainparams.GetConsensus()))
+        throw std::runtime_error(
+            "Error: The Hive is not yet enabled on the network"
+        );
+
     nHeight = pindexPrev->nHeight + 1;
 
     pblock->nVersion = ComputeBlockVersion(pindexPrev, chainparams.GetConsensus());
@@ -133,6 +150,10 @@ std::unique_ptr<CBlockTemplate> BlockAssembler::CreateNewBlock(const CScript& sc
     // -blockversion=N to test forking scenarios
     if (chainparams.MineBlocksOnDemand())
         pblock->nVersion = gArgs.GetArg("-blockversion", pblock->nVersion);
+
+    // LitecoinCash: Hive: Mark version bit to indicate Hive-mined block
+    if (hiveProofScript)
+        pblock->nVersion |= ((uint32_t)1) << chainparams.GetConsensus().hiveVersionBit;
 
     pblock->nTime = GetAdjustedTime();
     const int64_t nMedianTimePast = pindexPrev->GetMedianTimePast();
@@ -151,38 +172,72 @@ std::unique_ptr<CBlockTemplate> BlockAssembler::CreateNewBlock(const CScript& sc
 
     int nPackagesSelected = 0;
     int nDescendantsUpdated = 0;
-    addPackageTxs(nPackagesSelected, nDescendantsUpdated);
+    // LitecoinCash: Don't include BCTs in hivemined blocks
+    if (hiveProofScript)
+        fIncludeBCTs = false;
 
+    addPackageTxs(nPackagesSelected, nDescendantsUpdated);
+    
     int64_t nTime1 = GetTimeMicros();
 
     nLastBlockTx = nBlockTx;
     nLastBlockWeight = nBlockWeight;
 
-    // Create coinbase transaction.
-    CMutableTransaction coinbaseTx;
-    coinbaseTx.vin.resize(1);
-    coinbaseTx.vin[0].prevout.SetNull();
-    coinbaseTx.vout.resize(1);
-    coinbaseTx.vout[0].scriptPubKey = scriptPubKeyIn;
-    coinbaseTx.vout[0].nValue = nFees + GetBlockSubsidy(nHeight, chainparams.GetConsensus());
-    coinbaseTx.vin[0].scriptSig = CScript() << nHeight << OP_0;
-    pblock->vtx[0] = MakeTransactionRef(std::move(coinbaseTx));
-    pblocktemplate->vchCoinbaseCommitment = GenerateCoinbaseCommitment(*pblock, pindexPrev, chainparams.GetConsensus());
-    pblocktemplate->vTxFees[0] = -nFees;
+    // LitecoinCash: Hive: Create appropriate coinbase tx for pow or Hive block
+    if (hiveProofScript) {
+        CMutableTransaction coinbaseTx;
+
+        // 1 vin with empty prevout
+        coinbaseTx.vin.resize(1);
+        coinbaseTx.vin[0].prevout.SetNull();
+        coinbaseTx.vin[0].scriptSig = CScript() << nHeight << OP_0;
+
+        // vout[0]: Hive proof
+        coinbaseTx.vout.resize(2);
+        coinbaseTx.vout[0].scriptPubKey = *hiveProofScript;
+        coinbaseTx.vout[0].nValue = 0;
+
+        // vout[1]: Honey :)
+        coinbaseTx.vout[1].scriptPubKey = scriptPubKeyIn;
+        coinbaseTx.vout[1].nValue = nFees + GetBlockSubsidy(nHeight, chainparams.GetConsensus());
+
+        // vout[2]: Coinbase commitment
+        pblock->vtx[0] = MakeTransactionRef(std::move(coinbaseTx));
+        pblocktemplate->vchCoinbaseCommitment = GenerateCoinbaseCommitment(*pblock, pindexPrev, chainparams.GetConsensus());
+        pblocktemplate->vTxFees[0] = -nFees;
+    } else {
+        CMutableTransaction coinbaseTx;
+        coinbaseTx.vin.resize(1);
+        coinbaseTx.vin[0].prevout.SetNull();
+        coinbaseTx.vout.resize(1);
+        coinbaseTx.vout[0].scriptPubKey = scriptPubKeyIn;
+        coinbaseTx.vout[0].nValue = nFees + GetBlockSubsidy(nHeight, chainparams.GetConsensus());
+        coinbaseTx.vin[0].scriptSig = CScript() << nHeight << OP_0;
+        pblock->vtx[0] = MakeTransactionRef(std::move(coinbaseTx));
+        pblocktemplate->vchCoinbaseCommitment = GenerateCoinbaseCommitment(*pblock, pindexPrev, chainparams.GetConsensus());
+        pblocktemplate->vTxFees[0] = -nFees;
+    }
 
     LogPrintf("CreateNewBlock(): block weight: %u txs: %u fees: %ld sigops %d\n", GetBlockWeight(*pblock), nBlockTx, nFees, nBlockSigOpsCost);
 
     // Fill in header
     pblock->hashPrevBlock  = pindexPrev->GetBlockHash();
     UpdateTime(pblock, chainparams.GetConsensus(), pindexPrev);
-    pblock->nBits          = GetNextWorkRequired(pindexPrev, pblock, chainparams.GetConsensus());
-    pblock->nNonce         = 0;
+
+    // LitecoinCash: Hive: Choose correct nBits depending on whether a Hive block is requested
+    if (hiveProofScript)
+        pblock->nBits = GetNextHiveWorkRequired(pindexPrev, chainparams.GetConsensus());
+    else
+        pblock->nBits = GetNextWorkRequired(pindexPrev, pblock, chainparams.GetConsensus());
+
+    pblock->nNonce = 0;
     pblocktemplate->vTxSigOpsCost[0] = WITNESS_SCALE_FACTOR * GetLegacySigOpCount(*pblock->vtx[0]);
 
     CValidationState state;
     if (!TestBlockValidity(state, chainparams, *pblock, pindexPrev, false, false)) {
         throw std::runtime_error(strprintf("%s: TestBlockValidity failed: %s", __func__, FormatStateMessage(state)));
     }
+
     int64_t nTime2 = GetTimeMicros();
 
     LogPrint(BCLog::BENCH, "CreateNewBlock() packages: %.2fms (%d packages, %d updated descendants), validity: %.2fms (total %.2fms)\n", 0.001 * (nTime1 - nTimeStart), nPackagesSelected, nDescendantsUpdated, 0.001 * (nTime2 - nTime1), 0.001 * (nTime2 - nTimeStart));
@@ -219,10 +274,15 @@ bool BlockAssembler::TestPackage(uint64_t packageSize, int64_t packageSigOpsCost
 //   segwit activation)
 bool BlockAssembler::TestPackageTransactions(const CTxMemPool::setEntries& package)
 {
+    const Consensus::Params& consensusParams = Params().GetConsensus(); // LitecoinCash: Hive
+
     for (const CTxMemPool::txiter it : package) {
         if (!IsFinalTx(it->GetTx(), nHeight, nLockTimeCutoff))
             return false;
         if (!fIncludeWitness && it->GetTx().HasWitness())
+            return false;
+        // LitecoinCash: Inhibit BCTs if required
+        if (!fIncludeBCTs && it->GetTx().IsBCT(consensusParams, GetScriptForDestination(DecodeDestination(consensusParams.beeCreationAddress))))
             return false;
     }
     return true;
@@ -330,6 +390,8 @@ void BlockAssembler::addPackageTxs(int &nPackagesSelected, int &nDescendantsUpda
     // mempool has a lot of entries.
     const int64_t MAX_CONSECUTIVE_FAILURES = 1000;
     int64_t nConsecutiveFailed = 0;
+
+    const Consensus::Params& consensusParams = Params().GetConsensus();         // LitecoinCash: Hive
 
     while (mi != mempool.mapTx.get<ancestor_score>().end() || !mapModifiedTx.empty())
     {
@@ -457,4 +519,215 @@ void IncrementExtraNonce(CBlock* pblock, const CBlockIndex* pindexPrev, unsigned
 
     pblock->vtx[0] = MakeTransactionRef(std::move(txCoinbase));
     pblock->hashMerkleRoot = BlockMerkleRoot(*pblock);
+}
+
+// LitecoinCash: Hive: Bee management thread
+void BeeKeeper(const CChainParams& chainparams) {
+    const Consensus::Params& consensusParams = chainparams.GetConsensus();
+
+    LogPrintf("BeeKeeper: Thread started\n");
+    RenameThread("hive-beekeeper");
+
+    int height;
+    {
+        LOCK(cs_main);
+        height = chainActive.Tip()->nHeight;
+    }
+
+    try {
+        while (true) {
+            MilliSleep(5000);
+            int newHeight;
+            {
+                LOCK(cs_main);
+                newHeight = chainActive.Tip()->nHeight;
+            }
+            if (newHeight != height) {
+                // Height changed; release the bees!
+                height = newHeight;
+                try {
+                    BusyBees(consensusParams);
+                } catch (const std::runtime_error &e) {
+                    LogPrintf("! BeeKeeper: Error: %s\n", e.what());
+                }
+            }
+        }
+    } catch (const boost::thread_interrupted&) {
+        LogPrintf("!!! BeeKeeper: FATAL: Thread interrupted\n");
+        throw;
+    }
+}
+
+// LitecoinCash: Hive: Attempt to mint the next block
+bool BusyBees(const Consensus::Params& consensusParams) {
+    bool verbose = LogAcceptCategory(BCLog::HIVE);
+
+    CBlockIndex* pindexPrev = chainActive.Tip();
+    assert(pindexPrev != nullptr);
+
+    // Sanity checks
+    if (!IsHiveEnabled(pindexPrev, consensusParams)) {
+        LogPrint(BCLog::HIVE, "BusyBees: Skipping hive check: The Hive is not enabled on the network.\n");
+        return false;
+    }
+    if(!g_connman) {
+        LogPrint(BCLog::HIVE, "BusyBees: Skipping hive check: Peer-to-peer functionality missing or disabled\n");
+        return false;
+    }
+    if (g_connman->GetNodeCount(CConnman::CONNECTIONS_ALL) == 0) {
+        LogPrint(BCLog::HIVE, "BusyBees: Skipping hive check (not connected)\n");
+        return false;
+    }
+    if (IsInitialBlockDownload()) {
+        LogPrint(BCLog::HIVE, "BusyBees: Skipping hive check (in initial block download)\n");
+        return false;
+    }
+    if (pindexPrev->GetBlockHeader().IsHiveMined(consensusParams)) {
+        LogPrint(BCLog::HIVE, "BusyBees: Skipping hive check (last block was hive mined)\n");
+        return false;
+    }
+
+    // Get wallet
+    JSONRPCRequest request;
+    CWallet * const pwallet = GetWalletForJSONRPCRequest(request);
+    if (!EnsureWalletIsAvailable(pwallet, true)) {
+        LogPrint(BCLog::HIVE, "BusyBees: Skipping hive check (wallet unavailable)\n");
+        return false;
+    }
+
+    LogPrintf("********************* Hive: Bees at work *********************\n");
+
+    // Find deterministicRandString
+    std::string deterministicRandString = GetDeterministicRandString(pindexPrev);
+    if (verbose) LogPrintf("BusyBees: deterministicRandString   = %s\n", deterministicRandString);
+
+    // Find beeHashTarget
+    arith_uint256 beeHashTarget;
+    beeHashTarget.SetCompact(GetNextHiveWorkRequired(pindexPrev, consensusParams));
+    if (verbose) LogPrintf("BusyBees: beeHashTarget             = %s\n", beeHashTarget.ToString());
+
+    // Iterate all our active BCTs, letting their bees try and solve
+    LogPrint(BCLog::HIVE, "BusyBees: Checking bee hashes....\n");
+    std::vector<CBeeCreationTransactionInfo> bcts = pwallet->GetBCTs(false, false, consensusParams);
+    arith_uint256 bestHash = arith_uint256("ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
+    CBeeCreationTransactionInfo bestBct;
+    int beesChecked = 0;
+    uint32_t bestHashBee;
+    for (std::vector<CBeeCreationTransactionInfo>::const_iterator it = bcts.begin(); it != bcts.end(); it++) {
+        CBeeCreationTransactionInfo bct = *it;
+        // Skip immature and dead bees
+        if (bct.beeStatus != "mature")
+            continue;
+
+        // Iterate all bees in this BCT, keeping only the best hash found so far across all bees
+        for (uint32_t bee = 0; bee < (uint32_t)bct.beeCount; bee++) {
+            std::string hashHex = (CHashWriter(SER_GETHASH, 0) << deterministicRandString << bct.txid << bee).GetHash().GetHex();
+            //LogPrintf("Bee %i gives hash %s\n", bee, hashHex);
+            arith_uint256 beeHash = arith_uint256(hashHex);
+            if (beeHash < bestHash) {
+                bestHash = beeHash;
+                bestHashBee = bee;
+                bestBct = bct;
+            }
+
+            beesChecked++;
+        }
+    }
+
+    if (beesChecked == 0) {
+        LogPrintf("BusyBees: No bees currently mature.\n");
+        return false;
+    }
+
+    // Check if our best bee hash meets the target
+    if (bestHash >= beeHashTarget) {
+        LogPrintf("BusyBees: Checked %i bees; none strong enough to mint. Best hash was %s\n", beesChecked, bestHash.ToString());
+        return false;
+    }
+
+    if (verbose) LogPrintf("BusyBees: BEE MEETS HASH TARGET. Checked %i bees; best is bee #%i from BCT %s with hash %s. Honey address is %s.\n", beesChecked, bestHashBee, bestBct.txid, bestHash.ToString(), bestBct.honeyAddress);
+
+    // Assemble the Hive proof script
+    std::vector<unsigned char> messageProofVec;
+    std::vector<unsigned char> txidVec(bestBct.txid.begin(), bestBct.txid.end());
+    CScript hiveProofScript;
+    uint32_t bctHeight;
+    {   // Don't lock longer than needed
+        LOCK2(cs_main, pwallet->cs_wallet);
+
+        EnsureWalletIsUnlocked(pwallet);
+
+        CTxDestination dest = DecodeDestination(bestBct.honeyAddress);
+        if (!IsValidDestination(dest)) {
+            LogPrintf("BusyBees: Honey destination invalid\n");
+            return false;
+        }
+
+        const CKeyID *keyID = boost::get<CKeyID>(&dest);
+        if (!keyID) {
+            LogPrintf("BusyBees: Wallet doesn't have privkey for honey destination\n");
+            return false;
+        }
+
+        CKey key;
+        if (!pwallet->GetKey(*keyID, key)) {
+            LogPrintf("BusyBees: Privkey unavailable\n");
+            return false;
+        }
+
+        CHashWriter ss(SER_GETHASH, 0);
+        ss << deterministicRandString;
+        uint256 mhash = ss.GetHash();
+        if (!key.SignCompact(mhash, messageProofVec)) {
+            LogPrintf("BusyBees: Couldn't sign the bee proof!\n");
+            return false;
+        }
+        if (verbose) LogPrintf("BusyBees: messageSig                = %s\n", HexStr(&messageProofVec[0], &messageProofVec[messageProofVec.size()]));
+
+        COutPoint out(uint256S(bestBct.txid), 0);
+        Coin coin;
+        if (!pcoinsTip || !pcoinsTip->GetCoin(out, coin)) {
+            LogPrintf("BusyBees: Couldn't get the bct utxo!\n");
+            return false;
+        }
+        bctHeight = coin.nHeight;
+    }
+
+    unsigned char beeNonceEncoded[4];
+    WriteLE32(beeNonceEncoded, bestHashBee);
+    std::vector<unsigned char> beeNonceVec(beeNonceEncoded, beeNonceEncoded + 4);
+
+    unsigned char bctHeightEncoded[4];
+    WriteLE32(bctHeightEncoded, bctHeight);
+    std::vector<unsigned char> bctHeightVec(bctHeightEncoded, bctHeightEncoded + 4);
+
+    opcodetype communityContribFlag = bestBct.communityContrib ? OP_TRUE : OP_FALSE;
+    hiveProofScript << OP_RETURN << OP_BEE << beeNonceVec << bctHeightVec << communityContribFlag << txidVec << messageProofVec;
+
+    // Create honey script from honey address
+    CScript honeyScript = GetScriptForDestination(DecodeDestination(bestBct.honeyAddress));
+
+    // Create a Hive block
+    std::unique_ptr<CBlockTemplate> pblocktemplate(BlockAssembler(Params()).CreateNewBlock(honeyScript, true, &hiveProofScript));
+    if (!pblocktemplate.get()) {
+        LogPrintf("BusyBees: Couldn't create block\n");
+        return false;
+    }
+    CBlock *pblock = &pblocktemplate->block;
+    pblock->hashMerkleRoot = BlockMerkleRoot(*pblock);  // Calc the merkle root
+
+    if (verbose) {
+        LogPrintf("BusyBees: Block created:\n");
+        LogPrintf("%s",pblock->ToString());
+    }
+
+    // Commit and propagate the block
+    std::shared_ptr<const CBlock> shared_pblock = std::make_shared<const CBlock>(*pblock);
+    if (!ProcessNewBlock(Params(), shared_pblock, true, nullptr)) {
+        LogPrintf("BusyBees: Block wasn't accepted\n");
+        return false;
+    }
+
+    LogPrintf("BusyBees: ** Block mined\n");    
+    return true;
 }

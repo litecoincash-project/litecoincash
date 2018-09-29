@@ -21,6 +21,7 @@ enum DeploymentPos
     DEPLOYMENT_TESTDUMMY,
     DEPLOYMENT_CSV, // Deployment of BIP68, BIP112, and BIP113.
     DEPLOYMENT_SEGWIT, // Deployment of BIP141, BIP143, and BIP147.
+    DEPLOYMENT_HIVE,    // LitecoinCash: Hive: Deployment
     // NOTE: Also add new deployments to VersionBitsDeploymentInfo in versionbits.cpp
     MAX_VERSION_BITS_DEPLOYMENTS
 };
@@ -79,12 +80,28 @@ struct Params {
     uint256 nMinimumChainWork;
     uint256 defaultAssumeValid;
 
-    uint32_t powForkTime;           // LitecoinCash: Time of PoW hash method change
-    int lastScryptBlock;            // LitecoinCash: Height of last scrypt block
-    int slowStartBlocks;            // LitecoinCash: Scale post-fork block reward over this many blocks
-    uint256 powLimitSHA;            // LitecoinCash: Initial hash target at fork
-    CAmount premineAmount;          // LitecoinCash: Premine amount
-    CScript premineOutputScript;    // LitecoinCash: Premine output script
+    // LitecoinCash: General consensus params
+    uint32_t powForkTime;               // Time of PoW hash method change
+    int lastScryptBlock;                // Height of last scrypt block
+    int slowStartBlocks;                // Scale post-fork block reward over this many blocks
+    int totalMoneySupplyHeight;         // Height at which TMS is reached, do not issue rewards past this point
+    uint256 powLimitSHA;                // Initial hash target at fork
+    CAmount premineAmount;              // Premine amount
+    CScript premineOutputScript;        // Premine output script
+
+    // LitecoinCash: Hive-related consensus params
+    CAmount minBeeCost;                 // Minimum cost of a bee, used when no more block rewards
+    int beeCostFactor;                  // Bee cost is block_reward/beeCostFactor
+    std::string beeCreationAddress;     // Unspendable address for bee creation
+    std::string hiveCommunityAddress;   // Community fund address
+    int communityContribFactor;         // Optionally, donate bct_value/maxCommunityContribFactor to community fund
+    int beeGestationBlocks;             // The number of blocks for a new bee to mature
+    int beeLifespanBlocks;              // The number of blocks a bee lives for after maturation
+    uint256 powLimitHive;               // Highest (easiest) bee hash target
+    int hiveVersionBit;                 // Hive nVersion block marker bit
+    int minHiveCheckBlock;              // Don't bother checking below this height for Hive blocks (not used for consensus/validation checks, just efficiency when looking for potential BCTs)
+    int hiveTargetAdjustAggression;     // Snap speed for bee hash target adjustment EMA
+    int hiveBlockSpacingTarget;         // Target Hive block frequency (1 out of this many blocks should be Hive)
 };
 } // namespace Consensus
 

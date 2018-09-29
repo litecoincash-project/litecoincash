@@ -113,3 +113,17 @@ std::string CTransaction::ToString() const
         str += "    " + tx_out.ToString() + "\n";
     return str;
 }
+
+// LitecoinCash: Hive: Check if this transaction is a Bee Creation Transaction, and if so return the total bee fee paid via beeFeePaid and honey scriptPubKey via scriptPubKeyHoney
+bool CTransaction::IsBCT(const Consensus::Params& consensusParams, CScript scriptPubKeyBCF, CAmount* beeFeePaid, CScript* scriptPubKeyHoney) const {
+    bool isBCT = CScript::IsBCTScript(vout[0].scriptPubKey, scriptPubKeyBCF, scriptPubKeyHoney);
+
+    if (!isBCT)
+        return false;
+
+    // Grab fee
+    if (beeFeePaid)
+        *beeFeePaid = vout[0].nValue;
+
+    return true;
+}

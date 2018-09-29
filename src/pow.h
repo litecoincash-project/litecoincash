@@ -13,13 +13,19 @@
 class CBlockHeader;
 class CBlockIndex;
 class uint256;
+class CBlock;
 
 unsigned int GetNextWorkRequired(const CBlockIndex* pindexLast, const CBlockHeader *pblock, const Consensus::Params&);
 unsigned int CalculateNextWorkRequired(const CBlockIndex* pindexLast, int64_t nFirstBlockTime, const Consensus::Params&);
 unsigned int DarkGravityWave(const CBlockIndex* pindexLast, const Consensus::Params& params);                               // LitecoinCash: LCC (DGW) diff adjust implementation
 unsigned int GetNextWorkRequiredLTC(const CBlockIndex* pindexLast, const CBlockHeader *pblock, const Consensus::Params&);   // LitecoinCash: LTC diff adjust implementation
+unsigned int GetNextHiveWorkRequired(const CBlockIndex* pindexLast, const Consensus::Params& params);                       // LitecoinCash: Hive: Get the current Bee Hash Target
+bool CheckHiveProof(const CBlock* pblock, const Consensus::Params& params);                                                 // LitecoinCash: Hive: Check the hive proof for given block
+bool GetNetworkHiveInfo(int& immatureBees, int& immatureBCTs, int& matureBees, int& matureBCTs, CAmount& potentialLifespanRewards, const Consensus::Params& consensusParams); // LitecoinCash: Hive: Get count of all live and gestating BCTs on the network
 
 /** Check whether a block hash satisfies the proof-of-work requirement specified by nBits */
 bool CheckProofOfWork(uint256 hash, unsigned int nBits, const Consensus::Params&);
+
+
 
 #endif // BITCOIN_POW_H

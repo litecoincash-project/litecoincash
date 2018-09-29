@@ -368,8 +368,8 @@ UniValue verifymessage(const JSONRPCRequest& request)
     CHashWriter ss(SER_GETHASH, 0);
     ss << strMessageMagic;
     ss << strMessage;
-
     CPubKey pubkey;
+
     if (!pubkey.RecoverCompact(ss.GetHash(), vchSig))
         return false;
 

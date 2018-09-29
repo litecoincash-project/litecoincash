@@ -18,6 +18,7 @@
 #include <wallet/crypter.h>
 #include <wallet/walletdb.h>
 #include <wallet/rpcwallet.h>
+#include <consensus/params.h>   // LitecoinCash: Hive
 
 #include <algorithm>
 #include <atomic>
@@ -267,6 +268,12 @@ public:
 
     const uint256& GetHash() const { return tx->GetHash(); }
     bool IsCoinBase() const { return tx->IsCoinBase(); }
+    bool IsHiveCoinBase() const { return tx->IsHiveCoinBase(); }    // LitecoinCash: Hive
+
+    // LitecoinCash: Hive: Check if this transaction is a Bee Creation Transaction
+    bool IsBCT(const Consensus::Params& consensusParams, CScript scriptPubKeyBCF, CAmount* beeFeePaid = nullptr, CScript* scriptPubKeyHoney = nullptr) const {
+        return tx->IsBCT(consensusParams, scriptPubKeyBCF, beeFeePaid, scriptPubKeyHoney);
+    }
 };
 
 /** 
@@ -658,6 +665,21 @@ private:
     std::vector<char> _ssExtra;
 };
 
+// LitecoinCash: Hive: BCT results struct
+struct CBeeCreationTransactionInfo
+{
+    std::string txid;
+    int64_t time;
+    int beeCount;
+    CAmount beeFeePaid;
+    bool communityContrib;
+    std::string beeStatus;
+    std::string honeyAddress;
+    CAmount rewardsPaid;
+    CAmount profit;
+    int blocksFound;
+    int blocksLeft;
+};
 
 class WalletRescanReserver; //forward declarations for ScanForWalletTransactions/RescanFromTime
 /** 
@@ -966,6 +988,12 @@ public:
     CAmount GetAvailableBalance(const CCoinControl* coinControl = nullptr) const;
 
     OutputType TransactionChangeType(OutputType change_type, const std::vector<CRecipient>& vecSend);
+
+    // LitecoinCash: Hive: Create a BCT to gestate given number of bees
+    bool CreateBeeTransaction(int beeCount, CWalletTx& wtxNew, std::string honeyAddress, bool communityContrib, std::string& strFailReason, const Consensus::Params& consensusParams);
+
+    // LitecoinCash: Hive: Return all BCTs known by this wallet, optionally including dead bees and optionally scanning for blocks minted by bees from each BCT
+    std::vector<CBeeCreationTransactionInfo> GetBCTs(bool includeDead, bool scanRewards, const Consensus::Params& consensusParams);
 
     /**
      * Insert additional inputs into the transaction by

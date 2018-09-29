@@ -117,3 +117,4 @@ libbitcoinconsensus.pc
 contrib/devtools/split-debug.sh
 src/.vscode/
 .vscode/
+just*.sh

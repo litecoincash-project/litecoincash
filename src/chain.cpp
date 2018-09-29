@@ -4,6 +4,8 @@
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 #include <chain.h>
+#include <chainparams.h>    // LitecoinCash: Hive
+#include <util.h>    // LitecoinCash: Hive
 
 /**
  * CChain implementation
@@ -118,19 +120,35 @@ void CBlockIndex::BuildSkip()
         pskip = pprev->GetAncestor(GetSkipHeight(nHeight));
 }
 
+// LitecoinCash: Hive: Grant hive-mined blocks bonus work value - they get the work value of
+// their own block plus that of the PoW block behind them
 arith_uint256 GetBlockProof(const CBlockIndex& block)
 {
     arith_uint256 bnTarget;
     bool fNegative;
     bool fOverflow;
+
     bnTarget.SetCompact(block.nBits, &fNegative, &fOverflow);
     if (fNegative || fOverflow || bnTarget == 0)
         return 0;
+
     // We need to compute 2**256 / (bnTarget+1), but we can't represent 2**256
     // as it's too large for an arith_uint256. However, as 2**256 is at least as large
     // as bnTarget+1, it is equal to ((2**256 - bnTarget - 1) / (bnTarget+1)) + 1,
     // or ~bnTarget / (bnTarget+1) + 1.
-    return (~bnTarget / (bnTarget + 1)) + 1;
+    arith_uint256 bnTargetScaled = (~bnTarget / (bnTarget + 1)) + 1;
+
+    if (block.GetBlockHeader().IsHiveMined(Params().GetConsensus())) {
+        assert(block.pprev);
+
+        arith_uint256 bnPreviousTarget;
+        bnPreviousTarget.SetCompact(block.pprev->nBits, &fNegative, &fOverflow);
+        if (fNegative || fOverflow || bnPreviousTarget == 0)
+            return 0;
+        bnTargetScaled += (~bnPreviousTarget / (bnPreviousTarget + 1)) + 1;
+    }
+
+    return bnTargetScaled;
 }
 
 int64_t GetBlockProofEquivalentTime(const CBlockIndex& to, const CBlockIndex& from, const CBlockIndex& tip, const Consensus::Params& params)

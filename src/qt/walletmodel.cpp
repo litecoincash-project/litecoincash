@@ -11,6 +11,7 @@
 #include <qt/optionsmodel.h>
 #include <qt/paymentserver.h>
 #include <qt/recentrequeststablemodel.h>
+#include <qt/hivetablemodel.h>
 #include <qt/sendcoinsdialog.h>
 #include <qt/transactiontablemodel.h>
 
@@ -41,6 +42,7 @@ WalletModel::WalletModel(const PlatformStyle *platformStyle, CWallet *_wallet, O
     QObject(parent), wallet(_wallet), optionsModel(_optionsModel), addressTableModel(0),
     transactionTableModel(0),
     recentRequestsTableModel(0),
+    hiveTableModel(0),  // LitecoinCash: Hive
     cachedBalance(0), cachedUnconfirmedBalance(0), cachedImmatureBalance(0),
     cachedEncryptionStatus(Unencrypted),
     cachedNumBlocks(0)
@@ -51,6 +53,7 @@ WalletModel::WalletModel(const PlatformStyle *platformStyle, CWallet *_wallet, O
     addressTableModel = new AddressTableModel(wallet, this);
     transactionTableModel = new TransactionTableModel(platformStyle, wallet, this);
     recentRequestsTableModel = new RecentRequestsTableModel(wallet, this);
+    hiveTableModel = new HiveTableModel(wallet, this);  // LitecoinCash: Hive
 
     // This timer will be fired repeatedly to update the balance
     pollTimer = new QTimer(this);
@@ -392,6 +395,12 @@ RecentRequestsTableModel *WalletModel::getRecentRequestsTableModel()
     return recentRequestsTableModel;
 }
 
+// LitecoinCash: Hive
+HiveTableModel *WalletModel::getHiveTableModel()
+{
+    return hiveTableModel;
+}
+
 WalletModel::EncryptionStatus WalletModel::getEncryptionStatus() const
 {
     if(!wallet->IsCrypted())
@@ -629,6 +638,29 @@ void WalletModel::listLockedCoins(std::vector<COutPoint>& vOutpts)
 void WalletModel::loadReceiveRequests(std::vector<std::string>& vReceiveRequests)
 {
     vReceiveRequests = wallet->GetDestValues("rr"); // receive request
+}
+
+// LitecoinCash: Hive
+void WalletModel::getBCTs(std::vector<CBeeCreationTransactionInfo>& vBeeCreationTransactions, bool includeDeadBees) {
+    if (wallet)
+        vBeeCreationTransactions = wallet->GetBCTs(includeDeadBees, true, Params().GetConsensus());
+}
+
+// LitecoinCash: Hive
+bool WalletModel::createBees(int beeCount, bool communityContrib, QWidget *parent) {
+    wallet->BlockUntilSyncedToCurrentChain();
+
+    LOCK2(cs_main, wallet->cs_wallet);
+
+    CWalletTx wtxNew;
+    std::string strError;
+    std::string honeyAddress;
+    if (!wallet->CreateBeeTransaction(beeCount, wtxNew, honeyAddress, communityContrib, strError, Params().GetConsensus())) {
+        QMessageBox::critical(parent, tr("Error"), "Bee creation error: " + QString::fromStdString(strError));
+        return false;
+    }
+
+    return true;
 }
 
 bool WalletModel::saveReceiveRequest(const std::string &sAddress, const int64_t nId, const std::string &sRequest)

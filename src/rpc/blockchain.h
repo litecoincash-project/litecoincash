@@ -16,7 +16,9 @@ class UniValue;
  * @return A floating point number that is a multiple of the main net minimum
  * difficulty (4295032833 hashes).
  */
-double GetDifficulty(const CBlockIndex* blockindex = nullptr);
+// LitecoinCash: Hive: If optional argument getHiveDifficulty is true, will return Hive difficulty as close to blockindex or tip as possible.
+// If getHiveDifficulty is false, will return PoW difficulty as close to blockindex or tip as possible.
+double GetDifficulty(const CBlockIndex* blockindex = nullptr, bool getHiveDifficulty = false);
 
 /** Callback for when block tip changed. */
 void RPCNotifyBlockChange(bool ibd, const CBlockIndex *);

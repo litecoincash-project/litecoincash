@@ -219,7 +219,7 @@ static const unsigned int DEFAULT_CHECKLEVEL = 3;
 // Setting the target to > than 550MB will make it likely we can respect the target.
 static const uint64_t MIN_DISK_SPACE_FOR_BLOCK_FILES = 550 * 1024 * 1024;
 
-/** 
+/**
  * Process an incoming block. This only returns after the best known valid
  * block is made active. Note that it does not, however, guarantee that the
  * specific block passed to it has been checked for validity!
@@ -230,7 +230,7 @@ static const uint64_t MIN_DISK_SPACE_FOR_BLOCK_FILES = 550 * 1024 * 1024;
  *
  * Note that we guarantee that either the proof-of-work is valid on pblock, or
  * (and possibly also) BlockChecked will have been called.
- * 
+ *
  * Call without cs_main held.
  *
  * @param[in]   pblock  The block we want to process.
@@ -279,7 +279,7 @@ bool GetTransaction(const uint256& hash, CTransactionRef& tx, const Consensus::P
 /** Find the best known block, and make it the tip of the block chain */
 bool ActivateBestChain(CValidationState& state, const CChainParams& chainparams, std::shared_ptr<const CBlock> pblock = std::shared_ptr<const CBlock>());
 CAmount GetBlockSubsidy(int nHeight, const Consensus::Params& consensusParams);
-
+CAmount GetBeeCost(int nHeight, const Consensus::Params& consensusParams);  // LitecoinCash: Hive: Get the cost of a bee at given height
 /** Guess verification progress (as a fraction between 0.0=genesis and 1.0=current tip). */
 double GuessVerificationProgress(const ChainTxData& data, const CBlockIndex* pindex);
 
@@ -356,7 +356,7 @@ bool CheckSequenceLocks(const CTransaction &tx, int flags, LockPoints* lp = null
 
 /**
  * Closure representing one script verification
- * Note that this stores references to the spending transaction 
+ * Note that this stores references to the spending transaction
  */
 class CScriptCheck
 {
@@ -407,6 +407,15 @@ bool TestBlockValidity(CValidationState& state, const CChainParams& chainparams,
 
 /** Check whether witness commitments are required for block. */
 bool IsWitnessEnabled(const CBlockIndex* pindexPrev, const Consensus::Params& params);
+
+// LitecoinCash: Hive: Check if Hive is activated at given point
+bool IsHiveEnabled(const CBlockIndex* pindexPrev, const Consensus::Params& params);
+
+// LitecoinCash: Hive: Get the well-rooted deterministic random string (see whitepaper section 4.1)
+std::string GetDeterministicRandString(const CBlockIndex* pindexPrev);
+
+// LitecoinCash: Hive: Get tx by given hash, from a block at given chain height
+bool GetTxByHashAndHeight(const uint256 txHash, const int nHeight, CTransactionRef& txNew, CBlockIndex& foundAtOut, CBlockIndex* pindex, const Consensus::Params& consensusParams);
 
 /** When there are blocks in the active chain with missing data, rewind the chainstate and remove them from the block index */
 bool RewindBlockIndex(const CChainParams& params);

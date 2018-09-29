@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>596</width>
-    <height>512</height>
+    <width>665</width>
+    <height>427</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -39,6 +39,11 @@
       <layout class="QVBoxLayout" name="verticalLayout_2">
        <item>
         <widget class="QFrame" name="frame">
+         <property name="styleSheet">
+          <string notr="true">#frame {background:url(:/icons/presentationlogofade);
+background-repeat:no-repeat;
+background-position:bottom right;}</string>
+         </property>
          <property name="frameShape">
           <enum>QFrame::StyledPanel</enum>
          </property>
@@ -403,33 +408,281 @@
             </item>
            </layout>
           </item>
+          <item>
+           <spacer name="verticalSpacer_3">
+            <property name="orientation">
+             <enum>Qt::Vertical</enum>
+            </property>
+            <property name="sizeType">
+             <enum>QSizePolicy::Fixed</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>20</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+          <item>
+           <layout class="QHBoxLayout" name="horizontalLayout_3">
+            <item>
+             <widget class="QLabel" name="label_6">
+              <property name="font">
+               <font>
+                <weight>75</weight>
+                <bold>true</bold>
+               </font>
+              </property>
+              <property name="text">
+               <string>Your Current Hive</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="beeButton">
+              <property name="enabled">
+               <bool>true</bool>
+              </property>
+              <property name="maximumSize">
+               <size>
+                <width>30</width>
+                <height>16777215</height>
+               </size>
+              </property>
+              <property name="toolTip">
+               <string>The displayed information may be out of date. Your wallet automatically synchronizes with the LitecoinCash network after a connection is established, but this process has not completed yet.</string>
+              </property>
+              <property name="text">
+               <string/>
+              </property>
+              <property name="icon">
+               <iconset resource="../bitcoin.qrc">
+                <normaloff>:/icons/bee</normaloff>:/icons/bee</iconset>
+              </property>
+              <property name="iconSize">
+               <size>
+                <width>24</width>
+                <height>24</height>
+               </size>
+              </property>
+              <property name="flat">
+               <bool>true</bool>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <spacer name="horizontalSpacer_4">
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>40</width>
+                <height>20</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <layout class="QGridLayout" name="gridLayout_2">
+            <property name="spacing">
+             <number>12</number>
+            </property>
+            <item row="2" column="0">
+             <widget class="QLabel" name="profitLabel_2">
+              <property name="text">
+               <string>Profit:</string>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="0">
+             <widget class="QLabel" name="rewardsLabel">
+              <property name="text">
+               <string>Rewards:</string>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="1">
+             <widget class="QLabel" name="rewardsPaidLabel">
+              <property name="font">
+               <font>
+                <weight>75</weight>
+                <bold>true</bold>
+               </font>
+              </property>
+              <property name="text">
+               <string>0.000 000 00 LCC</string>
+              </property>
+              <property name="alignment">
+               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="1">
+             <widget class="QLabel" name="costLabel">
+              <property name="font">
+               <font>
+                <weight>75</weight>
+                <bold>true</bold>
+               </font>
+              </property>
+              <property name="text">
+               <string>0.000 000 00 LCC</string>
+              </property>
+              <property name="alignment">
+               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+              </property>
+             </widget>
+            </item>
+            <item row="2" column="1">
+             <widget class="QLabel" name="profitLabel">
+              <property name="font">
+               <font>
+                <weight>75</weight>
+                <bold>true</bold>
+               </font>
+              </property>
+              <property name="text">
+               <string>0.000 000 00 LCC</string>
+              </property>
+              <property name="alignment">
+               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="0">
+             <widget class="QLabel" name="costLabel_2">
+              <property name="text">
+               <string>Cost:</string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="2">
+             <layout class="QHBoxLayout" name="horizontalLayout_11">
+              <property name="spacing">
+               <number>0</number>
+              </property>
+              <item>
+               <widget class="QLabel" name="blocksFoundRowLabel_3">
+                <property name="font">
+                 <font>
+                  <kerning>true</kerning>
+                 </font>
+                </property>
+                <property name="text">
+                 <string>(</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QLabel" name="immatureLabel">
+                <property name="text">
+                 <string>0</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QLabel" name="label_14">
+                <property name="text">
+                 <string> immature, </string>
+                </property>
+                <property name="alignment">
+                 <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QLabel" name="matureLabel">
+                <property name="text">
+                 <string>0</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QLabel" name="blocksFoundRowLabel_2">
+                <property name="font">
+                 <font>
+                  <kerning>true</kerning>
+                 </font>
+                </property>
+                <property name="text">
+                 <string> mature bees)</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <spacer name="horizontalSpacer_14">
+                <property name="orientation">
+                 <enum>Qt::Horizontal</enum>
+                </property>
+                <property name="sizeHint" stdset="0">
+                 <size>
+                  <width>40</width>
+                  <height>20</height>
+                 </size>
+                </property>
+               </spacer>
+              </item>
+             </layout>
+            </item>
+            <item row="1" column="2">
+             <layout class="QHBoxLayout" name="horizontalLayout_12">
+              <property name="spacing">
+               <number>0</number>
+              </property>
+              <item>
+               <widget class="QLabel" name="blocksFoundRowLabel_4">
+                <property name="font">
+                 <font>
+                  <kerning>true</kerning>
+                 </font>
+                </property>
+                <property name="text">
+                 <string>(</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QLabel" name="blocksFoundLabel">
+                <property name="text">
+                 <string>0</string>
+                </property>
+                <property name="alignment">
+                 <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QLabel" name="label_15">
+                <property name="text">
+                 <string> blocks mined)</string>
+                </property>
+                <property name="alignment">
+                 <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <spacer name="horizontalSpacer_15">
+                <property name="orientation">
+                 <enum>Qt::Horizontal</enum>
+                </property>
+                <property name="sizeHint" stdset="0">
+                 <size>
+                  <width>40</width>
+                  <height>20</height>
+                 </size>
+                </property>
+               </spacer>
+              </item>
+             </layout>
+            </item>
+           </layout>
+          </item>
          </layout>
-        </widget>
-       </item>
-       <item>
-        <widget class="QPushButton" name="spaceDropButton">
-         <property name="cursor">
-          <cursorShape>PointingHandCursor</cursorShape>
-         </property>
-         <property name="toolTip">
-          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The first cryptocurrency dropped from Space! Click for more information about our successful SpaceDrop mission&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-         </property>
-         <property name="text">
-          <string/>
-         </property>
-         <property name="icon">
-          <iconset resource="../bitcoin.qrc">
-           <normaloff>:/icons/spacedrop</normaloff>:/icons/spacedrop</iconset>
-         </property>
-         <property name="iconSize">
-          <size>
-           <width>256</width>
-           <height>256</height>
-          </size>
-         </property>
-         <property name="flat">
-          <bool>true</bool>
-         </property>
         </widget>
        </item>
        <item>

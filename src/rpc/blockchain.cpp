@@ -51,7 +51,8 @@ extern void TxToJSON(const CTransaction& tx, const uint256 hashBlock, UniValue& 
 /* Calculate the difficulty for a given block index,
  * or the block index of the given chain.
  */
-double GetDifficulty(const CChain& chain, const CBlockIndex* blockindex)
+// LitecoinCash: Hive: Optional getHiveDifficulty param
+double GetDifficulty(const CChain& chain, const CBlockIndex* blockindex, bool getHiveDifficulty = false)
 {
     if (blockindex == nullptr)
     {
@@ -59,6 +60,25 @@ double GetDifficulty(const CChain& chain, const CBlockIndex* blockindex)
             return 1.0;
         else
             blockindex = chain.Tip();
+    }
+
+    // LitecoinCash: Hive: If tip is hivemined and we want PoW, step back one (Hive blocks always follow a PoW block)
+    const Consensus::Params& consensusParams = Params().GetConsensus();
+    if (!getHiveDifficulty && blockindex->GetBlockHeader().IsHiveMined(consensusParams)) {
+        assert (blockindex->pprev);
+        blockindex = blockindex->pprev;
+    }
+
+    // LitecoinCash: Hive: If tip is PoW and we want hivemined, step back until we find a Hive block
+    if (getHiveDifficulty) {
+        while (!blockindex->GetBlockHeader().IsHiveMined(consensusParams)) {
+            if (!blockindex->pprev || blockindex->nHeight < consensusParams.minHiveCheckBlock) {   // Ran out of blocks without finding a Hive block? Return min target
+                LogPrint(BCLog::HIVE, "GetDifficulty: No hivemined blocks found in history\n");
+                return 1.0;
+            }
+
+            blockindex = blockindex->pprev;
+        }
     }
 
     int nShift = (blockindex->nBits >> 24) & 0xff;
@@ -79,9 +99,10 @@ double GetDifficulty(const CChain& chain, const CBlockIndex* blockindex)
     return dDiff;
 }
 
-double GetDifficulty(const CBlockIndex* blockindex)
+// LitecoinCash: Hive: Pass through optional getHiveDifficulty param
+double GetDifficulty(const CBlockIndex* blockindex, bool getHiveDifficulty)
 {
-    return GetDifficulty(chainActive, blockindex);
+    return GetDifficulty(chainActive, blockindex, getHiveDifficulty);
 }
 
 UniValue blockheaderToJSON(const CBlockIndex* blockindex)
@@ -354,6 +375,32 @@ UniValue getdifficulty(const JSONRPCRequest& request)
 
     LOCK(cs_main);
     return GetDifficulty();
+}
+
+// LitecoinCash: Hive: Get hive difficulty
+UniValue gethivedifficulty(const JSONRPCRequest& request)
+{
+    if (request.fHelp || request.params.size() != 0)
+        throw std::runtime_error(
+            "gethivedifficulty\n"
+            "\nReturns the Hive difficulty as a multiple of the minimum difficulty.\n"
+            "\nResult:\n"
+            "n.nnn       (numeric) the Hive difficulty as a multiple of the minimum difficulty.\n"
+            "\nExamples:\n"
+            + HelpExampleCli("gethivedifficulty", "")
+            + HelpExampleRpc("gethivedifficulty", "")
+        );
+
+    CBlockIndex* pindexPrev = chainActive.Tip();
+    assert(pindexPrev != nullptr);
+    if (!IsHiveEnabled(pindexPrev, Params().GetConsensus()))
+        throw std::runtime_error(
+            "Error: The Hive is not yet enabled on the network"
+        );
+
+
+    LOCK(cs_main);
+    return GetDifficulty(nullptr, true);
 }
 
 std::string EntryDescriptionString()
@@ -1625,6 +1672,7 @@ static const CRPCCommand commands[] =
     { "blockchain",         "getblockheader",         &getblockheader,         {"blockhash","verbose"} },
     { "blockchain",         "getchaintips",           &getchaintips,           {} },
     { "blockchain",         "getdifficulty",          &getdifficulty,          {} },
+    { "blockchain",         "gethivedifficulty",      &gethivedifficulty,      {} },        // LitecoinCash: Get Hive difficulty
     { "blockchain",         "getmempoolancestors",    &getmempoolancestors,    {"txid","verbose"} },
     { "blockchain",         "getmempooldescendants",  &getmempooldescendants,  {"txid","verbose"} },
     { "blockchain",         "getmempoolentry",        &getmempoolentry,        {"txid"} },

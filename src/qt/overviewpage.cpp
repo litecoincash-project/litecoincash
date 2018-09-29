@@ -14,11 +14,10 @@
 #include <qt/transactionfilterproxy.h>
 #include <qt/transactiontablemodel.h>
 #include <qt/walletmodel.h>
+#include <qt/hivetablemodel.h>  // LitecoinCash: Hive
 
 #include <QAbstractItemDelegate>
 #include <QPainter>
-#include <QUrl>                 // LitecoinCash: For SpaceDrop button handler
-#include <QDesktopServices>     // LitecoinCash: For SpaceDrop button handler
 
 #define DECORATION_SIZE 54
 #define NUM_ITEMS 5
@@ -125,9 +124,6 @@ OverviewPage::OverviewPage(const PlatformStyle *platformStyle, QWidget *parent) 
 {
     ui->setupUi(this);
 
-    // LitecoinCash: Set up SpaceDrop button handler
-    connect(ui->spaceDropButton, SIGNAL(released()), this, SLOT(handleSpaceDropButtonClicked()));
-
     // use a SingleColorIcon for the "out of sync warning" icon
     QIcon icon = platformStyle->SingleColorIcon(":/icons/warning");
     icon.addPixmap(icon.pixmap(QSize(64,64), QIcon::Normal), QIcon::Disabled); // also set the disabled icon because we are using a disabled QPushButton to work around missing HiDPI support of QLabel (https://bugreports.qt.io/browse/QTBUG-42503)
@@ -146,12 +142,9 @@ OverviewPage::OverviewPage(const PlatformStyle *platformStyle, QWidget *parent) 
     showOutOfSyncWarning(true);
     connect(ui->labelWalletStatus, SIGNAL(clicked()), this, SLOT(handleOutOfSyncWarningClicks()));
     connect(ui->labelTransactionsStatus, SIGNAL(clicked()), this, SLOT(handleOutOfSyncWarningClicks()));
-}
 
-// LitecoinCash: SpaceDrop button handler
-void OverviewPage::handleSpaceDropButtonClicked()
-{
-    QDesktopServices::openUrl(QUrl("https://space.litecoinca.sh"));
+    // LitecoinCash: Hive
+    cost = rewardsPaid = profit = 0;
 }
 
 void OverviewPage::handleTransactionClicked(const QModelIndex &index)
@@ -250,10 +243,40 @@ void OverviewPage::setWalletModel(WalletModel *model)
 
         updateWatchOnlyLabels(model->haveWatchOnly());
         connect(model, SIGNAL(notifyWatchonlyChanged(bool)), this, SLOT(updateWatchOnlyLabels(bool)));
+
+        // LitecoinCash: Hive: Connect summary updater
+        connect(model, SIGNAL(newHiveSummaryAvailable()), this, SLOT(updateHiveSummary()));
     }
 
     // update the display unit, to not use the default ("BTC")
     updateDisplayUnit();
+}
+
+// LitecoinCash: Hive: Update the hive summary
+void OverviewPage::updateHiveSummary() {
+    if (walletModel && walletModel->getHiveTableModel()) {
+        int immature, mature, dead, blocksFound;
+        walletModel->getHiveTableModel()->getSummaryValues(immature, mature, dead, blocksFound, cost, rewardsPaid, profit);
+
+        ui->rewardsPaidLabel->setText(
+            BitcoinUnits::format(walletModel->getOptionsModel()->getDisplayUnit(), rewardsPaid)
+            + " "
+            + BitcoinUnits::shortName(walletModel->getOptionsModel()->getDisplayUnit())
+        );
+        ui->costLabel->setText(
+            BitcoinUnits::format(walletModel->getOptionsModel()->getDisplayUnit(), cost)
+            + " "
+            + BitcoinUnits::shortName(walletModel->getOptionsModel()->getDisplayUnit())
+        );
+        ui->profitLabel->setText(
+            BitcoinUnits::format(walletModel->getOptionsModel()->getDisplayUnit(), profit)
+            + " "
+            + BitcoinUnits::shortName(walletModel->getOptionsModel()->getDisplayUnit())
+        );
+        ui->matureLabel->setText(QString::number(mature));
+        ui->immatureLabel->setText(QString::number(immature));
+        ui->blocksFoundLabel->setText(QString::number(blocksFound));
+    }
 }
 
 void OverviewPage::updateDisplayUnit()
@@ -268,6 +291,23 @@ void OverviewPage::updateDisplayUnit()
         txdelegate->unit = walletModel->getOptionsModel()->getDisplayUnit();
 
         ui->listTransactions->update();
+
+        // LitecoinCash: Hive: Update CAmounts in hive summary
+        ui->rewardsPaidLabel->setText(
+            BitcoinUnits::format(walletModel->getOptionsModel()->getDisplayUnit(), rewardsPaid)
+            + " "
+            + BitcoinUnits::shortName(walletModel->getOptionsModel()->getDisplayUnit())
+        );
+        ui->costLabel->setText(
+            BitcoinUnits::format(walletModel->getOptionsModel()->getDisplayUnit(), cost)
+            + " "
+            + BitcoinUnits::shortName(walletModel->getOptionsModel()->getDisplayUnit())
+        );
+        ui->profitLabel->setText(
+            BitcoinUnits::format(walletModel->getOptionsModel()->getDisplayUnit(), profit)
+            + " "
+            + BitcoinUnits::shortName(walletModel->getOptionsModel()->getDisplayUnit())
+        );
     }
 }
 
@@ -281,4 +321,9 @@ void OverviewPage::showOutOfSyncWarning(bool fShow)
 {
     ui->labelWalletStatus->setVisible(fShow);
     ui->labelTransactionsStatus->setVisible(fShow);
+}
+
+// LitecoinCash: Hive: Handle bee button click
+void OverviewPage::on_beeButton_clicked() {
+    Q_EMIT beeButtonClicked();
 }

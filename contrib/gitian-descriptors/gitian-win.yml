@@ -22,8 +22,8 @@ packages:
 - "ca-certificates"
 - "python"
 remotes:
-- "url": "https://github.com/litecoincash-project/litecoincash.git"
-  "dir": "litecoincash"
+- "url": "https://github.com/litecoincash-project/litecoincash-hive-test.git"
+  "dir": "litecoincash-hive-test"
 files: []
 script: |
   WRAP_DIR=$HOME/wrapped
@@ -101,7 +101,7 @@ script: |
   create_per-host_linker_wrapper "2000-01-01 12:00:00"
   export PATH=${WRAP_DIR}:${PATH}
 
-  cd litecoincash
+  cd litecoincash-hive-test
   BASEPREFIX=`pwd`/depends
   # Build dependencies for each host
   for i in $HOSTS; do

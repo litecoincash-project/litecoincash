@@ -130,9 +130,10 @@ private:
 
     // Configuration parameters for the block size
     bool fIncludeWitness;
+    bool fIncludeBCTs;              // LitecoinCash: Hive: Allow BCTs in block?
     unsigned int nBlockMaxWeight;
     CFeeRate blockMinFeeRate;
-
+    
     // Information on the current status of the block
     uint64_t nBlockWeight;
     uint64_t nBlockTx;
@@ -156,7 +157,8 @@ public:
     BlockAssembler(const CChainParams& params, const Options& options);
 
     /** Construct a new block template with coinbase to scriptPubKeyIn */
-    std::unique_ptr<CBlockTemplate> CreateNewBlock(const CScript& scriptPubKeyIn, bool fMineWitnessTx=true);
+    // LitecoinCash: Hive: If hiveProofScript is passed, create a Hive block instead of a PoW block
+    std::unique_ptr<CBlockTemplate> CreateNewBlock(const CScript& scriptPubKeyIn, bool fMineWitnessTx=true, const CScript* hiveProofScript=nullptr);
 
 private:
     // utility functions
@@ -195,5 +197,11 @@ private:
 /** Modify the extranonce in a block */
 void IncrementExtraNonce(CBlock* pblock, const CBlockIndex* pindexPrev, unsigned int& nExtraNonce);
 int64_t UpdateTime(CBlockHeader* pblock, const Consensus::Params& consensusParams, const CBlockIndex* pindexPrev);
+
+// LitecoinCash: Hive: Bee management thread
+void BeeKeeper(const CChainParams& chainparams);
+
+// LitecoinCash: Hive: Attempt to mint the next block
+bool BusyBees(const Consensus::Params& consensusParams);
 
 #endif // BITCOIN_MINER_H

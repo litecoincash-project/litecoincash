@@ -10,6 +10,8 @@
 
 #include <support/allocators/secure.h>
 
+#include <wallet/wallet.h>  // LitecoinCash: Hive
+
 #include <map>
 #include <vector>
 
@@ -21,6 +23,7 @@ class AddressTableModel;
 class OptionsModel;
 class PlatformStyle;
 class RecentRequestsTableModel;
+class HiveTableModel;               // LitecoinCash: Hive
 class TransactionTableModel;
 class WalletModelTransaction;
 
@@ -130,6 +133,7 @@ public:
     AddressTableModel *getAddressTableModel();
     TransactionTableModel *getTransactionTableModel();
     RecentRequestsTableModel *getRecentRequestsTableModel();
+    HiveTableModel *getHiveTableModel();    // LitecoinCash: Hive
 
     CAmount getBalance(const CCoinControl *coinControl = nullptr) const;
     CAmount getUnconfirmedBalance() const;
@@ -206,6 +210,9 @@ public:
     void loadReceiveRequests(std::vector<std::string>& vReceiveRequests);
     bool saveReceiveRequest(const std::string &sAddress, const int64_t nId, const std::string &sRequest);
 
+    void getBCTs(std::vector<CBeeCreationTransactionInfo>& vBeeCreationTransactions, bool includeDeadBees);     // LitecoinCash: Hive
+    bool createBees(int beeCount, bool communityContrib, QWidget *parent);                                      // LitecoinCash: Hive
+
     bool transactionCanBeAbandoned(uint256 hash) const;
     bool abandonTransaction(uint256 hash) const;
 
@@ -232,6 +239,7 @@ private:
     AddressTableModel *addressTableModel;
     TransactionTableModel *transactionTableModel;
     RecentRequestsTableModel *recentRequestsTableModel;
+    HiveTableModel *hiveTableModel; // LitecoinCash: Hive
 
     // Cache some values to be able to detect changes
     CAmount cachedBalance;
@@ -273,6 +281,9 @@ Q_SIGNALS:
 
     // Watch-only address added
     void notifyWatchonlyChanged(bool fHaveWatchonly);
+
+    // LitecoinCash: Fired when new hive summary available
+    void newHiveSummaryAvailable();
 
 public Q_SLOTS:
     /* Wallet status might have changed */

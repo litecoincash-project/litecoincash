@@ -28,8 +28,8 @@ packages:
 - "ca-certificates"
 - "python"
 remotes:
-- "url": "https://github.com/litecoincash-project/litecoincash.git"
-  "dir": "litecoincash"
+- "url": "https://github.com/litecoincash-project/litecoincash-hive-test.git"
+  "dir": "litecoincash-hive-test"
 files: []
 script: |
 
@@ -113,7 +113,7 @@ script: |
   chmod +x ${WRAP_DIR}/${prog}
   done
 
-  cd litecoincash
+  cd litecoincash-hive-test
   BASEPREFIX=`pwd`/depends
   # Build dependencies for each host
   for i in $HOSTS; do

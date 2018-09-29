@@ -235,7 +235,6 @@ UniValue getaccountaddress(const JSONRPCRequest& request)
     return ret;
 }
 
-
 UniValue getrawchangeaddress(const JSONRPCRequest& request)
 {
     CWallet * const pwallet = GetWalletForJSONRPCRequest(request);
@@ -534,6 +533,256 @@ UniValue sendtoaddress(const JSONRPCRequest& request)
     SendMoney(pwallet, dest, nAmount, fSubtractFeeFromAmount, wtx, coin_control);
 
     return wtx.GetHash().GetHex();
+}
+
+// LitecoinCash: Hive: Get current bee cost
+UniValue getbeecost(const JSONRPCRequest& request)
+{
+    if (request.fHelp || request.params.size() > 1)
+        throw std::runtime_error(
+            "getbeecost ( height )\n"
+            "\nReturns the cost to create a single bee at given block height.\n"
+            "\nArguments:\n"
+            "1. height                 (numeric, optional) The block height. Defaults to current tip height.\n"
+            "\nResult:\n"
+            "amount                    (numeric) The amount in " + CURRENCY_UNIT + "\n"
+            "\nExamples:\n"
+            + HelpExampleCli("getbeecost", "")
+            + HelpExampleRpc("getbeecost", "")
+       );
+
+    const Consensus::Params& consensusParams = Params().GetConsensus();
+
+    CBlockIndex* pindexPrev = chainActive.Tip();
+    assert(pindexPrev != nullptr);
+    if (!IsHiveEnabled(pindexPrev, consensusParams))
+        throw std::runtime_error(
+            "Error: The Hive is not yet enabled on the network"
+        );
+
+    CWallet * const pwallet = GetWalletForJSONRPCRequest(request);
+    if (request.params[0].isNull() && !EnsureWalletIsAvailable(pwallet, request.fHelp))
+        return NullUniValue;
+
+    int height = !request.params[0].isNull() ? request.params[0].get_int() : chainActive.Height();
+    if(!IsHiveEnabled(chainActive[height], consensusParams))
+        throw std::runtime_error(
+            "Error: The Hive is not enabled at the requested height"
+        );
+
+    CAmount beeCost = GetBeeCost(height, consensusParams);
+
+    return ValueFromAmount(beeCost);
+}
+
+// LitecoinCash: Hive: Create bee(s)
+UniValue createbees(const JSONRPCRequest& request)
+{
+    CWallet * const pwallet = GetWalletForJSONRPCRequest(request);
+    if (!EnsureWalletIsAvailable(pwallet, request.fHelp))
+        return NullUniValue;
+
+    if (request.fHelp || request.params.size() < 1 || request.params.size() > 3)
+        throw std::runtime_error(
+            "createbees bee_count ( community_contrib, \"honey_address\" )\n"
+            "\nCreate one or more bees in a single transaction, sign it, and broadcast it to the network.\n"
+            + HelpRequiringPassphrase(pwallet) +
+            "\nArguments:\n"
+            "1. bee_count              (numeric, required) The number of bees to create.\n"
+            "2. community_contrib      (boolean, optional, default=true) If true, a small percentage of bee creation cost will be paid to a community fund.\n"
+            "3. \"honey_address\"        (string, optional) The LCC address to receive rewards for blocks mined by bee(s) created in this transaction.\n"
+            "\nResult:\n"
+            "\"txid\"                    (string) The transaction id.\n"
+            "\nExamples:\n"
+            + HelpExampleCli("createbees", "1")
+            + HelpExampleCli("createbees", "5 true \"MBA3cASkMpjqjn8NmbcfYRPHdzkPm6AYdW\"")
+            + HelpExampleRpc("createbees", "12")
+            + HelpExampleRpc("createbees", "34 false \"MBA3cASkMpjqjn8NmbcfYRPHdzkPm6AYdW\"")
+        );
+
+    RPCTypeCheckArgument(request.params[0], UniValue::VNUM);
+    int beeCount = request.params[0].get_int();
+
+    bool communityContrib = true;
+    if (!request.params[1].isNull()) {
+        RPCTypeCheckArgument(request.params[1], UniValue::VBOOL);
+        communityContrib = request.params[1].get_bool();
+    }
+
+    std::string honeyAddress;
+    if (!request.params[2].isNull()) {
+        RPCTypeCheckArgument(request.params[2], UniValue::VSTR);
+        if (!request.params[2].get_str().empty())
+            honeyAddress = request.params[2].get_str();
+    }
+
+    pwallet->BlockUntilSyncedToCurrentChain();
+    LOCK2(cs_main, pwallet->cs_wallet);
+
+    CWalletTx wtxNew;
+    std::string strError;
+    if (pwallet->CreateBeeTransaction(beeCount, wtxNew, honeyAddress, communityContrib, strError, Params().GetConsensus()))
+        return wtxNew.GetHash().GetHex();
+    else
+        throw JSONRPCError(RPC_WALLET_BCT_FAIL, strError);
+}
+
+// LitecoinCash: Hive: Get network hive info
+UniValue getnetworkhiveinfo(const JSONRPCRequest& request)
+{
+    if (request.fHelp || request.params.size() > 0)
+        throw std::runtime_error(
+            "getnetworkhiveinfo\n"
+            "\nLists the mature and immature bee populations across the entire network.\n"
+            "\nResult:\n"
+            "{\n"
+            "  immature_bee_count,     (numeric) The number of immature bees\n"
+            "  immature_bct_count,     (numeric) The number of immature Bee Creation Transactions\n"
+            "  mature_bee_count,       (numeric) The number of mature bees\n"
+            "  mature_bct_count,       (numeric) The number of mature Bee Creation Transactions\n"
+            "  honey_pot               (numeric) Total potential network rewards available during bee lifespan (in " + CURRENCY_UNIT + ")\n"
+            "}\n"
+            "\nExamples:\n"
+            + HelpExampleCli("getnetworkhiveinfo", "")
+            + HelpExampleRpc("getnetworkhiveinfo", "")
+        );
+
+    const Consensus::Params& consensusParams = Params().GetConsensus();
+    CBlockIndex* pindexPrev = chainActive.Tip();
+    assert(pindexPrev != nullptr);
+
+    if (!IsHiveEnabled(pindexPrev, consensusParams))
+        throw std::runtime_error("Error: The Hive is not yet enabled on the network");
+
+    int globalImmatureBees, globalImmatureBCTs, globalMatureBees, globalMatureBCTs;
+    CAmount potentialRewards;
+    if (!GetNetworkHiveInfo(globalImmatureBees, globalImmatureBCTs, globalMatureBees, globalMatureBCTs, potentialRewards, consensusParams))
+        throw std::runtime_error("Error: A block required to calculate network bee population was not available (pruned data / not found on disk)");
+
+    UniValue jsonResults(UniValue::VOBJ);
+    jsonResults.push_back(Pair("immature_bee_count", globalImmatureBees));
+    jsonResults.push_back(Pair("immature_bct_count", globalImmatureBCTs));
+    jsonResults.push_back(Pair("mature_bee_count", globalMatureBees));
+    jsonResults.push_back(Pair("mature_bct_count", globalMatureBCTs));
+    jsonResults.push_back(Pair("honey_pot", potentialRewards));
+
+    return jsonResults;
+}
+
+// LitecoinCash: Hive: Get wallet's own hive info
+UniValue gethiveinfo(const JSONRPCRequest& request)
+{
+    CWallet * const pwallet = GetWalletForJSONRPCRequest(request);
+    if (!EnsureWalletIsAvailable(pwallet, request.fHelp))
+        return NullUniValue;
+
+    if (request.fHelp || request.params.size() > 1)
+        throw std::runtime_error(
+            "gethiveinfo ( include_dead )\n"
+            "\nLists the status of your current hive, broken down by bee creation transaction.\n"
+            "\nArguments:\n"
+            "1. include_dead           (boolean, optional, default=false) Include bees whose lifespans have expired\n"
+            "\nResult:\n"
+            "{\n"
+            "    summary: {\n"
+            "        bee_count,                (numeric) Total bee count in hive\n"
+            "        mature_bees,              (numeric) Total mature bees\n"
+            "        immature_bees,            (numeric) Total immature bees\n"
+            "        blocks_found,             (numeric) Total blocks found\n"
+            "        bee_fee_paid,             (numeric) Total bee creation fees (in " + CURRENCY_UNIT + ")\n"
+            "        rewards_paid,             (numeric) Total rewards paid (in " + CURRENCY_UNIT + ")\n"
+            "        profit,                   (numeric) Total rewards paid (in " + CURRENCY_UNIT + ")\n"
+            "    },\n"
+            "    bees: [\n"
+            "        {\n"
+            "            \"txid\",               (string) Transaction ID of the bee creation transaction\n"
+            "            time,                 (numeric) Timestamp of block containing the bee creation transaction (only present once tx is in a block)\n"
+            "            bee_count,            (numeric) The number of bees created\n"
+            "            community_contrib,    (boolean) If true, indicates that a portion of the bee creation fee was paid to the community fund\n"
+            "            \"bee_status\",         (string) immature | mature | dead. Only mature bees are capable of minting\n"
+            "            \"honey_address\",      (string) The address which will receive block rewards for blocks minted by the bees\n"
+            "            bee_fee_paid,         (numeric) Total bee creation fee (in " + CURRENCY_UNIT + ")\n"
+            "            rewards_paid,         (numeric) The amount of block rewards earned by the bees (in " + CURRENCY_UNIT + ")\n"
+            "            profit,               (numeric) The profit earned by the bees (in " + CURRENCY_UNIT + ")\n"
+            "            blocks_found,         (numeric) The number of blocks minted by the bees\n"
+            "            blocks_left           (numeric) The number of blocks of bee lifespan remaining\n"
+            "        },...\n"
+            "    ]\n"
+            "}\n"
+            "\nExamples:\n"
+            + HelpExampleCli("gethiveinfo", "")
+            + HelpExampleCli("gethiveinfo", "true")
+            + HelpExampleRpc("gethiveinfo", "")
+        );
+
+    const Consensus::Params& consensusParams = Params().GetConsensus();
+    CBlockIndex* pindexPrev = chainActive.Tip();
+    assert(pindexPrev != nullptr);
+    if (!IsHiveEnabled(pindexPrev, consensusParams))
+        throw std::runtime_error(
+            "Error: The Hive is not yet enabled on the network"
+        );
+
+    bool includeDead = false;
+    if (!request.params[0].isNull()) {
+        RPCTypeCheckArgument(request.params[0], UniValue::VBOOL);
+        includeDead = request.params[0].get_bool();
+    }
+
+    LOCK2(cs_main, pwallet->cs_wallet);
+
+    // Iterate wallet txs looking for bee creation txs (BCTs)
+    std::vector<CBeeCreationTransactionInfo> bcts = pwallet->GetBCTs(includeDead, true, consensusParams);
+    UniValue bctList(UniValue::VARR);
+
+    int totalBees = 0;
+    int totalImmature = 0;
+    int totalMature = 0;
+    int totalBlocksFound = 0;
+    CAmount totalBeeFee = 0;
+    CAmount totalRewards = 0;
+    for (std::vector<CBeeCreationTransactionInfo>::const_iterator it = bcts.begin(); it != bcts.end(); it++) {
+        CBeeCreationTransactionInfo bct = *it;
+
+        UniValue entry(UniValue::VOBJ);
+        entry.push_back(Pair("txid", bct.txid));
+        entry.push_back(Pair("time", bct.time));
+        entry.push_back(Pair("bee_count", bct.beeCount));
+        entry.push_back(Pair("community_contrib", bct.communityContrib));
+        entry.push_back(Pair("bee_status", bct.beeStatus));
+        entry.push_back(Pair("honey_address", bct.honeyAddress));
+        entry.push_back(Pair("bee_fee_paid", ValueFromAmount(bct.beeFeePaid)));
+        entry.push_back(Pair("rewards_paid", ValueFromAmount(bct.rewardsPaid)));
+        entry.push_back(Pair("profit", ValueFromAmount(bct.profit)));
+        entry.push_back(Pair("blocks_found", bct.blocksFound));
+        entry.push_back(Pair("blocks_left", bct.blocksLeft));
+
+        totalBlocksFound += bct.blocksFound;
+        totalBeeFee += bct.beeFeePaid;
+        totalRewards += bct.rewardsPaid;
+        totalBees += bct.beeCount;
+        if (bct.beeStatus == "immature")
+            totalImmature += bct.beeCount;
+        else if (bct.beeStatus == "mature")
+            totalMature += bct.beeCount;
+
+        bctList.push_back(entry);
+    }
+
+    UniValue summary(UniValue::VOBJ);
+    summary.push_back(Pair("bee_count", totalBees));
+    summary.push_back(Pair("mature_bees", totalMature));
+    summary.push_back(Pair("immature_bees", totalImmature));
+    summary.push_back(Pair("blocks_found", totalBlocksFound));
+    summary.push_back(Pair("bee_fee_paid", ValueFromAmount(totalBeeFee)));
+    summary.push_back(Pair("rewards_paid", ValueFromAmount(totalRewards)));
+    summary.push_back(Pair("profit", ValueFromAmount(totalRewards-totalBeeFee)));
+
+    UniValue jsonResults(UniValue::VOBJ);
+    jsonResults.push_back(Pair("summary", summary));
+    jsonResults.push_back(Pair("bees", bctList));
+
+    return jsonResults;
 }
 
 UniValue listaddressgroupings(const JSONRPCRequest& request)
@@ -3541,6 +3790,10 @@ extern UniValue rescanblockchain(const JSONRPCRequest& request);
 static const CRPCCommand commands[] =
 { //  category              name                        actor (function)           argNames
     //  --------------------- ------------------------    -----------------------  ----------
+    { "wallet",             "getbeecost",               &getbeecost,               {"height"} },                                            // LitecoinCash: Hive: Get bee cost for given height (defaults to tipheight)
+    { "wallet",             "createbees",               &createbees,               {"bee_count","community_contrib","honey_address"} },    // LitecoinCash: Hive: Create bee(s)
+    { "wallet",             "gethiveinfo",              &gethiveinfo,              {"include_dead"} },                                      // LitecoinCash: Hive: Get current hive info
+    { "wallet",             "getnetworkhiveinfo",       &getnetworkhiveinfo,       {} },                                                    // LitecoinCash: Hive: Get current bee populations across whole network
     { "rawtransactions",    "fundrawtransaction",       &fundrawtransaction,       {"hexstring","options","iswitness"} },
     { "hidden",             "resendwallettransactions", &resendwallettransactions, {} },
     { "wallet",             "abandontransaction",       &abandontransaction,       {"txid"} },

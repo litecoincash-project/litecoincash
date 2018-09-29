@@ -382,6 +382,15 @@ QString TransactionTableModel::formatTxType(const TransactionRecord *wtx) const
         return tr("Payment to yourself");
     case TransactionRecord::Generated:
         return tr("Mined");
+
+    // LitecoinCash: Hive: Handle additional TransactionRecord types
+    case TransactionRecord::HiveBeeCreation:
+        return tr("Hive bee creation");
+    case TransactionRecord::HiveCommunityFund:
+        return tr("Hive community fund");
+    case TransactionRecord::HiveHoney:
+        return tr("Hivemined");
+
     default:
         return QString();
     }
@@ -399,6 +408,15 @@ QVariant TransactionTableModel::txAddressDecoration(const TransactionRecord *wtx
     case TransactionRecord::SendToAddress:
     case TransactionRecord::SendToOther:
         return QIcon(":/icons/tx_output");
+
+    // LitecoinCash: Hive: Handle additional TransactionRecord types
+    case TransactionRecord::HiveBeeCreation:
+        return QIcon(":/icons/tx_hive_bct");
+    case TransactionRecord::HiveCommunityFund:
+        return QIcon(":/icons/tx_hive_cf");
+    case TransactionRecord::HiveHoney:
+        return QIcon(":/icons/tx_hive_honey");
+
     default:
         return QIcon(":/icons/tx_inout");
     }
@@ -422,6 +440,15 @@ QString TransactionTableModel::formatTxToAddress(const TransactionRecord *wtx, b
         return lookupAddress(wtx->address, tooltip) + watchAddress;
     case TransactionRecord::SendToOther:
         return QString::fromStdString(wtx->address) + watchAddress;
+
+    // LitecoinCash: Hive: Handle additional TransactionRecord types
+    case TransactionRecord::HiveBeeCreation:
+        return "Hive bee creation";
+    case TransactionRecord::HiveHoney:
+        return lookupAddress(wtx->address, tooltip);
+    case TransactionRecord::HiveCommunityFund:
+        return "Hive community fund contribution";
+
     case TransactionRecord::SendToSelf:
     default:
         return tr("(n/a)") + watchAddress;

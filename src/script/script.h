@@ -181,6 +181,8 @@ enum opcodetype
     OP_NOP9 = 0xb8,
     OP_NOP10 = 0xb9,
 
+    // LitecoinCash: Hive
+    OP_BEE = 0xbe,
 
     // template matching params
     OP_SMALLINTEGER = 0xfa,
@@ -666,6 +668,29 @@ public:
         // The default prevector::clear() does not release memory
         CScriptBase::clear();
         shrink_to_fit();
+    }
+
+    // LitecoinCash: Hive: Check if script is a Bee Creation script and optionally get the honey scriptPubKey in scriptPubKeyHoney
+    static bool IsBCTScript(CScript scriptPubKey, CScript scriptPubKeyBCF, CScript* scriptPubKeyHoney = nullptr) {
+        // Check it's big enough
+        if (scriptPubKey.size() < 52)
+            return false;
+
+        // Check for the unspendable bee creation script
+        CScript scriptPubKeyBCFCheck(&scriptPubKey[0], &scriptPubKey[25]);
+        if (scriptPubKeyBCFCheck != scriptPubKeyBCF)
+            return false;
+
+        // Check OP_RETURN OP_BEE delimiter
+        if (scriptPubKey[25] != OP_RETURN || scriptPubKey[26] != OP_BEE)
+            return false;
+
+        // Grab scriptPubKeyHoney
+        CScript localScriptPubKeyHoney(&scriptPubKey[27], &scriptPubKey[scriptPubKey.size()]);
+        if (scriptPubKeyHoney)
+            *scriptPubKeyHoney = localScriptPubKeyHoney;
+
+        return true;
     }
 };
 
