@@ -53,7 +53,7 @@ WalletModel::WalletModel(const PlatformStyle *platformStyle, CWallet *_wallet, O
     addressTableModel = new AddressTableModel(wallet, this);
     transactionTableModel = new TransactionTableModel(platformStyle, wallet, this);
     recentRequestsTableModel = new RecentRequestsTableModel(wallet, this);
-    hiveTableModel = new HiveTableModel(wallet, this);  // LitecoinCash: Hive
+    hiveTableModel = new HiveTableModel(platformStyle, wallet, this);  // LitecoinCash: Hive
 
     // This timer will be fired repeatedly to update the balance
     pollTimer = new QTimer(this);
@@ -655,11 +655,43 @@ bool WalletModel::createBees(int beeCount, bool communityContrib, QWidget *paren
     CWalletTx wtxNew;
     std::string strError;
     std::string honeyAddress;
-    if (!wallet->CreateBeeTransaction(beeCount, wtxNew, honeyAddress, communityContrib, strError, Params().GetConsensus())) {
+    CReserveKey reservekey(wallet);
+    if (!wallet->CreateBeeTransaction(beeCount, wtxNew, reservekey, honeyAddress, communityContrib, strError, Params().GetConsensus())) {
         QMessageBox::critical(parent, tr("Error"), "Bee creation error: " + QString::fromStdString(strError));
         return false;
     }
 
+    CAmount totalAmount = wtxNew.GetDebit(ISMINE_ALL) - wtxNew.GetCredit(ISMINE_ALL);
+    CAmount txFee = wtxNew.GetDebit(ISMINE_ALL) - wtxNew.tx->GetValueOut();
+
+    QString questionString = tr("Do you wish to proceed with bee creation?");
+    questionString.append("<br />");
+    questionString.append("<table style=\"text-align: left;\">");
+    questionString.append("<tr><td>");
+    questionString.append(tr("Bee count:"));
+    questionString.append("</td><td>");
+    questionString.append(QString::number(beeCount));
+    questionString.append("</td></tr><tr><td>");
+    questionString.append(tr("Total cost:"));
+    questionString.append("</td><td>");
+    questionString.append(BitcoinUnits::formatHtmlWithUnit(optionsModel->getDisplayUnit(), totalAmount));
+    questionString.append("</td></tr><tr><td colspan=\"2\">");
+    questionString.append("(including " + BitcoinUnits::formatHtmlWithUnit(optionsModel->getDisplayUnit(), txFee) + " tx fee)");
+    questionString.append("</td></tr></table>");
+    SendConfirmationDialog confirmationDialog(tr("Confirm bee creation"), questionString);
+    confirmationDialog.exec();
+    QMessageBox::StandardButton retval = (QMessageBox::StandardButton)confirmationDialog.result();
+
+    if (retval != QMessageBox::Yes)
+        return false;
+
+    CValidationState state;
+    if (!wallet->CommitTransaction(wtxNew, reservekey, g_connman.get(), state)) {
+        QMessageBox::critical(parent, tr("Error"), "Bee creation error: " + QString::fromStdString(state.GetRejectReason()));
+        return false;
+    }
+
+    QMessageBox::information(parent, tr("Success"), "Bees created! Bees will appear in your hive as soon as the transaction appears in a block.");
     return true;
 }
 

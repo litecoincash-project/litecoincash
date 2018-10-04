@@ -34,15 +34,12 @@ class HiveDialog : public QDialog
 public:
     enum ColumnWidths {
         CREATED_COLUMN_WIDTH = 100,
-        COUNT_COLUMN_WIDTH = 60,
-        STATUS_COLUMN_WIDTH = 85,
-        BLOCKS_LEFT_COLUMN_WIDTH = 65,
-        BLOCKS_FOUND_COLUMN_WIDTH = 85,
-        TIME_LEFT_COLUMN_WIDTH = 135,
-        COST_COLUMN_WIDTH = 90,
-        REWARDS_COLUMN_WIDTH = 90,
-        PROFIT_COLUMN_WIDTH = 90,
-        HIVE_COL_MIN_WIDTH = 40
+        COUNT_COLUMN_WIDTH = 80,
+        STATUS_COLUMN_WIDTH = 350,
+        COST_COLUMN_WIDTH = 135,
+        REWARDS_COLUMN_WIDTH = 135,
+        PROFIT_COLUMN_WIDTH = 135,
+        HIVE_COL_MIN_WIDTH = 80
     };
 
     explicit HiveDialog(const PlatformStyle *platformStyle, QWidget *parent = 0);
@@ -53,6 +50,8 @@ public:
 
 public Q_SLOTS:
     void updateData(bool forceGlobalSummaryUpdate = false);
+    void setBalance(const CAmount& balance, const CAmount& unconfirmedBalance, const CAmount& immatureBalance,
+                    const CAmount& watchOnlyBalance, const CAmount& watchUnconfBalance, const CAmount& watchImmatureBalance);
     
 protected:
     virtual void keyPressEvent(QKeyEvent *event);
@@ -66,7 +65,8 @@ private:
     CAmount beeCost, totalCost;
     int immature, mature, dead, blocksFound;
     CAmount rewardsPaid, cost, profit;
-    CAmount potentialRewards, projectedReturnPerBee;
+    CAmount potentialRewards;
+    CAmount currentBalance;
     int lastGlobalCheckHeight;
     virtual void resizeEvent(QResizeEvent *event);
 

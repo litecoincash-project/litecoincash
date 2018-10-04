@@ -256,29 +256,32 @@ bool GetNetworkHiveInfo(int& immatureBees, int& immatureBCTs, int& matureBees, i
             LogPrintf("! GetBeeCount: Warn: Block not available (pruned data); can't calculate network bee count.");
             return false;
         }
-        if (!ReadBlockFromDisk(block, pindexPrev, consensusParams)) {
-            LogPrintf("! GetBeeCount: Warn: Block not available (not found on disk); can't calculate network bee count.");
-            return false;
-        }
-        CAmount beeCost = GetBeeCost(pindexPrev->nHeight, consensusParams);
-        if (block.vtx.size() > 0) {
-            for(const auto& tx : block.vtx) {
-                CAmount beeFeePaid;
-                if (tx->IsBCT(consensusParams, scriptPubKeyBCF, &beeFeePaid)) {                 // If it's a BCT, total its bees
-                    if (tx->vout.size() > 1 && tx->vout[1].scriptPubKey == scriptPubKeyCF) {    // If it has a community fund contrib...
-                        CAmount donationAmount = tx->vout[1].nValue;
-                        CAmount expectedDonationAmount = (beeFeePaid + donationAmount) / consensusParams.communityContribFactor;  // ...check for valid donation amount
-                        if (donationAmount != expectedDonationAmount)
-                            continue;
-                        beeFeePaid += donationAmount;                                           // Add donation amount back to total paid
-                    }
-                    int beeCount = beeFeePaid / beeCost;
-                    if (i < consensusParams.beeGestationBlocks) {
-                        immatureBees += beeCount;
-                        immatureBCTs++;
-                    } else {
-                        matureBees += beeCount; 
-                        matureBCTs++;
+
+        if (!pindexPrev->GetBlockHeader().IsHiveMined(consensusParams)) {                          // Don't check Hivemined blocks (no BCTs will be found in them)
+            if (!ReadBlockFromDisk(block, pindexPrev, consensusParams)) {
+                LogPrintf("! GetBeeCount: Warn: Block not available (not found on disk); can't calculate network bee count.");
+                return false;
+            }
+            CAmount beeCost = GetBeeCost(pindexPrev->nHeight, consensusParams);
+            if (block.vtx.size() > 0) {
+                for(const auto& tx : block.vtx) {
+                    CAmount beeFeePaid;
+                    if (tx->IsBCT(consensusParams, scriptPubKeyBCF, &beeFeePaid)) {                 // If it's a BCT, total its bees
+                        if (tx->vout.size() > 1 && tx->vout[1].scriptPubKey == scriptPubKeyCF) {    // If it has a community fund contrib...
+                            CAmount donationAmount = tx->vout[1].nValue;
+                            CAmount expectedDonationAmount = (beeFeePaid + donationAmount) / consensusParams.communityContribFactor;  // ...check for valid donation amount
+                            if (donationAmount != expectedDonationAmount)
+                                continue;
+                            beeFeePaid += donationAmount;                                           // Add donation amount back to total paid
+                        }
+                        int beeCount = beeFeePaid / beeCost;
+                        if (i < consensusParams.beeGestationBlocks) {
+                            immatureBees += beeCount;
+                            immatureBCTs++;
+                        } else {
+                            matureBees += beeCount; 
+                            matureBCTs++;
+                        }
                     }
                 }
             }
@@ -330,7 +333,7 @@ bool CheckHiveProof(const CBlock* pblock, const Consensus::Params& consensusPara
     // Block mustn't include any BCTs
     CScript scriptPubKeyBCF = GetScriptForDestination(DecodeDestination(consensusParams.beeCreationAddress));
     if (pblock->vtx.size() > 1)
-        for (int i=1; i < pblock->vtx.size(); i++)
+        for (unsigned int i=1; i < pblock->vtx.size(); i++)
             if (pblock->vtx[i]->IsBCT(consensusParams, scriptPubKeyBCF)) {
                 LogPrintf("CheckHiveProof: Hivemined block contains BCTs!\n");
                 return false;                
@@ -439,7 +442,7 @@ bool CheckHiveProof(const CBlock* pblock, const Consensus::Params& consensusPara
 
     // Grab the BCT utxo
     bool deepDrill = false;
-    int bctFoundHeight;
+    uint32_t bctFoundHeight;
     CAmount bctValue;
     CScript bctScriptPubKey;
     {

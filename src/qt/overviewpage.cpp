@@ -276,6 +276,17 @@ void OverviewPage::updateHiveSummary() {
         ui->matureLabel->setText(QString::number(mature));
         ui->immatureLabel->setText(QString::number(immature));
         ui->blocksFoundLabel->setText(QString::number(blocksFound));
+        
+        if (dead > 0) {
+            ui->deadLabel->setText(QString::number(dead));
+            ui->deadLabel->setVisible(true);
+            ui->deadPreLabel->setVisible(true);
+            ui->deadPostLabel->setVisible(true);
+        } else {
+            ui->deadLabel->setVisible(false);
+            ui->deadPreLabel->setVisible(false);
+            ui->deadPostLabel->setVisible(false);         
+        }
     }
 }
 

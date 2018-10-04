@@ -45,7 +45,8 @@ HiveDialog::HiveDialog(const PlatformStyle *_platformStyle, QWidget *parent) :
     beeCost = totalCost = rewardsPaid = cost = profit = 0;
     immature = mature = dead = blocksFound = 0;
     lastGlobalCheckHeight = 0;
-    potentialRewards = projectedReturnPerBee = 0;
+    potentialRewards = 0;
+    currentBalance = 0;
 
     ui->globalHiveSummaryError->hide();
 }
@@ -67,6 +68,10 @@ void HiveDialog::setModel(WalletModel *_model) {
         connect(_model->getOptionsModel(), SIGNAL(displayUnitChanged(int)), this, SLOT(updateDisplayUnit()));
         updateDisplayUnit();
 
+        setBalance(_model->getBalance(), _model->getUnconfirmedBalance(), _model->getImmatureBalance(),
+                   _model->getWatchBalance(), _model->getWatchUnconfirmedBalance(), _model->getWatchImmatureBalance());
+        connect(_model, SIGNAL(balanceChanged(CAmount,CAmount,CAmount,CAmount,CAmount,CAmount)), this, SLOT(setBalance(CAmount,CAmount,CAmount,CAmount,CAmount,CAmount)));
+
         QTableView* tableView = ui->currentHiveView;
 
         tableView->verticalHeader()->hide();
@@ -78,9 +83,6 @@ void HiveDialog::setModel(WalletModel *_model) {
         tableView->setColumnWidth(HiveTableModel::Created, CREATED_COLUMN_WIDTH);        
         tableView->setColumnWidth(HiveTableModel::Count, COUNT_COLUMN_WIDTH);
         tableView->setColumnWidth(HiveTableModel::Status, STATUS_COLUMN_WIDTH);
-        tableView->setColumnWidth(HiveTableModel::BlocksLeft, BLOCKS_LEFT_COLUMN_WIDTH);
-        tableView->setColumnWidth(HiveTableModel::BlocksFound, BLOCKS_LEFT_COLUMN_WIDTH);
-        tableView->setColumnWidth(HiveTableModel::TimeLeft, TIME_LEFT_COLUMN_WIDTH);
         tableView->setColumnWidth(HiveTableModel::Cost, COST_COLUMN_WIDTH);
         tableView->setColumnWidth(HiveTableModel::Rewards, REWARDS_COLUMN_WIDTH);
         tableView->setColumnWidth(HiveTableModel::Profit, PROFIT_COLUMN_WIDTH);
@@ -95,6 +97,15 @@ void HiveDialog::setModel(WalletModel *_model) {
 
 HiveDialog::~HiveDialog() {
     delete ui;
+}
+
+void HiveDialog::setBalance(const CAmount& balance, const CAmount& unconfirmedBalance, const CAmount& immatureBalance, const CAmount& watchOnlyBalance, const CAmount& watchUnconfBalance, const CAmount& watchImmatureBalance) {
+    currentBalance = balance;
+    ui->currentBalance->setText(
+        BitcoinUnits::format(model->getOptionsModel()->getDisplayUnit(), currentBalance)
+        + " "
+        + BitcoinUnits::shortName(model->getOptionsModel()->getDisplayUnit())
+    );
 }
 
 void HiveDialog::updateData(bool forceGlobalSummaryUpdate) {
@@ -157,20 +168,13 @@ void HiveDialog::updateData(bool forceGlobalSummaryUpdate) {
             ui->globalHiveSummaryError->show();
         } else {
             ui->globalHiveSummaryError->hide();
-            ui->globalHiveSummary->show();        
-            ui->globalImmatureLabel->setText(QString::number(globalImmatureBees) + " (" + QString::number(globalImmatureBCTs) + " BCTs)");
-            ui->globalMatureLabel->setText(QString::number(globalMatureBees) + " (" + QString::number(globalMatureBCTs) + " BCTs)");
+            ui->globalHiveSummary->show();
+            ui->globalImmatureLabel->setText(QString::number(globalImmatureBees) + " (in " + QString::number(globalImmatureBCTs) + " transactions)");
+            ui->globalMatureLabel->setText(QString::number(globalMatureBees) + " (in " + QString::number(globalMatureBCTs) + " transactions)");
         }
-
-        projectedReturnPerBee = (globalMatureBees == 0) ? 0 : potentialRewards / globalMatureBees;
 
         ui->potentialRewardsLabel->setText(
             BitcoinUnits::format(model->getOptionsModel()->getDisplayUnit(), potentialRewards)
-            + " "
-            + BitcoinUnits::shortName(model->getOptionsModel()->getDisplayUnit())
-        );
-        ui->projectedReturnPerBeeLabel->setText(
-            BitcoinUnits::format(model->getOptionsModel()->getDisplayUnit(), projectedReturnPerBee)
             + " "
             + BitcoinUnits::shortName(model->getOptionsModel()->getDisplayUnit())
         );
@@ -210,8 +214,8 @@ void HiveDialog::updateDisplayUnit() {
             + " "
             + BitcoinUnits::shortName(model->getOptionsModel()->getDisplayUnit())
         );
-        ui->projectedReturnPerBeeLabel->setText(
-            BitcoinUnits::format(model->getOptionsModel()->getDisplayUnit(), projectedReturnPerBee)
+        ui->currentBalance->setText(
+            BitcoinUnits::format(model->getOptionsModel()->getDisplayUnit(), currentBalance)
             + " "
             + BitcoinUnits::shortName(model->getOptionsModel()->getDisplayUnit())
         );        
@@ -259,25 +263,6 @@ void HiveDialog::on_createBeesButton_clicked() {
             QMessageBox::critical(this, tr("Error"), tr("Insufficient balance to create bees."));
             return;
         }
-
-        QString questionString = tr("Do you wish to proceed with bee creation?");
-        questionString.append("<br />");
-        questionString.append("<table style=\"text-align: left;\">");
-        questionString.append("<tr><td>");
-        questionString.append(tr("Bee count:"));
-        questionString.append("</td><td>");
-        questionString.append(QString::number(ui->beeCountSpinner->value()));
-        questionString.append("</td></tr><tr><td>");
-        questionString.append(tr("Total cost:"));
-        questionString.append("</td><td>");
-        questionString.append(BitcoinUnits::formatHtmlWithUnit(model->getOptionsModel()->getDisplayUnit(), totalCost) + "<br />+ transaction fees");
-        questionString.append("</td></tr></table>");
-        SendConfirmationDialog confirmationDialog(tr("Confirm bee creation"), questionString, SEND_CONFIRM_DELAY, this);
-        confirmationDialog.exec();
-        QMessageBox::StandardButton retval = (QMessageBox::StandardButton)confirmationDialog.result();
-
-        if (retval != QMessageBox::Yes)
-            return;
 
         model->createBees(ui->beeCountSpinner->value(), ui->donateCommunityFundCheckbox->isChecked(), this);
     }

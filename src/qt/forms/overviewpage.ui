@@ -556,7 +556,7 @@ background-position:bottom right;}</string>
             <item row="0" column="0">
              <widget class="QLabel" name="costLabel_2">
               <property name="text">
-               <string>Cost:</string>
+               <string>Bee cost:</string>
               </property>
              </widget>
             </item>
@@ -609,7 +609,55 @@ background-position:bottom right;}</string>
                  </font>
                 </property>
                 <property name="text">
-                 <string> mature bees)</string>
+                 <string> mature</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QLabel" name="deadPreLabel">
+                <property name="font">
+                 <font>
+                  <kerning>true</kerning>
+                 </font>
+                </property>
+                <property name="text">
+                 <string>, </string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QLabel" name="deadLabel">
+                <property name="font">
+                 <font>
+                  <kerning>true</kerning>
+                 </font>
+                </property>
+                <property name="text">
+                 <string>0</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QLabel" name="deadPostLabel">
+                <property name="font">
+                 <font>
+                  <kerning>true</kerning>
+                 </font>
+                </property>
+                <property name="text">
+                 <string> dead</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QLabel" name="blocksFoundRowLabel_6">
+                <property name="font">
+                 <font>
+                  <kerning>true</kerning>
+                 </font>
+                </property>
+                <property name="text">
+                 <string>)</string>
                 </property>
                </widget>
               </item>

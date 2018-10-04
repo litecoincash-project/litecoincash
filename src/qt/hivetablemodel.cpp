@@ -7,18 +7,19 @@
 #include <qt/bitcoinunits.h>
 #include <qt/guiutil.h>
 #include <qt/optionsmodel.h>
+#include <qt/platformstyle.h>
 
 #include <clientversion.h>
 #include <streams.h>
 
 #include <util.h>
 
-HiveTableModel::HiveTableModel(CWallet *wallet, WalletModel *parent) : QAbstractTableModel(parent), walletModel(parent)
+HiveTableModel::HiveTableModel(const PlatformStyle *_platformStyle, CWallet *wallet, WalletModel *parent) : QAbstractTableModel(parent), walletModel(parent), platformStyle(_platformStyle)
 {
     Q_UNUSED(wallet);
 
     // Set column headings
-    columns << tr("Created") << tr("Bee count") << tr("Bee status") << tr("Blocks left") << tr("Mined") << tr("Estimated time left") << tr("Fee paid") << tr("Rewards earned") << tr("Profit");
+    columns << tr("Created") << tr("Bee count") << tr("Bee status & lifespan (times are approx)") << tr("Fee paid") << tr("Rewards earned") << tr("Profit");
 
     sortOrder = Qt::DescendingOrder;
     sortColumn = 0;
@@ -105,31 +106,55 @@ QVariant HiveTableModel::data(const QModelIndex &index, int role) const {
             case Status:
                 {
                     QString status = QString::fromStdString(rec->beeStatus);
+                    if (status == "dead")
+                        return "Dead";
                     if (status == "immature")
-                        return "Matures in " + QString::number(rec->blocksLeft - Params().GetConsensus().beeLifespanBlocks);
+                        status = "Matures in " + QString::number(rec->blocksLeft - Params().GetConsensus().beeLifespanBlocks) + " blocks";
                     status[0] = status[0].toUpper();
+                    status += ": " + QString::number(rec->blocksLeft) + " blocks left (" + secondsToString(rec->blocksLeft * Params().GetConsensus().nPowTargetSpacing / 2) + ")";
                     return status;
                 }
-            case BlocksLeft:
-                return QString::number(rec->blocksLeft);
-            case BlocksFound:
-                return QString::number(rec->blocksFound);
-            case TimeLeft:
-                return secondsToString(rec->blocksLeft * Params().GetConsensus().nPowTargetSpacing / 2);
             case Cost:
                 return BitcoinUnits::format(walletModel->getOptionsModel()->getDisplayUnit(), rec->beeFeePaid) + " " + BitcoinUnits::shortName(this->walletModel->getOptionsModel()->getDisplayUnit());
             case Rewards:
-                return BitcoinUnits::format(walletModel->getOptionsModel()->getDisplayUnit(), rec->rewardsPaid) + " " + BitcoinUnits::shortName(this->walletModel->getOptionsModel()->getDisplayUnit());
+                if (rec->blocksFound == 0)
+                    return "No blocks mined";
+                return BitcoinUnits::format(walletModel->getOptionsModel()->getDisplayUnit(), rec->rewardsPaid)
+                    + " " + BitcoinUnits::shortName(this->walletModel->getOptionsModel()->getDisplayUnit()) 
+                    + " (" + QString::number(rec->blocksFound) + " blocks mined)";
             case Profit:
                 return BitcoinUnits::format(walletModel->getOptionsModel()->getDisplayUnit(), rec->profit) + " " + BitcoinUnits::shortName(this->walletModel->getOptionsModel()->getDisplayUnit());                
         }
     }
     else if (role == Qt::TextAlignmentRole)
     {
-        if (index.column() == Cost || index.column() == Rewards || index.column() == Profit || index.column() == Count || index.column() == BlocksLeft || index.column() == BlocksFound)
+        if (index.column() == Status)
+            return (int)(Qt::AlignLeft|Qt::AlignVCenter);
+        else if (index.column() == Cost || index.column() == Rewards || index.column() == Profit || index.column() == Count)
             return (int)(Qt::AlignRight|Qt::AlignVCenter);
         else
             return (int)(Qt::AlignCenter|Qt::AlignVCenter);
+    }
+    else if (role == Qt::ForegroundRole)
+    {
+        const CBeeCreationTransactionInfo *rec = &list[index.row()];
+        if (rec->beeStatus == "dead")
+            return QColor(139, 0, 0);
+        if (rec->beeStatus == "immature")
+            return QColor(128, 70, 0);
+        return QColor(27, 104, 45);
+    }
+    else if (role == Qt::DecorationRole)
+    {
+        const CBeeCreationTransactionInfo *rec = &list[index.row()];
+        if (index.column() == Status) {
+            QString iconStr = ":/icons/beestatus_dead";    // Dead
+            if (rec->beeStatus == "mature")
+                iconStr = ":/icons/beestatus_mature";
+            else if (rec->beeStatus == "immature")
+                iconStr = ":/icons/beestatus_immature";                
+            return platformStyle->SingleColorIcon(iconStr);
+        }
     }
     return QVariant();
 }
@@ -164,12 +189,6 @@ bool CBeeCreationTransactionInfoLessThan::operator()(CBeeCreationTransactionInfo
             return pLeft->beeCount < pRight->beeCount;
         case HiveTableModel::Status:
             return pLeft->blocksLeft < pRight->blocksLeft;
-        case HiveTableModel::TimeLeft:
-            return pLeft->blocksLeft < pRight->blocksLeft;
-        case HiveTableModel::BlocksLeft:
-            return pLeft->blocksLeft < pRight->blocksLeft;
-        case HiveTableModel::BlocksFound:
-            return pLeft->blocksFound < pRight->blocksFound;
         case HiveTableModel::Cost:
             return pLeft->beeFeePaid < pRight->beeFeePaid;
         case HiveTableModel::Rewards:
@@ -186,5 +205,5 @@ QString HiveTableModel::secondsToString(qint64 seconds) {
     const qint64 DAY = 86400;
     qint64 days = seconds / DAY;
     QTime t = QTime(0,0).addSecs(seconds % DAY);
-    return QString("%1 days %2 hours %3 mins").arg(days).arg(t.hour()).arg(t.minute());
+    return QString("%1 days %2 hrs %3 mins").arg(days).arg(t.hour()).arg(t.minute());
 }

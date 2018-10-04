@@ -31,19 +31,16 @@ class HiveTableModel: public QAbstractTableModel
     Q_OBJECT
 
 public:
-    explicit HiveTableModel(CWallet *wallet, WalletModel *parent);
+    explicit HiveTableModel(const PlatformStyle *_platformStyle, CWallet *wallet, WalletModel *parent);
     ~HiveTableModel();
 
     enum ColumnIndex {
         Created = 0,
         Count = 1,
         Status = 2,
-        BlocksLeft = 3,
-        BlocksFound = 4,
-        TimeLeft = 5,
-        Cost = 6,
-        Rewards = 7,
-        Profit = 8,
+        Cost = 3,
+        Rewards = 4,
+        Profit = 5,
         NUMBER_OF_COLUMNS
     };
 
@@ -64,6 +61,7 @@ private:
     static QString secondsToString(qint64 seconds);
     void addBCT(const CBeeCreationTransactionInfo &bct);
 
+    const PlatformStyle *platformStyle;
     WalletModel *walletModel;
     QStringList columns;
     QList<CBeeCreationTransactionInfo> list;

@@ -990,7 +990,7 @@ public:
     OutputType TransactionChangeType(OutputType change_type, const std::vector<CRecipient>& vecSend);
 
     // LitecoinCash: Hive: Create a BCT to gestate given number of bees
-    bool CreateBeeTransaction(int beeCount, CWalletTx& wtxNew, std::string honeyAddress, bool communityContrib, std::string& strFailReason, const Consensus::Params& consensusParams);
+    bool CreateBeeTransaction(int beeCount, CWalletTx& wtxNew, CReserveKey& reservekey, std::string honeyAddress, bool communityContrib, std::string& strFailReason, const Consensus::Params& consensusParams);
 
     // LitecoinCash: Hive: Return all BCTs known by this wallet, optionally including dead bees and optionally scanning for blocks minted by bees from each BCT
     std::vector<CBeeCreationTransactionInfo> GetBCTs(bool includeDead, bool scanRewards, const Consensus::Params& consensusParams);

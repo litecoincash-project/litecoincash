@@ -2820,7 +2820,7 @@ std::vector<CBeeCreationTransactionInfo> CWallet::GetBCTs(bool includeDead, bool
 }
 
 // LitecoinCash: Hive: Create, sign and broadcast a BCT to gestate given number of bees
-bool CWallet::CreateBeeTransaction(int beeCount, CWalletTx& wtxNew, std::string honeyAddress, bool communityContrib, std::string& strFailReason, const Consensus::Params& consensusParams) {
+bool CWallet::CreateBeeTransaction(int beeCount, CWalletTx& wtxNew, CReserveKey& reservekey, std::string honeyAddress, bool communityContrib, std::string& strFailReason, const Consensus::Params& consensusParams) {
     CBlockIndex* pindexPrev = chainActive.Tip();
     assert(pindexPrev != nullptr);
 
@@ -2919,7 +2919,6 @@ bool CWallet::CreateBeeTransaction(int beeCount, CWalletTx& wtxNew, std::string 
     }
 
     // Create the BCT with our specified outputs
-    CReserveKey reservekey(this);
     CAmount feeRequired;
     int changePos = communityContrib ? 2 : 1;      // Always put any change in the last output
     std::string strError;
@@ -2929,13 +2928,6 @@ bool CWallet::CreateBeeTransaction(int beeCount, CWalletTx& wtxNew, std::string 
             strFailReason = "Error: Insufficient balance to cover bee creation fee and transaction fee";
         else
             strFailReason = "Error: Couldn't create BCT: " + strError;
-        return false;
-    }
-
-    // Send the BCT
-    CValidationState state;
-    if (!CommitTransaction(wtxNew, reservekey, g_connman.get(), state)) {
-        strFailReason = "Error: Bee creation transaction was rejected. Reason given: " + state.GetRejectReason();
         return false;
     }
 
