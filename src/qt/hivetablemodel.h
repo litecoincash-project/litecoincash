@@ -38,9 +38,10 @@ public:
         Created = 0,
         Count = 1,
         Status = 2,
-        Cost = 3,
-        Rewards = 4,
-        Profit = 5,
+        EstimatedTime = 3,
+        Cost = 4,
+        Rewards = 5,
+        Profit = 6,
         NUMBER_OF_COLUMNS
     };
 

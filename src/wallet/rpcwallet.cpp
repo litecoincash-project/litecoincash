@@ -621,10 +621,13 @@ UniValue createbees(const JSONRPCRequest& request)
 
     CWalletTx wtxNew;
     std::string strError;
-    CReserveKey reservekey(pwallet);
-    if (pwallet->CreateBeeTransaction(beeCount, wtxNew, reservekey, honeyAddress, communityContrib, strError, Params().GetConsensus())) {
+    CReserveKey reservekeyChange(pwallet);
+    CReserveKey reservekeyHoney(pwallet);
+    if (pwallet->CreateBeeTransaction(beeCount, wtxNew, reservekeyChange, reservekeyHoney, honeyAddress, communityContrib, strError, Params().GetConsensus())) {
         CValidationState state;
-        if (!pwallet->CommitTransaction(wtxNew, reservekey, g_connman.get(), state))
+        if (honeyAddress.empty()) // If not using a custom honey address, keep the honey key
+            reservekeyHoney.KeepKey();
+        if (!pwallet->CommitTransaction(wtxNew, reservekeyChange, g_connman.get(), state))
             throw JSONRPCError(RPC_WALLET_BCT_FAIL, "Error: Bee creation transaction was rejected. Reason given: " + state.GetRejectReason());
         return wtxNew.GetHash().GetHex();
     } else

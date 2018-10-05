@@ -18,6 +18,7 @@
 #include <qt/receiverequestdialog.h>
 #include <qt/hivetablemodel.h>
 #include <qt/walletmodel.h>
+#include <qt/tinypie.h>
 
 #include <QAction>
 #include <QCursor>
@@ -49,6 +50,14 @@ HiveDialog::HiveDialog(const PlatformStyle *_platformStyle, QWidget *parent) :
     currentBalance = 0;
 
     ui->globalHiveSummaryError->hide();
+
+    ui->beePopIndexPie->foregroundCol = Qt::red;
+
+    // Swap cols for hive weight pie
+    QColor temp = ui->hiveWeightPie->foregroundCol;
+    ui->hiveWeightPie->foregroundCol = ui->hiveWeightPie->backgroundCol;
+    ui->hiveWeightPie->backgroundCol = temp;
+    ui->hiveWeightPie->borderCol = palette().color(backgroundRole());
 }
 
 void HiveDialog::setClientModel(ClientModel *_clientModel) {
@@ -83,6 +92,7 @@ void HiveDialog::setModel(WalletModel *_model) {
         tableView->setColumnWidth(HiveTableModel::Created, CREATED_COLUMN_WIDTH);        
         tableView->setColumnWidth(HiveTableModel::Count, COUNT_COLUMN_WIDTH);
         tableView->setColumnWidth(HiveTableModel::Status, STATUS_COLUMN_WIDTH);
+        tableView->setColumnWidth(HiveTableModel::EstimatedTime, TIME_COLUMN_WIDTH);
         tableView->setColumnWidth(HiveTableModel::Cost, COST_COLUMN_WIDTH);
         tableView->setColumnWidth(HiveTableModel::Rewards, REWARDS_COLUMN_WIDTH);
         tableView->setColumnWidth(HiveTableModel::Profit, PROFIT_COLUMN_WIDTH);
@@ -169,8 +179,15 @@ void HiveDialog::updateData(bool forceGlobalSummaryUpdate) {
         } else {
             ui->globalHiveSummaryError->hide();
             ui->globalHiveSummary->show();
-            ui->globalImmatureLabel->setText(QString::number(globalImmatureBees) + " (in " + QString::number(globalImmatureBCTs) + " transactions)");
-            ui->globalMatureLabel->setText(QString::number(globalMatureBees) + " (in " + QString::number(globalMatureBCTs) + " transactions)");
+            if (globalImmatureBees == 0)
+                ui->globalImmatureLabel->setText("0");
+            else
+                ui->globalImmatureLabel->setText(QString::number(globalImmatureBees) + " (in " + QString::number(globalImmatureBCTs) + " transactions)");
+
+            if (globalMatureBees == 0)
+                ui->globalMatureLabel->setText("0");
+            else
+                ui->globalMatureLabel->setText(QString::number(globalMatureBees) + " (in " + QString::number(globalMatureBCTs) + " transactions)");
         }
 
         ui->potentialRewardsLabel->setText(
@@ -179,8 +196,15 @@ void HiveDialog::updateData(bool forceGlobalSummaryUpdate) {
             + BitcoinUnits::shortName(model->getOptionsModel()->getDisplayUnit())
         );
 
-        ui->localHiveWeightLabel->setText((mature == 0 || globalMatureBees == 0) ? "0" : QString::number(mature / (double)globalMatureBees, 'f', 3));
+        double hiveWeight = mature / (double)globalMatureBees;
+        ui->localHiveWeightLabel->setText((mature == 0 || globalMatureBees == 0) ? "0" : QString::number(hiveWeight, 'f', 3));
+        ui->hiveWeightPie->normalisedVal = hiveWeight;
 
+        double beePopIndex = ((beeCost * globalMatureBees) / potentialRewards) * 100.0;
+        if (beePopIndex > 200) beePopIndex = 200;
+        ui->beePopIndexLabel->setText(QString::number(beePopIndex));
+        ui->beePopIndexPie->normalisedVal = beePopIndex / 100;
+        
         lastGlobalCheckHeight = chainActive.Tip()->nHeight;
     }
 

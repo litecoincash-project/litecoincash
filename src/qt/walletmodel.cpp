@@ -655,8 +655,9 @@ bool WalletModel::createBees(int beeCount, bool communityContrib, QWidget *paren
     CWalletTx wtxNew;
     std::string strError;
     std::string honeyAddress;
-    CReserveKey reservekey(wallet);
-    if (!wallet->CreateBeeTransaction(beeCount, wtxNew, reservekey, honeyAddress, communityContrib, strError, Params().GetConsensus())) {
+    CReserveKey reservekeyChange(wallet);
+    CReserveKey reservekeyHoney(wallet);
+    if (!wallet->CreateBeeTransaction(beeCount, wtxNew, reservekeyChange, reservekeyHoney, honeyAddress, communityContrib, strError, Params().GetConsensus())) {
         QMessageBox::critical(parent, tr("Error"), "Bee creation error: " + QString::fromStdString(strError));
         return false;
     }
@@ -685,8 +686,10 @@ bool WalletModel::createBees(int beeCount, bool communityContrib, QWidget *paren
     if (retval != QMessageBox::Yes)
         return false;
 
+    reservekeyHoney.KeepKey();  // Keep the honey key (always needed; UI doesn't expose custom honey address)
+
     CValidationState state;
-    if (!wallet->CommitTransaction(wtxNew, reservekey, g_connman.get(), state)) {
+    if (!wallet->CommitTransaction(wtxNew, reservekeyChange, g_connman.get(), state)) {
         QMessageBox::critical(parent, tr("Error"), "Bee creation error: " + QString::fromStdString(state.GetRejectReason()));
         return false;
     }

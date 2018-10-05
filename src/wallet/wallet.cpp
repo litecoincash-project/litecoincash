@@ -2819,8 +2819,8 @@ std::vector<CBeeCreationTransactionInfo> CWallet::GetBCTs(bool includeDead, bool
     return bcts;
 }
 
-// LitecoinCash: Hive: Create, sign and broadcast a BCT to gestate given number of bees
-bool CWallet::CreateBeeTransaction(int beeCount, CWalletTx& wtxNew, CReserveKey& reservekey, std::string honeyAddress, bool communityContrib, std::string& strFailReason, const Consensus::Params& consensusParams) {
+// LitecoinCash: Hive: Create a BCT to gestate given number of bees
+bool CWallet::CreateBeeTransaction(int beeCount, CWalletTx& wtxNew, CReserveKey& reservekeyChange, CReserveKey& reservekeyHoney, std::string honeyAddress, bool communityContrib, std::string& strFailReason, const Consensus::Params& consensusParams) {
     CBlockIndex* pindexPrev = chainActive.Tip();
     assert(pindexPrev != nullptr);
 
@@ -2858,7 +2858,7 @@ bool CWallet::CreateBeeTransaction(int beeCount, CWalletTx& wtxNew, CReserveKey&
             TopUpKeyPool();
 
         CPubKey newKey;
-        if (!GetKeyFromPool(newKey)) {
+        if (!reservekeyHoney.GetReservedKey(newKey, true)) {
             strFailReason = "Error: Couldn't create a new pubkey";
             return false;
         }
@@ -2923,7 +2923,7 @@ bool CWallet::CreateBeeTransaction(int beeCount, CWalletTx& wtxNew, CReserveKey&
     int changePos = communityContrib ? 2 : 1;      // Always put any change in the last output
     std::string strError;
     CCoinControl coinControl;
-    if (!CreateTransaction(vecSend, wtxNew, reservekey, feeRequired, changePos, strError, coinControl, true)) {
+    if (!CreateTransaction(vecSend, wtxNew, reservekeyChange, feeRequired, changePos, strError, coinControl, true)) {
         if (totalBeeCost + feeRequired > curBalance)   // Now we know fee requirement, check balance fail again
             strFailReason = "Error: Insufficient balance to cover bee creation fee and transaction fee";
         else

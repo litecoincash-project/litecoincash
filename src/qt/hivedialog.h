@@ -35,7 +35,8 @@ public:
     enum ColumnWidths {
         CREATED_COLUMN_WIDTH = 100,
         COUNT_COLUMN_WIDTH = 80,
-        STATUS_COLUMN_WIDTH = 350,
+        STATUS_COLUMN_WIDTH = 100,
+        TIME_COLUMN_WIDTH = 250,
         COST_COLUMN_WIDTH = 135,
         REWARDS_COLUMN_WIDTH = 135,
         PROFIT_COLUMN_WIDTH = 135,
