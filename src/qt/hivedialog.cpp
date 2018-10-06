@@ -198,12 +198,12 @@ void HiveDialog::updateData(bool forceGlobalSummaryUpdate) {
 
         double hiveWeight = mature / (double)globalMatureBees;
         ui->localHiveWeightLabel->setText((mature == 0 || globalMatureBees == 0) ? "0" : QString::number(hiveWeight, 'f', 3));
-        ui->hiveWeightPie->normalisedVal = hiveWeight;
+        ui->hiveWeightPie->setValue(hiveWeight);
 
         double beePopIndex = ((beeCost * globalMatureBees) / potentialRewards) * 100.0;
         if (beePopIndex > 200) beePopIndex = 200;
         ui->beePopIndexLabel->setText(QString::number(beePopIndex));
-        ui->beePopIndexPie->normalisedVal = beePopIndex / 100;
+        ui->beePopIndexPie->setValue(beePopIndex / 100);
         
         lastGlobalCheckHeight = chainActive.Tip()->nHeight;
     }

@@ -10,7 +10,6 @@
 class TinyPie : public QWidget
 {
 public:
-    double normalisedVal;
     QColor foregroundCol;
     QColor backgroundCol;
     QColor borderCol;
@@ -18,6 +17,15 @@ public:
     explicit TinyPie(QWidget *parent=0);
 
     void paintEvent(QPaintEvent *event) Q_DECL_OVERRIDE;
+    void setValue(const double val) {
+        normalisedVal = val;
+        update();
+    }
+
+private:
+    double normalisedVal;
+    
+    QPainterPath HexPath(double scale, double centerX, double centerY);
 };
 
 #endif

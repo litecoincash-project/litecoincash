@@ -29,19 +29,28 @@ void TinyPie::paintEvent(QPaintEvent *event) {
         painter.drawPie(0, 0, width(), height(), 90 * 16, -localVal * 16 * 360);
     }
 
-    // Hex border
+    // Hex borders
     painter.setPen(QPen(borderCol, 4));
     QColor trans = Qt::black;
     trans.setAlphaF(0);
     painter.setBrush(trans);
+    QPainterPath path = HexPath(0.011, width()/2, height()/2);
+    painter.drawPath(path);
 
-    double scale = 0.0011,
-        a = 5000 * scale,
-        b = 8660 * scale,
-        centerX = width()/2,
-        centerY = height()/2;
+    painter.setPen(QPen(Qt::black, 1));
+    path = HexPath(0.009, width()/2, height()/2);
+    painter.drawPath(path);
 
-    QPainterPath path;    
+    QWidget::paintEvent(event);
+    painter.end();
+}
+
+QPainterPath TinyPie::HexPath(double scale, double centerX, double centerY) {
+    double a = 500 * scale,
+        b = 866 * scale;
+
+    QPainterPath path;
+
     path.moveTo(centerX, centerY - 2 * a);
     path.lineTo(centerX - b, centerY - a);
     path.lineTo(centerX - b, centerY + a);
@@ -49,8 +58,6 @@ void TinyPie::paintEvent(QPaintEvent *event) {
     path.lineTo(centerX + b, centerY + a);
     path.lineTo(centerX + b, centerY - a);
     path.lineTo(centerX, centerY - 2 * a);
-    painter.drawPath(path);
 
-    QWidget::paintEvent(event);
-    painter.end();
+    return path;
 }
