@@ -194,7 +194,7 @@ background-color:white;}</string>
           <property name="minimumSize">
            <size>
             <width>80</width>
-            <height>0</height>
+            <height>20</height>
            </size>
           </property>
           <property name="minimum">
@@ -606,7 +606,7 @@ background-color:white;
        <widget class="QPushButton" name="refreshGlobalSummaryButton">
         <property name="minimumSize">
          <size>
-          <width>60</width>
+          <width>75</width>
           <height>0</height>
          </size>
         </property>
@@ -652,7 +652,7 @@ background-color:white;
        <widget class="QPushButton" name="retryGlobalSummaryButton">
         <property name="minimumSize">
          <size>
-          <width>60</width>
+          <width>75</width>
           <height>0</height>
          </size>
         </property>
@@ -905,39 +905,6 @@ background-color:white;
       </widget>
      </item>
      <item>
-      <spacer name="deadLabelSpacer">
-       <property name="orientation">
-        <enum>Qt::Horizontal</enum>
-       </property>
-       <property name="sizeType">
-        <enum>QSizePolicy::Fixed</enum>
-       </property>
-       <property name="sizeHint" stdset="0">
-        <size>
-         <width>10</width>
-         <height>0</height>
-        </size>
-       </property>
-      </spacer>
-     </item>
-     <item>
-      <widget class="QLabel" name="label_4">
-       <property name="text">
-        <string>Blocks found:</string>
-       </property>
-       <property name="alignment">
-        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QLabel" name="blocksFoundLabel">
-       <property name="text">
-        <string>0</string>
-       </property>
-      </widget>
-     </item>
-     <item>
       <spacer name="horizontalSpacer_15">
        <property name="orientation">
         <enum>Qt::Horizontal</enum>
@@ -1031,6 +998,39 @@ background-color:white;
      </item>
      <item>
       <widget class="QLabel" name="profitLabel">
+       <property name="text">
+        <string>0</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <spacer name="deadLabelSpacer">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeType">
+        <enum>QSizePolicy::Fixed</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>10</width>
+         <height>0</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item>
+      <widget class="QLabel" name="label_4">
+       <property name="text">
+        <string>Blocks found:</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="blocksFoundLabel">
        <property name="text">
         <string>0</string>
        </property>

@@ -39,7 +39,6 @@ public:
         TIME_COLUMN_WIDTH = 300,
         COST_COLUMN_WIDTH = 110,
         REWARDS_COLUMN_WIDTH = 220,
-        //PROFIT_COLUMN_WIDTH = 135,
         HIVE_COL_MIN_WIDTH = 100
     };
 

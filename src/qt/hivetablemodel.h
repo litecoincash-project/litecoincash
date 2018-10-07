@@ -41,7 +41,6 @@ public:
         EstimatedTime = 3,
         Cost = 4,
         Rewards = 5,
-        //Profit = 6,
         NUMBER_OF_COLUMNS
     };
 
