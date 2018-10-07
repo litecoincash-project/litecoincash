@@ -19,7 +19,7 @@ HiveTableModel::HiveTableModel(const PlatformStyle *_platformStyle, CWallet *wal
     Q_UNUSED(wallet);
 
     // Set column headings
-    columns << tr("Created") << tr("Bee count") << tr("Bee status") << tr("Estimated time until status change") << tr("Fee paid") << tr("Rewards earned") << tr("Profit");
+    columns << tr("Created") << tr("Bee count") << tr("Bee status") << tr("Estimated time until status change") << tr("Fee paid") << tr("Rewards earned");// << tr("Profit");
 
     sortOrder = Qt::DescendingOrder;
     sortColumn = 0;
@@ -115,10 +115,8 @@ QVariant HiveTableModel::data(const QModelIndex &index, int role) const {
                     if (rec->beeStatus == "immature") {
                         int blocksTillMature = rec->blocksLeft - Params().GetConsensus().beeLifespanBlocks;
                         status = "Matures in " + QString::number(blocksTillMature) + " blocks (" + secondsToString(blocksTillMature * Params().GetConsensus().nPowTargetSpacing / 2) + ")";
-                    } else if (rec->beeStatus == "mature") {
-                        int blocksTillDeath = rec->blocksLeft - Params().GetConsensus().beeLifespanBlocks;
-                        status = "Alive for " + QString::number(blocksTillDeath) + " blocks (" + secondsToString(blocksTillDeath * Params().GetConsensus().nPowTargetSpacing / 2) + ")";
-                    }
+                    } else if (rec->beeStatus == "mature")
+                        status = "Alive for " + QString::number(rec->blocksLeft) + " blocks (" + secondsToString(rec->blocksLeft * Params().GetConsensus().nPowTargetSpacing / 2) + ")";
                     return status;
                 }
             case Cost:
@@ -129,13 +127,15 @@ QVariant HiveTableModel::data(const QModelIndex &index, int role) const {
                 return BitcoinUnits::format(walletModel->getOptionsModel()->getDisplayUnit(), rec->rewardsPaid)
                     + " " + BitcoinUnits::shortName(this->walletModel->getOptionsModel()->getDisplayUnit()) 
                     + " (" + QString::number(rec->blocksFound) + " blocks mined)";
+            /*
             case Profit:
-                return BitcoinUnits::format(walletModel->getOptionsModel()->getDisplayUnit(), rec->profit) + " " + BitcoinUnits::shortName(this->walletModel->getOptionsModel()->getDisplayUnit());                
+                return BitcoinUnits::format(walletModel->getOptionsModel()->getDisplayUnit(), rec->profit) + " " + BitcoinUnits::shortName(this->walletModel->getOptionsModel()->getDisplayUnit());*/
         }
     }
     else if (role == Qt::TextAlignmentRole)
     {
-        if (index.column() == Cost || index.column() == Rewards || index.column() == Profit || index.column() == Count)
+        //if (index.column() == Cost || index.column() == Rewards || index.column() == Profit || index.column() == Count)
+        if (index.column() == Cost || index.column() == Rewards || index.column() == Count)
             return (int)(Qt::AlignRight|Qt::AlignVCenter);
         else
             return (int)(Qt::AlignCenter|Qt::AlignVCenter);
@@ -199,8 +199,8 @@ bool CBeeCreationTransactionInfoLessThan::operator()(CBeeCreationTransactionInfo
             return pLeft->beeFeePaid < pRight->beeFeePaid;
         case HiveTableModel::Rewards:
             return pLeft->rewardsPaid < pRight->rewardsPaid;
-        case HiveTableModel::Profit:
-            return pLeft->profit < pRight->profit;
+        //case HiveTableModel::Profit:
+            //return pLeft->profit < pRight->profit;
         case HiveTableModel::Created:
         default:
             return pLeft->time < pRight->time;

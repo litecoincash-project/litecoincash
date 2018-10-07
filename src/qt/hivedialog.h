@@ -35,12 +35,12 @@ public:
     enum ColumnWidths {
         CREATED_COLUMN_WIDTH = 100,
         COUNT_COLUMN_WIDTH = 80,
-        STATUS_COLUMN_WIDTH = 100,
-        TIME_COLUMN_WIDTH = 250,
-        COST_COLUMN_WIDTH = 135,
-        REWARDS_COLUMN_WIDTH = 135,
-        PROFIT_COLUMN_WIDTH = 135,
-        HIVE_COL_MIN_WIDTH = 80
+        STATUS_COLUMN_WIDTH = 120,
+        TIME_COLUMN_WIDTH = 300,
+        COST_COLUMN_WIDTH = 110,
+        REWARDS_COLUMN_WIDTH = 220,
+        //PROFIT_COLUMN_WIDTH = 135,
+        HIVE_COL_MIN_WIDTH = 150
     };
 
     explicit HiveDialog(const PlatformStyle *platformStyle, QWidget *parent = 0);

@@ -95,10 +95,11 @@ void HiveDialog::setModel(WalletModel *_model) {
         tableView->setColumnWidth(HiveTableModel::EstimatedTime, TIME_COLUMN_WIDTH);
         tableView->setColumnWidth(HiveTableModel::Cost, COST_COLUMN_WIDTH);
         tableView->setColumnWidth(HiveTableModel::Rewards, REWARDS_COLUMN_WIDTH);
-        tableView->setColumnWidth(HiveTableModel::Profit, PROFIT_COLUMN_WIDTH);
+        //tableView->setColumnWidth(HiveTableModel::Profit, PROFIT_COLUMN_WIDTH);
 
         // Last 2 columns are set by the columnResizingFixer, when the table geometry is ready.
-        columnResizingFixer = new GUIUtil::TableViewLastColumnResizingFixer(tableView, PROFIT_COLUMN_WIDTH, HIVE_COL_MIN_WIDTH, this);
+        //columnResizingFixer = new GUIUtil::TableViewLastColumnResizingFixer(tableView, PROFIT_COLUMN_WIDTH, HIVE_COL_MIN_WIDTH, this);
+        columnResizingFixer = new GUIUtil::TableViewLastColumnResizingFixer(tableView, 200, 200, this);
 
         // Populate initial data
         updateData(true);
@@ -171,7 +172,7 @@ void HiveDialog::updateData(bool forceGlobalSummaryUpdate) {
     );
     updateTotalCostDisplay();
 
-    if (forceGlobalSummaryUpdate || chainActive.Tip()->nHeight == lastGlobalCheckHeight + 10) { // Don't update global summary every block
+    if (forceGlobalSummaryUpdate || chainActive.Tip()->nHeight >= lastGlobalCheckHeight + 10) { // Don't update global summary every block
         int globalImmatureBees, globalImmatureBCTs, globalMatureBees, globalMatureBCTs;
         if (!GetNetworkHiveInfo(globalImmatureBees, globalImmatureBCTs, globalMatureBees, globalMatureBCTs, potentialRewards, consensusParams)) {
             ui->globalHiveSummary->hide();
@@ -182,12 +183,12 @@ void HiveDialog::updateData(bool forceGlobalSummaryUpdate) {
             if (globalImmatureBees == 0)
                 ui->globalImmatureLabel->setText("0");
             else
-                ui->globalImmatureLabel->setText(QString::number(globalImmatureBees) + " (in " + QString::number(globalImmatureBCTs) + " transactions)");
+                ui->globalImmatureLabel->setText(QString::number(globalImmatureBees) + " (" + QString::number(globalImmatureBCTs) + " transactions)");
 
             if (globalMatureBees == 0)
                 ui->globalMatureLabel->setText("0");
             else
-                ui->globalMatureLabel->setText(QString::number(globalMatureBees) + " (in " + QString::number(globalMatureBCTs) + " transactions)");
+                ui->globalMatureLabel->setText(QString::number(globalMatureBees) + " (" + QString::number(globalMatureBCTs) + " transactions)");
         }
 
         ui->potentialRewardsLabel->setText(
@@ -200,9 +201,9 @@ void HiveDialog::updateData(bool forceGlobalSummaryUpdate) {
         ui->localHiveWeightLabel->setText((mature == 0 || globalMatureBees == 0) ? "0" : QString::number(hiveWeight, 'f', 3));
         ui->hiveWeightPie->setValue(hiveWeight);
 
-        double beePopIndex = ((beeCost * globalMatureBees) / potentialRewards) * 100.0;
+        double beePopIndex = ((beeCost * globalMatureBees) / (double)potentialRewards) * 100.0;
         if (beePopIndex > 200) beePopIndex = 200;
-        ui->beePopIndexLabel->setText(QString::number(beePopIndex));
+        ui->beePopIndexLabel->setText(QString::number(floor(beePopIndex)));
         ui->beePopIndexPie->setValue(beePopIndex / 100);
         
         lastGlobalCheckHeight = chainActive.Tip()->nHeight;

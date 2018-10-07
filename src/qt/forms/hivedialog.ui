@@ -510,10 +510,13 @@ background-color:white;
       <item>
        <widget class="QLabel" name="label_16">
         <property name="text">
-         <string>Bee population index: </string>
+         <string>&lt;a href=&quot;https://hive.litecoinca.sh/whitepaper.pdf&quot;&gt;&lt;span style=&quot;text-decoration: underline;&quot;&gt;Gashi index&lt;/span&gt;&lt;/a&gt;: </string>
         </property>
         <property name="alignment">
          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        </property>
+        <property name="openExternalLinks">
+         <bool>true</bool>
         </property>
        </widget>
       </item>
@@ -572,7 +575,7 @@ background-color:white;
       <item>
        <widget class="QLabel" name="label_13">
         <property name="text">
-         <string>(Global stats refresh in </string>
+         <string>(Stats refresh: </string>
         </property>
         <property name="alignment">
          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
