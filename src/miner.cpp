@@ -177,7 +177,7 @@ std::unique_ptr<CBlockTemplate> BlockAssembler::CreateNewBlock(const CScript& sc
         fIncludeBCTs = false;
 
     addPackageTxs(nPackagesSelected, nDescendantsUpdated);
-    
+
     int64_t nTime1 = GetTimeMicros();
 
     nLastBlockTx = nBlockTx;
@@ -390,8 +390,6 @@ void BlockAssembler::addPackageTxs(int &nPackagesSelected, int &nDescendantsUpda
     // mempool has a lot of entries.
     const int64_t MAX_CONSECUTIVE_FAILURES = 1000;
     int64_t nConsecutiveFailed = 0;
-
-    const Consensus::Params& consensusParams = Params().GetConsensus();         // LitecoinCash: Hive
 
     while (mi != mempool.mapTx.get<ancestor_score>().end() || !mapModifiedTx.empty())
     {
@@ -728,6 +726,6 @@ bool BusyBees(const Consensus::Params& consensusParams) {
         return false;
     }
 
-    LogPrintf("BusyBees: ** Block mined\n");    
+    LogPrintf("BusyBees: ** Block mined\n");
     return true;
 }

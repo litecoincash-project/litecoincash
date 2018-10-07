@@ -14,7 +14,7 @@
 
 #include <util.h>
 
-HiveTableModel::HiveTableModel(const PlatformStyle *_platformStyle, CWallet *wallet, WalletModel *parent) : platformStyle(_platformStyle), QAbstractTableModel(parent), walletModel(parent)
+HiveTableModel::HiveTableModel(const PlatformStyle *_platformStyle, CWallet *wallet, WalletModel *parent) : platformStyle(_platformStyle), walletModel(parent), QAbstractTableModel(parent)
 {
     Q_UNUSED(wallet);
 
