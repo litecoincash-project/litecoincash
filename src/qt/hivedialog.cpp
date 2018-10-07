@@ -99,7 +99,7 @@ void HiveDialog::setModel(WalletModel *_model) {
 
         // Last 2 columns are set by the columnResizingFixer, when the table geometry is ready.
         //columnResizingFixer = new GUIUtil::TableViewLastColumnResizingFixer(tableView, PROFIT_COLUMN_WIDTH, HIVE_COL_MIN_WIDTH, this);
-        columnResizingFixer = new GUIUtil::TableViewLastColumnResizingFixer(tableView, 200, 200, this);
+        columnResizingFixer = new GUIUtil::TableViewLastColumnResizingFixer(tableView, REWARDS_COLUMN_WIDTH, HIVE_COL_MIN_WIDTH, this);
 
         // Populate initial data
         updateData(true);

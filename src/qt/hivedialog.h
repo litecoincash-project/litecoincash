@@ -40,7 +40,7 @@ public:
         COST_COLUMN_WIDTH = 110,
         REWARDS_COLUMN_WIDTH = 220,
         //PROFIT_COLUMN_WIDTH = 135,
-        HIVE_COL_MIN_WIDTH = 150
+        HIVE_COL_MIN_WIDTH = 100
     };
 
     explicit HiveDialog(const PlatformStyle *platformStyle, QWidget *parent = 0);
