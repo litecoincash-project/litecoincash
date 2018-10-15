@@ -83,6 +83,7 @@ BitcoinGUI::BitcoinGUI(const PlatformStyle *_platformStyle, const NetworkStyle *
     labelWalletEncryptionIcon(0),
     labelWalletHDStatusIcon(0),
     connectionsControl(0),
+    hiveStatusIcon(0),          // LitecoinCash: Hive status icon
     labelBlocksIcon(0),
     progressBarLabel(0),
     progressBar(0),
@@ -202,6 +203,7 @@ BitcoinGUI::BitcoinGUI(const PlatformStyle *_platformStyle, const NetworkStyle *
     labelWalletEncryptionIcon = new QLabel();
     labelWalletHDStatusIcon = new QLabel();
     connectionsControl = new GUIUtil::ClickableLabel();
+    hiveStatusIcon = new GUIUtil::ClickableLabel();                         // LitecoinCash: Hive status icon
     labelBlocksIcon = new GUIUtil::ClickableLabel();
     if(enableWallet)
     {
@@ -214,6 +216,8 @@ BitcoinGUI::BitcoinGUI(const PlatformStyle *_platformStyle, const NetworkStyle *
     frameBlocksLayout->addStretch();
     frameBlocksLayout->addWidget(connectionsControl);
     frameBlocksLayout->addStretch();
+    frameBlocksLayout->addWidget(hiveStatusIcon);        // LitecoinCash: Hive status icon
+    frameBlocksLayout->addStretch();                     // LitecoinCash: Hive status icon
     frameBlocksLayout->addWidget(labelBlocksIcon);
     frameBlocksLayout->addStretch();
 
@@ -248,6 +252,9 @@ BitcoinGUI::BitcoinGUI(const PlatformStyle *_platformStyle, const NetworkStyle *
 
     connect(connectionsControl, SIGNAL(clicked(QPoint)), this, SLOT(toggleNetworkActive()));
 
+    // LitecoinCash: Hive: Clicking on hive status icon takes user to Hive tab
+    connect(hiveStatusIcon, SIGNAL(clicked(QPoint)), this, SLOT(gotoHivePage()));
+
     modalOverlay = new ModalOverlay(this->centralWidget());
 #ifdef ENABLE_WALLET
     if(enableWallet) {
@@ -256,6 +263,8 @@ BitcoinGUI::BitcoinGUI(const PlatformStyle *_platformStyle, const NetworkStyle *
         connect(progressBar, SIGNAL(clicked(QPoint)), this, SLOT(showModalOverlay()));
     }
 #endif
+
+    updateHiveStatusIcon(":/icons/hivestatus_disabled", "The Hive is not enabled on the network");
 }
 
 BitcoinGUI::~BitcoinGUI()
@@ -590,7 +599,7 @@ void BitcoinGUI::setWalletActionsEnabled(bool enabled)
     usedReceivingAddressesAction->setEnabled(enabled);
     openAction->setEnabled(enabled);
     hiveAction->setEnabled(enabled);                // LitecoinCash: Hive page
-    importPrivateKeyAction->setEnabled(enabled);    // LitecoinCash: Key import helper    
+    importPrivateKeyAction->setEnabled(enabled);    // LitecoinCash: Key import helper
 }
 
 void BitcoinGUI::createTrayIcon(const NetworkStyle *networkStyle)
@@ -770,6 +779,14 @@ void BitcoinGUI::updateNetworkState()
     connectionsControl->setToolTip(tooltip);
 
     connectionsControl->setPixmap(platformStyle->SingleColorIcon(icon).pixmap(STATUSBAR_ICONSIZE,STATUSBAR_ICONSIZE));
+}
+
+// LitecoinCash: Hive: Update the hive status icon
+void BitcoinGUI::updateHiveStatusIcon(QString icon, QString tooltip) {
+    QPixmap pixmap;
+    pixmap.load(icon);
+    hiveStatusIcon->setPixmap(pixmap.scaled(STATUSBAR_ICONSIZE,STATUSBAR_ICONSIZE));
+    hiveStatusIcon->setToolTip(tooltip);
 }
 
 void BitcoinGUI::setNumConnections(int count)

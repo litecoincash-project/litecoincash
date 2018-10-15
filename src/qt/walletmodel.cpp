@@ -401,6 +401,15 @@ HiveTableModel *WalletModel::getHiveTableModel()
     return hiveTableModel;
 }
 
+// LitecoinCash: Hive
+bool WalletModel::isHiveEnabled()
+{
+    if (!wallet)
+        return false;
+
+    return IsHiveEnabled(chainActive.Tip(), Params().GetConsensus());
+}
+
 WalletModel::EncryptionStatus WalletModel::getEncryptionStatus() const
 {
     if(!wallet->IsCrypted())
@@ -528,18 +537,29 @@ void WalletModel::unsubscribeFromCoreSignals()
 }
 
 // WalletModel::UnlockContext implementation
-WalletModel::UnlockContext WalletModel::requestUnlock()
+WalletModel::UnlockContext WalletModel::requestUnlock(bool hiveOnly)
 {
     bool was_locked = getEncryptionStatus() == Locked;
+
+    // LitecoinCash: Hive: Support unlock for hive mining only
+    if ((!was_locked) && fWalletUnlockHiveMiningOnly)
+    {
+       setWalletLocked(true);
+       was_locked = getEncryptionStatus() == Locked;
+    }
+
     if(was_locked)
     {
         // Request UI to unlock wallet
-        Q_EMIT requireUnlock();
+		if (hiveOnly)
+			Q_EMIT requireUnlockHive();
+		else
+			Q_EMIT requireUnlock();
     }
     // If wallet is still locked, unlock was failed or cancelled, mark context as invalid
     bool valid = getEncryptionStatus() != Locked;
 
-    return UnlockContext(this, valid, was_locked);
+    return UnlockContext(this, valid, was_locked && !fWalletUnlockHiveMiningOnly); // LitecoinCash: Hive: Support unlock for hive mining only
 }
 
 WalletModel::UnlockContext::UnlockContext(WalletModel *_wallet, bool _valid, bool _relock):

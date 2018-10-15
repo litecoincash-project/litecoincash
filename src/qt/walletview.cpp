@@ -113,6 +113,9 @@ void WalletView::setBitcoinGUI(BitcoinGUI *gui)
 
         // Connect HD enabled state signal 
         connect(this, SIGNAL(hdEnabledStatusChanged(int)), gui, SLOT(setHDStatus(int)));
+
+        // LitecoinCash: Hive: Connect hive status update signal
+        connect(hivePage, SIGNAL(hiveStatusIconChanged(QString, QString)), gui, SLOT(updateHiveStatusIcon(QString, QString)));
     }
 }
 
@@ -156,6 +159,9 @@ void WalletView::setWalletModel(WalletModel *_walletModel)
 
         // Ask for passphrase if needed
         connect(_walletModel, SIGNAL(requireUnlock()), this, SLOT(unlockWallet()));
+		
+		// LitecoinCash: Hive: Ask for passphrase if needed hive only
+        connect(_walletModel, SIGNAL(requireUnlockHive()), this, SLOT(unlockWalletHive()));
 
         // Show progress dialog
         connect(_walletModel, SIGNAL(showProgress(QString,int)), this, SLOT(showProgress(QString,int)));
@@ -296,6 +302,20 @@ void WalletView::unlockWallet()
     if (walletModel->getEncryptionStatus() == WalletModel::Locked)
     {
         AskPassphraseDialog dlg(AskPassphraseDialog::Unlock, this);
+        dlg.setModel(walletModel);
+        dlg.exec();
+    }
+}
+
+// LitecoinCash: Hive: Unlock wallet just for hive
+void WalletView::unlockWalletHive()
+{
+    if(!walletModel)
+        return;
+    // Unlock wallet when requested by wallet model
+    if (walletModel->getEncryptionStatus() == WalletModel::Locked)
+    {
+        AskPassphraseDialog dlg(AskPassphraseDialog::UnlockHiveMining, this);
         dlg.setModel(walletModel);
         dlg.exec();
     }

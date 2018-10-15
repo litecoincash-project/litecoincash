@@ -62,7 +62,7 @@ std::string DecodeDumpString(const std::string &str) {
     for (unsigned int pos = 0; pos < str.length(); pos++) {
         unsigned char c = str[pos];
         if (c == '%' && pos+2 < str.length()) {
-            c = (((str[pos+1]>>6)*9+((str[pos+1]-'0')&15)) << 4) | 
+            c = (((str[pos+1]>>6)*9+((str[pos+1]-'0')&15)) << 4) |
                 ((str[pos+2]>>6)*9+((str[pos+2]-'0')&15));
             pos += 2;
         }
@@ -151,6 +151,8 @@ UniValue importprivkey(const JSONRPCRequest& request)
         bool fGood = vchSecret.SetString(strSecret);
 
         if (!fGood) throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Invalid private key encoding");
+        if(fWalletUnlockHiveMiningOnly)        // LitecoinCash: Hive: Support unlocking wallets for hive only
+            throw JSONRPCError(RPC_WALLET_UNLOCK_NEEDED, "Wallet is unlocked for hive mining only.");
 
         CKey key = vchSecret.GetKey();
         if (!key.IsValid()) throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Private key outside allowed range");
@@ -648,9 +650,10 @@ UniValue dumpprivkey(const JSONRPCRequest& request)
 
     std::string strAddress = request.params[0].get_str();
     CTxDestination dest = DecodeDestination(strAddress);
-    if (!IsValidDestination(dest)) {
+    if (!IsValidDestination(dest))
         throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Invalid LitecoinCash address");
-    }
+    if(fWalletUnlockHiveMiningOnly)        // LitecoinCash: Hive: Support unlocking wallets for hive only
+        throw JSONRPCError(RPC_WALLET_UNLOCK_NEEDED, "Wallet is unlocked for hive mining only.");
     auto keyid = GetKeyForDestination(*pwallet, dest);
     if (keyid.IsNull()) {
         throw JSONRPCError(RPC_TYPE_ERROR, "Address does not refer to a key");

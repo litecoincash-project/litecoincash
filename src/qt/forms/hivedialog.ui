@@ -201,7 +201,7 @@ background-color:white;}</string>
            <number>1</number>
           </property>
           <property name="maximum">
-           <number>99999</number>
+           <number>9999999</number>
           </property>
          </widget>
         </item>
@@ -305,12 +305,45 @@ background-color:white;}</string>
             <height>0</height>
            </size>
           </property>
+          <property name="toolTip">
+           <string>Create bees now. You will be shown a confirmation dialogue including final transaction fees.</string>
+          </property>
           <property name="text">
            <string>Create bees</string>
           </property>
           <property name="icon">
            <iconset resource="../bitcoin.qrc">
             <normaloff>:/icons/bee</normaloff>:/icons/bee</iconset>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="releaseSwarmButton">
+          <property name="minimumSize">
+           <size>
+            <width>100</width>
+            <height>0</height>
+           </size>
+          </property>
+          <property name="font">
+           <font>
+            <weight>75</weight>
+            <bold>true</bold>
+           </font>
+          </property>
+          <property name="toolTip">
+           <string>Click to unlock your wallet so that your bees can work. Note this only unlocks the wallet for hivemining; you must
+still fully unlock it to send funds.</string>
+          </property>
+          <property name="styleSheet">
+           <string notr="true">color:red;</string>
+          </property>
+          <property name="text">
+           <string>WALLET IS LOCKED: Unlock for hive mining</string>
+          </property>
+          <property name="icon">
+           <iconset resource="../bitcoin.qrc">
+            <normaloff>:/icons/warning</normaloff>:/icons/warning</iconset>
           </property>
          </widget>
         </item>
@@ -410,6 +443,9 @@ background-color:white;
       </property>
       <item>
        <widget class="QLabel" name="label_6">
+        <property name="toolTip">
+         <string>The total number of immature bees across the whole network</string>
+        </property>
         <property name="text">
          <string>Immature bees: </string>
         </property>
@@ -420,6 +456,9 @@ background-color:white;
       </item>
       <item>
        <widget class="QLabel" name="globalImmatureLabel">
+        <property name="toolTip">
+         <string>The total number of immature bees across the whole network</string>
+        </property>
         <property name="text">
          <string>0</string>
         </property>
@@ -443,6 +482,9 @@ background-color:white;
       </item>
       <item>
        <widget class="QLabel" name="label_12">
+        <property name="toolTip">
+         <string>The total number of mature bees across the whole network</string>
+        </property>
         <property name="text">
          <string>Mature bees: </string>
         </property>
@@ -453,6 +495,9 @@ background-color:white;
       </item>
       <item>
        <widget class="QLabel" name="globalMatureLabel">
+        <property name="toolTip">
+         <string>The total number of mature bees across the whole network</string>
+        </property>
         <property name="text">
          <string>0</string>
         </property>
@@ -476,6 +521,9 @@ background-color:white;
       </item>
       <item>
        <widget class="QLabel" name="label_11">
+        <property name="toolTip">
+         <string>The total block rewards available on the network over the lifespan of a single bee</string>
+        </property>
         <property name="text">
          <string>Honey pot: </string>
         </property>
@@ -486,6 +534,9 @@ background-color:white;
       </item>
       <item>
        <widget class="QLabel" name="potentialRewardsLabel">
+        <property name="toolTip">
+         <string>The total block rewards available on the network over the lifespan of a single bee</string>
+        </property>
         <property name="text">
          <string>0</string>
         </property>
@@ -509,6 +560,11 @@ background-color:white;
       </item>
       <item>
        <widget class="QLabel" name="label_16">
+        <property name="toolTip">
+         <string>The Gashi Index is a measure of network bee population. At a value of 100,
+the network is saturated with the maximum number of bees that are expected
+to make back their cost. At values below 100, it is expected at all bees will be profitable.</string>
+        </property>
         <property name="text">
          <string>&lt;a href=&quot;https://hive.litecoinca.sh/whitepaper.pdf&quot;&gt;&lt;span style=&quot;text-decoration: underline;&quot;&gt;Gashi index&lt;/span&gt;&lt;/a&gt;: </string>
         </property>
@@ -522,6 +578,11 @@ background-color:white;
       </item>
       <item>
        <widget class="QLabel" name="beePopIndexLabel">
+        <property name="toolTip">
+         <string>The Gashi Index is a measure of network bee population. At a value of 100,
+the network is saturated with the maximum number of bees that are expected
+to make back their cost. At values below 100, it is expected at all bees will be profitable.</string>
+        </property>
         <property name="text">
          <string>0</string>
         </property>
@@ -557,6 +618,11 @@ background-color:white;
           <height>20</height>
          </size>
         </property>
+        <property name="toolTip">
+         <string>The Gashi Index is a measure of network bee population. At a value of 100,
+the network is saturated with the maximum number of bees that are expected
+to make back their cost. At values below 100, it is expected at all bees will be profitable.</string>
+        </property>
        </widget>
       </item>
       <item>
@@ -574,6 +640,9 @@ background-color:white;
       </item>
       <item>
        <widget class="QLabel" name="label_13">
+        <property name="toolTip">
+         <string>Global network hive stats are automatically refreshed every 10 blocks</string>
+        </property>
         <property name="text">
          <string>(Stats refresh: </string>
         </property>
@@ -594,6 +663,9 @@ background-color:white;
       </item>
       <item>
        <widget class="QLabel" name="label_15">
+        <property name="toolTip">
+         <string>Global network hive stats are automatically refreshed every 10 blocks</string>
+        </property>
         <property name="text">
          <string> blocks) </string>
         </property>
@@ -609,6 +681,9 @@ background-color:white;
           <width>75</width>
           <height>0</height>
          </size>
+        </property>
+        <property name="toolTip">
+         <string>Refresh global hive stats now</string>
         </property>
         <property name="text">
          <string>Refresh now</string>
@@ -655,6 +730,9 @@ background-color:white;
           <width>75</width>
           <height>0</height>
          </size>
+        </property>
+        <property name="toolTip">
+         <string>Attempt to generate global network hive stats now</string>
         </property>
         <property name="text">
          <string>Generate Now</string>
@@ -739,7 +817,7 @@ background-color:white;
         <enum>Qt::StrongFocus</enum>
        </property>
        <property name="toolTip">
-        <string>If ticked, your Hive display and summary will include bees that have expired as well as bees that are currently living.</string>
+        <string>If ticked, your hive display and summary will include bees that have expired as well as bees that are currently living.</string>
        </property>
        <property name="text">
         <string>Include dead bees</string>
@@ -774,6 +852,11 @@ background-color:white;
     <layout class="QHBoxLayout" name="yourHiveSummary">
      <item>
       <widget class="QLabel" name="label_14">
+       <property name="toolTip">
+        <string>Hive Weight = is your hive population / global hive population. 
+This represents how much of the global hive you control as well as
+your hive's chance of mining any given hivemineable block.</string>
+       </property>
        <property name="text">
         <string>Hive weight:</string>
        </property>
@@ -784,6 +867,11 @@ background-color:white;
      </item>
      <item>
       <widget class="QLabel" name="localHiveWeightLabel">
+       <property name="toolTip">
+        <string>Hive Weight = is your hive population / global hive population. 
+This represents how much of the global hive you control as well as
+your hive's chance of mining any given hivemineable block.</string>
+       </property>
        <property name="text">
         <string>0</string>
        </property>
@@ -802,6 +890,11 @@ background-color:white;
          <width>20</width>
          <height>20</height>
         </size>
+       </property>
+       <property name="toolTip">
+        <string>Hive Weight = is your hive population / global hive population. 
+This represents how much of the global hive you control as well as
+your hive's chance of mining any given hivemineable block.</string>
        </property>
       </widget>
      </item>
@@ -823,6 +916,9 @@ background-color:white;
      </item>
      <item>
       <widget class="QLabel" name="label">
+       <property name="toolTip">
+        <string>Current number of immature bees in your hive</string>
+       </property>
        <property name="text">
         <string>Immature:</string>
        </property>
@@ -833,6 +929,9 @@ background-color:white;
      </item>
      <item>
       <widget class="QLabel" name="immatureLabel">
+       <property name="toolTip">
+        <string>Current number of immature bees in your hive</string>
+       </property>
        <property name="text">
         <string>0</string>
        </property>
@@ -856,6 +955,9 @@ background-color:white;
      </item>
      <item>
       <widget class="QLabel" name="label_3">
+       <property name="toolTip">
+        <string>Current number of mature bees in your hive</string>
+       </property>
        <property name="text">
         <string>Mature:</string>
        </property>
@@ -866,6 +968,9 @@ background-color:white;
      </item>
      <item>
       <widget class="QLabel" name="matureLabel">
+       <property name="toolTip">
+        <string>Current number of mature bees in your hive</string>
+       </property>
        <property name="text">
         <string>0</string>
        </property>
@@ -889,6 +994,9 @@ background-color:white;
      </item>
      <item>
       <widget class="QLabel" name="deadTitleLabel">
+       <property name="toolTip">
+        <string>Current number of dead bees in your hive</string>
+       </property>
        <property name="text">
         <string>Dead:</string>
        </property>
@@ -899,6 +1007,9 @@ background-color:white;
      </item>
      <item>
       <widget class="QLabel" name="deadLabel">
+       <property name="toolTip">
+        <string>Current number of dead bees in your hive</string>
+       </property>
        <property name="text">
         <string>0</string>
        </property>
@@ -921,7 +1032,49 @@ background-color:white;
       </spacer>
      </item>
      <item>
+      <widget class="QLabel" name="label_4">
+       <property name="toolTip">
+        <string>The number of blocks hivemined by your bees</string>
+       </property>
+       <property name="text">
+        <string>Blocks found:</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="blocksFoundLabel">
+       <property name="toolTip">
+        <string>The number of blocks hivemined by your bees</string>
+       </property>
+       <property name="text">
+        <string>0</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <spacer name="deadLabelSpacer">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeType">
+        <enum>QSizePolicy::Fixed</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>20</width>
+         <height>0</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item>
       <widget class="QLabel" name="label_10">
+       <property name="toolTip">
+        <string>Total bee cost of your hive</string>
+       </property>
        <property name="text">
         <string>Cost:</string>
        </property>
@@ -932,6 +1085,9 @@ background-color:white;
      </item>
      <item>
       <widget class="QLabel" name="costLabel">
+       <property name="toolTip">
+        <string>Total bee cost of your hive</string>
+       </property>
        <property name="text">
         <string>0</string>
        </property>
@@ -955,6 +1111,9 @@ background-color:white;
      </item>
      <item>
       <widget class="QLabel" name="label_5">
+       <property name="toolTip">
+        <string>Total block rewards earned by your bees</string>
+       </property>
        <property name="text">
         <string>Rewards:</string>
        </property>
@@ -965,6 +1124,9 @@ background-color:white;
      </item>
      <item>
       <widget class="QLabel" name="rewardsPaidLabel">
+       <property name="toolTip">
+        <string>Total block rewards earned by your bees</string>
+       </property>
        <property name="text">
         <string>0</string>
        </property>
@@ -988,6 +1150,9 @@ background-color:white;
      </item>
      <item>
       <widget class="QLabel" name="label_7">
+       <property name="toolTip">
+        <string>Total profit made by your bees</string>
+       </property>
        <property name="text">
         <string>Profit:</string>
        </property>
@@ -998,39 +1163,9 @@ background-color:white;
      </item>
      <item>
       <widget class="QLabel" name="profitLabel">
-       <property name="text">
-        <string>0</string>
+       <property name="toolTip">
+        <string>Total profit made by your bees</string>
        </property>
-      </widget>
-     </item>
-     <item>
-      <spacer name="deadLabelSpacer">
-       <property name="orientation">
-        <enum>Qt::Horizontal</enum>
-       </property>
-       <property name="sizeType">
-        <enum>QSizePolicy::Fixed</enum>
-       </property>
-       <property name="sizeHint" stdset="0">
-        <size>
-         <width>10</width>
-         <height>0</height>
-        </size>
-       </property>
-      </spacer>
-     </item>
-     <item>
-      <widget class="QLabel" name="label_4">
-       <property name="text">
-        <string>Blocks found:</string>
-       </property>
-       <property name="alignment">
-        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QLabel" name="blocksFoundLabel">
        <property name="text">
         <string>0</string>
        </property>

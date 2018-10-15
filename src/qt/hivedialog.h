@@ -52,6 +52,10 @@ public Q_SLOTS:
     void updateData(bool forceGlobalSummaryUpdate = false);
     void setBalance(const CAmount& balance, const CAmount& unconfirmedBalance, const CAmount& immatureBalance,
                     const CAmount& watchOnlyBalance, const CAmount& watchUnconfBalance, const CAmount& watchImmatureBalance);
+    void setEncryptionStatus(int status);
+
+Q_SIGNALS:
+    void hiveStatusIconChanged(QString icon, QString tooltip);    
     
 protected:
     virtual void keyPressEvent(QKeyEvent *event);
@@ -79,6 +83,7 @@ private Q_SLOTS:
     void updateDisplayUnit();
     void on_retryGlobalSummaryButton_clicked();
     void on_refreshGlobalSummaryButton_clicked();
+    void on_releaseSwarmButton_clicked();
 };
 
 #endif // BITCOIN_QT_HIVEDIALOG_H

@@ -84,6 +84,7 @@ private:
     QLabel *labelWalletEncryptionIcon;
     QLabel *labelWalletHDStatusIcon;
     QLabel *connectionsControl;
+    QLabel *hiveStatusIcon;             // LitecoinCash: Hive status icon
     QLabel *labelBlocksIcon;
     QLabel *progressBarLabel;
     QProgressBar *progressBar;
@@ -172,6 +173,9 @@ public Q_SLOTS:
     */
     void message(const QString &title, const QString &message, unsigned int style, bool *ret = nullptr);
 
+    // LitecoinCash: Hive: Update hive status icon
+    void updateHiveStatusIcon(QString icon, QString tooltip);
+    
 #ifdef ENABLE_WALLET
     /** Set the encryption status as shown in the UI.
        @param[in] status            current encryption status

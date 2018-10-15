@@ -87,6 +87,9 @@ void EnsureWalletIsUnlocked(CWallet * const pwallet)
     if (pwallet->IsLocked()) {
         throw JSONRPCError(RPC_WALLET_UNLOCK_NEEDED, "Error: Please enter the wallet passphrase with walletpassphrase first.");
     }
+    if (fWalletUnlockHiveMiningOnly) {
+        throw JSONRPCError(RPC_WALLET_UNLOCK_NEEDED, "Error: Wallet is unlocked for hive mining only, please enter the wallet passphrase with walletpassphrase first.");
+    }
 }
 
 void WalletTxToJSON(const CWalletTx& wtx, UniValue& entry)
@@ -621,6 +624,9 @@ UniValue createbees(const JSONRPCRequest& request)
 
     CWalletTx wtxNew;
     std::string strError;
+	
+	EnsureWalletIsUnlocked(pwallet);
+	
     CReserveKey reservekeyChange(pwallet);
     CReserveKey reservekeyHoney(pwallet);
     if (pwallet->CreateBeeTransaction(beeCount, wtxNew, reservekeyChange, reservekeyHoney, honeyAddress, communityContrib, strError, Params().GetConsensus())) {
@@ -699,6 +705,7 @@ UniValue gethiveinfo(const JSONRPCRequest& request)
             "        bee_fee_paid,             (numeric) Total bee creation fees (in " + CURRENCY_UNIT + ")\n"
             "        rewards_paid,             (numeric) Total rewards paid (in " + CURRENCY_UNIT + ")\n"
             "        profit,                   (numeric) Total rewards paid (in " + CURRENCY_UNIT + ")\n"
+            "        \"warnings\"                (string) Warnings; empty if no warnings\n"
             "    },\n"
             "    bees: [\n"
             "        {\n"
@@ -706,7 +713,7 @@ UniValue gethiveinfo(const JSONRPCRequest& request)
             "            time,                 (numeric) Timestamp of block containing the bee creation transaction (only present once tx is in a block)\n"
             "            bee_count,            (numeric) The number of bees created\n"
             "            community_contrib,    (boolean) If true, indicates that a portion of the bee creation fee was paid to the community fund\n"
-            "            \"bee_status\",         (string) immature | mature | dead. Only mature bees are capable of minting\n"
+            "            \"bee_status\",         (string) immature | mature | dead. Only mature bees are capable of mining\n"
             "            \"honey_address\",      (string) The address which will receive block rewards for blocks minted by the bees\n"
             "            bee_fee_paid,         (numeric) Total bee creation fee (in " + CURRENCY_UNIT + ")\n"
             "            rewards_paid,         (numeric) The amount of block rewards earned by the bees (in " + CURRENCY_UNIT + ")\n"
@@ -784,7 +791,8 @@ UniValue gethiveinfo(const JSONRPCRequest& request)
     summary.push_back(Pair("bee_fee_paid", ValueFromAmount(totalBeeFee)));
     summary.push_back(Pair("rewards_paid", ValueFromAmount(totalRewards)));
     summary.push_back(Pair("profit", ValueFromAmount(totalRewards-totalBeeFee)));
-
+    summary.push_back(Pair("warnings", pwallet->IsLocked()? "Wallet is locked and must be unlocked to mine" : ""));
+            
     UniValue jsonResults(UniValue::VOBJ);
     jsonResults.push_back(Pair("summary", summary));
     jsonResults.push_back(Pair("bees", bctList));
@@ -2570,6 +2578,12 @@ static void LockWallet(CWallet* pWallet)
     pWallet->Lock();
 }
 
+// LitecoinCash: Hive: Callback to set the wallet back to unlocked only for hive on walletpassphrase timeout
+static void SetHiveOnly()
+{
+	fWalletUnlockHiveMiningOnly = true;
+}
+
 UniValue walletpassphrase(const JSONRPCRequest& request)
 {
     CWallet * const pwallet = GetWalletForJSONRPCRequest(request);
@@ -2583,7 +2597,7 @@ UniValue walletpassphrase(const JSONRPCRequest& request)
             "\nStores the wallet decryption key in memory for 'timeout' seconds.\n"
             "This is needed prior to performing transactions related to private keys such as sending litecoincash\n"
             "\nArguments:\n"
-            "1. \"passphrase\"     (string, required) The wallet passphrase\n"
+            "1. \"passphrase\"       (string, required) The wallet passphrase\n"
             "2. timeout            (numeric, required) The time to keep the decryption key in seconds. Limited to at most 1073741824 (2^30) seconds.\n"
             "                                          Any value greater than 1073741824 seconds will be set to 1073741824 seconds.\n"
             "\nNote:\n"
@@ -2625,6 +2639,13 @@ UniValue walletpassphrase(const JSONRPCRequest& request)
         nSleepTime = (int64_t)1 << 30;
     }
 
+	// LitecoinCash: Hive: Support locked wallets
+	bool wasUnLockedHiveOnly = false;
+	if (!pwallet->IsLocked() && fWalletUnlockHiveMiningOnly) {
+		pwallet->Lock();
+		wasUnLockedHiveOnly = true;
+	}
+	
     if (strWalletPass.length() > 0)
     {
         if (!pwallet->Unlock(strWalletPass)) {
@@ -2637,9 +2658,75 @@ UniValue walletpassphrase(const JSONRPCRequest& request)
             "Stores the wallet decryption key in memory for <timeout> seconds.");
 
     pwallet->TopUpKeyPool();
+	
+	fWalletUnlockHiveMiningOnly = false;	
+	
+	// LitecoinCash: Hive: Support locked wallets
+	if (!wasUnLockedHiveOnly) {
+		pwallet->nRelockTime = GetTime() + nSleepTime;
+		RPCRunLater(strprintf("lockwallet(%s)", pwallet->GetName()), boost::bind(LockWallet, pwallet), nSleepTime);
+	} else {
+		RPCRunLater(strprintf("sethiveonly(%s)", pwallet->GetName()), boost::bind(SetHiveOnly), nSleepTime);
+	}
+	
+    return NullUniValue;
+}
 
-    pwallet->nRelockTime = GetTime() + nSleepTime;
-    RPCRunLater(strprintf("lockwallet(%s)", pwallet->GetName()), boost::bind(LockWallet, pwallet), nSleepTime);
+
+// LitecoinCash: Hive: Unlock wallet for hiving only (Prevent trivial sendmoney attack if user OS account compromised)
+UniValue walletpassphrasehiveonly(const JSONRPCRequest& request)
+{
+    CWallet * const pwallet = GetWalletForJSONRPCRequest(request);
+    if (!EnsureWalletIsAvailable(pwallet, request.fHelp)) {
+        return NullUniValue;
+    }
+
+    if (request.fHelp || request.params.size() != 1) {
+        throw std::runtime_error(
+            "walletpassphrasehiveonly \"passphrase\"\n"
+            "\nStores the wallet decryption key in memory indefinitely for hive mining use only.\n"
+            "This is needed to enable the hive mining thread to run. Performing other transactions related to\n" 
+			"private keys such as sending litecoincash, is not enabled and will require you to run\n"
+			"walletpassphrase separately.\n"
+            "\nArguments:\n"
+            "1. \"passphrase\"       (string, required) The wallet passphrase\n"
+            
+            "\nExamples:\n"
+            "\nUnlock the wallet for hive mining only\n"
+            + HelpExampleCli("walletpassphrasehiveonly", "\"my pass phrase\"") +
+            "\nAs json rpc call\n"
+            + HelpExampleRpc("walletpassphrasehiveonly", "\"my pass phrase\"")
+        );
+    }
+
+    LOCK2(cs_main, pwallet->cs_wallet);
+
+    if (request.fHelp)
+        return true;
+    if (!pwallet->IsCrypted()) {
+        throw JSONRPCError(RPC_WALLET_WRONG_ENC_STATE, "Error: running with an unencrypted wallet, but walletpassphrasehiveonly was called.");
+    }
+
+    // Note that the walletpassphrase is stored in request.params[0] which is not mlock()ed
+    SecureString strWalletPass;
+    strWalletPass.reserve(100);
+    // TODO: get rid of this .c_str() by implementing SecureString::operator=(std::string)
+    // Alternately, find a way to make request.params[0] mlock()'d to begin with.
+    strWalletPass = request.params[0].get_str().c_str();
+
+    if (strWalletPass.length() > 0)
+    {
+        if (!pwallet->Unlock(strWalletPass)) {
+            throw JSONRPCError(RPC_WALLET_PASSPHRASE_INCORRECT, "Error: The wallet passphrase entered was incorrect.");
+        }
+    }
+    else
+        throw std::runtime_error(
+            "walletpassphrasehiveonly <passphrase>\n"
+            "Stores the wallet decryption key in memory indefinitely for hive mining use only.");
+
+    pwallet->TopUpKeyPool();
+	fWalletUnlockHiveMiningOnly = true;
 
     return NullUniValue;
 }
@@ -3850,6 +3937,7 @@ static const CRPCCommand commands[] =
     { "wallet",             "walletlock",               &walletlock,               {} },
     { "wallet",             "walletpassphrasechange",   &walletpassphrasechange,   {"oldpassphrase","newpassphrase"} },
     { "wallet",             "walletpassphrase",         &walletpassphrase,         {"passphrase","timeout"} },
+	{ "wallet",             "walletpassphrasehiveonly", &walletpassphrasehiveonly, {"passphrase"} },
     { "wallet",             "removeprunedfunds",        &removeprunedfunds,        {"txid"} },
     { "wallet",             "rescanblockchain",         &rescanblockchain,         {"start_height", "stop_height"} },
 

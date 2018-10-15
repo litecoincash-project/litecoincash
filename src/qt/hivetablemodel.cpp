@@ -14,7 +14,7 @@
 
 #include <util.h>
 
-HiveTableModel::HiveTableModel(const PlatformStyle *_platformStyle, CWallet *wallet, WalletModel *parent) : platformStyle(_platformStyle), walletModel(parent), QAbstractTableModel(parent)
+HiveTableModel::HiveTableModel(const PlatformStyle *_platformStyle, CWallet *wallet, WalletModel *parent) : platformStyle(_platformStyle), QAbstractTableModel(parent), walletModel(parent)
 {
     Q_UNUSED(wallet);
 
@@ -131,9 +131,9 @@ QVariant HiveTableModel::data(const QModelIndex &index, int role) const {
     }
     else if (role == Qt::TextAlignmentRole)
     {
-        if (index.column() == Cost && rec->blocksFound == 0)
+        /*if (index.column() == Rewards && rec->blocksFound == 0)
             return (int)(Qt::AlignCenter|Qt::AlignVCenter);
-        else if (index.column() == Cost || index.column() == Rewards || index.column() == Count)
+        else*/ if (index.column() == Cost || index.column() == Rewards || index.column() == Count)
             return (int)(Qt::AlignRight|Qt::AlignVCenter);
         else
             return (int)(Qt::AlignCenter|Qt::AlignVCenter);
@@ -141,6 +141,15 @@ QVariant HiveTableModel::data(const QModelIndex &index, int role) const {
     else if (role == Qt::ForegroundRole)
     {
         const CBeeCreationTransactionInfo *rec = &list[index.row()];
+
+        if (index.column() == Rewards) {
+            if (rec->blocksFound == 0)
+                return QColor(139, 0, 0);
+            if (rec->profit < 0)
+                return QColor(128, 70, 0);
+            return QColor(27, 104, 45);
+        }
+
         if (rec->beeStatus == "dead")
             return QColor(139, 0, 0);
         if (rec->beeStatus == "immature")

@@ -193,7 +193,7 @@ public:
         void CopyFrom(const UnlockContext& rhs);
     };
 
-    UnlockContext requestUnlock();
+    UnlockContext requestUnlock(bool hiveOnly=false);
 
     bool getPubKey(const CKeyID &address, CPubKey& vchPubKeyOut) const;
     bool IsSpendable(const CTxDestination& dest) const;
@@ -212,6 +212,7 @@ public:
 
     void getBCTs(std::vector<CBeeCreationTransactionInfo>& vBeeCreationTransactions, bool includeDeadBees);     // LitecoinCash: Hive
     bool createBees(int beeCount, bool communityContrib, QWidget *parent);                                      // LitecoinCash: Hive
+    bool isHiveEnabled();                                                                                       // LitecoinCash: Hive
 
     bool transactionCanBeAbandoned(uint256 hash) const;
     bool abandonTransaction(uint256 hash) const;
@@ -269,6 +270,9 @@ Q_SIGNALS:
     // It is valid behaviour for listeners to keep the wallet locked after this signal;
     // this means that the unlocking failed or was cancelled.
     void requireUnlock();
+
+	// LitecoinCash: Hive: Signal emitted when a wallet needs to be unlocked for hive only
+	void requireUnlockHive();
 
     // Fired when a message should be reported to the user
     void message(const QString &title, const QString &message, unsigned int style);

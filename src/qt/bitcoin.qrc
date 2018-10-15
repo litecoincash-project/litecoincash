@@ -54,6 +54,11 @@
         <file alias="beestatus_immature">res/icons/beestatus_immature.png</file>
         <file alias="beestatus_crown">res/icons/beestatus_crown.png</file>
         <file alias="beestatus_dead">res/icons/beestatus_dead.png</file>
+        <file alias="hivestatus_disabled">res/icons/hivestatus_disabled.png</file>
+        <file alias="hivestatus_clear">res/icons/hivestatus_clear.png</file>
+        <file alias="hivestatus_red">res/icons/hivestatus_red.png</file>
+        <file alias="hivestatus_orange">res/icons/hivestatus_orange.png</file>
+        <file alias="hivestatus_green">res/icons/hivestatus_green.png</file>
         <file alias="hive_background_flash">res/icons/hive_background_flash.png</file>
         <file alias="presentationlogo">res/icons/presentationlogo.png</file>
         <file alias="presentationlogofade">res/icons/presentationlogo-fade.png</file>

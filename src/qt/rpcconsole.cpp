@@ -72,7 +72,8 @@ const QStringList historyFilter = QStringList()
     << "signrawtransaction"
     << "walletpassphrase"
     << "walletpassphrasechange"
-    << "encryptwallet";
+    << "encryptwallet"
+	<< "walletpassphrasehiveonly";	// LitecoinCash: Hive: Locked wallet hive unlock
 
 }
 

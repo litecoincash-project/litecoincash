@@ -1750,7 +1750,7 @@ bool AppInitMain()
 
     // ********************************************************* Step 12: finished
 
-    // LitecoinCash: Hive: Start the minting thread
+    // LitecoinCash: Hive: Start the mining thread
 #ifdef ENABLE_WALLET
     threadGroup.create_thread(boost::bind(&BeeKeeper, boost::cref(chainparams)));
 #endif

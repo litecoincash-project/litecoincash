@@ -106,6 +106,9 @@ public Q_SLOTS:
     void changePassphrase();
     /** Ask for passphrase to unlock wallet temporarily */
     void unlockWallet();
+	
+	// LitecoinCash: Unlock wallet just for hive
+	void unlockWalletHive();
 
     // LitecoinCash: Key import helper
     void importPrivateKey();

@@ -2697,6 +2697,8 @@ OutputType CWallet::TransactionChangeType(OutputType change_type, const std::vec
     return g_address_type;
 }
 
+bool fWalletUnlockHiveMiningOnly = false;  // LitecoinCash: Hive: Unlock for hive mining purposes only.
+
 // LitecoinCash: Hive: Return all BCTs known by this wallet, optionally including dead bees and optionally scanning for blocks minted by bees from each BCT
 std::vector<CBeeCreationTransactionInfo> CWallet::GetBCTs(bool includeDead, bool scanRewards, const Consensus::Params& consensusParams) {
     std::vector<CBeeCreationTransactionInfo> bcts;
@@ -2828,13 +2830,13 @@ bool CWallet::CreateBeeTransaction(int beeCount, CWalletTx& wtxNew, CReserveKey&
         strFailReason = "Error: The Hive has not yet been activated on the network";
         return false;
     }
-
+	
     // Sanity check beeCount
     if (beeCount < 1) {
         strFailReason = "Error: At least 1 bee must be created";
         return false;
     }
-
+	
     // Check available balance (note: can't check fee at this point because we don't know the tx size)
     CAmount beeCost = GetBeeCost(chainActive.Height(), consensusParams);
     CAmount curBalance = GetAvailableBalance();
@@ -2854,7 +2856,7 @@ bool CWallet::CreateBeeTransaction(int beeCount, CWalletTx& wtxNew, CReserveKey&
     // Create a new honey address for future coinbase rewards if needed
     CTxDestination destinationFCA;
     if (honeyAddress.empty()) {
-        if (IsLocked())
+        if (!IsLocked())
             TopUpKeyPool();
 
         CPubKey newKey;

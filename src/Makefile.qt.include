@@ -335,6 +335,11 @@ RES_ICONS = \
   qt/res/icons/beestatus_immature.png \
   qt/res/icons/beestatus_crown.png \
   qt/res/icons/beestatus_dead.png \
+  qt/res/icons/hivestatus_disabled.png \
+  qt/res/icons/hivestatus_clear.png \
+  qt/res/icons/hivestatus_red.png \
+  qt/res/icons/hivestatus_orange.png \
+  qt/res/icons/hivestatus_green.png \
   qt/res/icons/hive_background_flash.png \
   qt/res/icons/presentationlogo.png \
   qt/res/icons/presentationlogo-fade.png \

@@ -77,9 +77,12 @@ void HiveDialog::setModel(WalletModel *_model) {
         connect(_model->getOptionsModel(), SIGNAL(displayUnitChanged(int)), this, SLOT(updateDisplayUnit()));
         updateDisplayUnit();
 
-        setBalance(_model->getBalance(), _model->getUnconfirmedBalance(), _model->getImmatureBalance(),
-                   _model->getWatchBalance(), _model->getWatchUnconfirmedBalance(), _model->getWatchImmatureBalance());
+        setBalance(_model->getBalance(), _model->getUnconfirmedBalance(), _model->getImmatureBalance(), _model->getWatchBalance(), _model->getWatchUnconfirmedBalance(), _model->getWatchImmatureBalance());
         connect(_model, SIGNAL(balanceChanged(CAmount,CAmount,CAmount,CAmount,CAmount,CAmount)), this, SLOT(setBalance(CAmount,CAmount,CAmount,CAmount,CAmount,CAmount)));
+        
+        if (_model->getEncryptionStatus() != WalletModel::Locked)
+            ui->releaseSwarmButton->hide();
+        connect(_model, SIGNAL(encryptionStatusChanged(int)), this, SLOT(setEncryptionStatus(int)));
 
         QTableView* tableView = ui->currentHiveView;
 
@@ -89,7 +92,7 @@ void HiveDialog::setModel(WalletModel *_model) {
         tableView->setAlternatingRowColors(true);
         tableView->setSelectionBehavior(QAbstractItemView::SelectRows);
         tableView->setSelectionMode(QAbstractItemView::ContiguousSelection);
-        tableView->setColumnWidth(HiveTableModel::Created, CREATED_COLUMN_WIDTH);        
+        tableView->setColumnWidth(HiveTableModel::Created, CREATED_COLUMN_WIDTH);
         tableView->setColumnWidth(HiveTableModel::Count, COUNT_COLUMN_WIDTH);
         tableView->setColumnWidth(HiveTableModel::Status, STATUS_COLUMN_WIDTH);
         tableView->setColumnWidth(HiveTableModel::EstimatedTime, TIME_COLUMN_WIDTH);
@@ -117,6 +120,19 @@ void HiveDialog::setBalance(const CAmount& balance, const CAmount& unconfirmedBa
         + " "
         + BitcoinUnits::shortName(model->getOptionsModel()->getDisplayUnit())
     );
+}
+
+void HiveDialog::setEncryptionStatus(int status) {
+    switch(status) {
+        case WalletModel::Unencrypted:
+        case WalletModel::Unlocked:
+            ui->releaseSwarmButton->hide();
+            break;
+        case WalletModel::Locked:
+            ui->releaseSwarmButton->show();
+            break;
+    }
+    updateData();
 }
 
 void HiveDialog::updateData(bool forceGlobalSummaryUpdate) {
@@ -162,6 +178,31 @@ void HiveDialog::updateData(bool forceGlobalSummaryUpdate) {
             ui->deadTitleLabel->show();
             ui->deadLabelSpacer->changeSize(ui->immatureLabelSpacer->geometry().width(), 0, QSizePolicy::Fixed, QSizePolicy::Fixed);
         }
+
+        // Set icon and tooltip for tray icon
+        QString tooltip, icon;
+        if (!model->isHiveEnabled()) {
+            tooltip = "The Hive is not enabled on the network";
+            icon = ":/icons/hivestatus_disabled";
+        } else {
+            if (mature + immature == 0) {
+                tooltip = "No live bees currently in wallet";
+                icon = ":/icons/hivestatus_clear";
+            } else if (mature == 0) {
+                tooltip = "Only immature bees currently in wallet";
+                icon = ":/icons/hivestatus_orange";
+            } else {
+                if (model->getEncryptionStatus() == WalletModel::Locked) {
+                    tooltip = "WARNING: Bees mature but not mining because wallet is locked";
+                    icon = ":/icons/hivestatus_red";
+                } else {
+                    tooltip = "Bees mature and mining";
+                    icon = ":/icons/hivestatus_green";
+                }
+            }
+        }
+        // Now update bitcoingui
+        Q_EMIT hiveStatusIconChanged(icon, tooltip);
     }
 
     beeCost = GetBeeCost(chainActive.Tip()->nHeight, consensusParams);
@@ -282,13 +323,23 @@ void HiveDialog::on_refreshGlobalSummaryButton_clicked() {
     updateData(true);
 }
 
+void HiveDialog::on_releaseSwarmButton_clicked() {
+    if(model)
+        model->requestUnlock(true);
+}
+
 void HiveDialog::on_createBeesButton_clicked() {
     if (model) {
         if (totalCost > model->getBalance()) {
             QMessageBox::critical(this, tr("Error"), tr("Insufficient balance to create bees."));
             return;
         }
-
+		WalletModel::UnlockContext ctx(model->requestUnlock());
+		if(!ctx.isValid())
+		{
+			// Unlock wallet was cancelled
+			return;
+		}
         model->createBees(ui->beeCountSpinner->value(), ui->donateCommunityFundCheckbox->isChecked(), this);
     }
 }

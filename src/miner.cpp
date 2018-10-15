@@ -565,7 +565,7 @@ bool BusyBees(const Consensus::Params& consensusParams) {
 
     // Sanity checks
     if (!IsHiveEnabled(pindexPrev, consensusParams)) {
-        LogPrint(BCLog::HIVE, "BusyBees: Skipping hive check: The Hive is not enabled on the network.\n");
+        LogPrint(BCLog::HIVE, "BusyBees: Skipping hive check: The Hive is not enabled on the network\n");
         return false;
     }
     if(!g_connman) {
@@ -590,6 +590,10 @@ bool BusyBees(const Consensus::Params& consensusParams) {
     CWallet * const pwallet = GetWalletForJSONRPCRequest(request);
     if (!EnsureWalletIsAvailable(pwallet, true)) {
         LogPrint(BCLog::HIVE, "BusyBees: Skipping hive check (wallet unavailable)\n");
+        return false;
+    }
+    if (pwallet->IsLocked()) {
+        LogPrint(BCLog::HIVE, "BusyBees: Skipping hive check, wallet is locked\n");
         return false;
     }
 
@@ -652,8 +656,6 @@ bool BusyBees(const Consensus::Params& consensusParams) {
     uint32_t bctHeight;
     {   // Don't lock longer than needed
         LOCK2(cs_main, pwallet->cs_wallet);
-
-        EnsureWalletIsUnlocked(pwallet);
 
         CTxDestination dest = DecodeDestination(bestBct.honeyAddress);
         if (!IsValidDestination(dest)) {
