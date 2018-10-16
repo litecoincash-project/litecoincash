@@ -19,6 +19,8 @@
 #include <validation.h>         // LitecoinCash: Hive
 #include <utilstrencodings.h>   // LitecoinCash: Hive
 
+BeePopGraphPoint beePopGraph[12000];       // LitecoinCash: Hive
+
 // LitecoinCash: DarkGravity V3 (https://github.com/dashpay/dash/blob/master/src/pow.cpp#L82)
 // By Evan Duffield <evan@dash.org>
 unsigned int DarkGravityWave(const CBlockIndex* pindexLast, const CBlockHeader *pblock, const Consensus::Params& params)
@@ -236,12 +238,22 @@ unsigned int GetNextHiveWorkRequired(const CBlockIndex* pindexLast, const Consen
 }
 
 // LitecoinCash: Hive: Get count of all live and gestating BCTs on the network
-bool GetNetworkHiveInfo(int& immatureBees, int& immatureBCTs, int& matureBees, int& matureBCTs, CAmount& potentialLifespanRewards, const Consensus::Params& consensusParams) {
+bool GetNetworkHiveInfo(int& immatureBees, int& immatureBCTs, int& matureBees, int& matureBCTs, CAmount& potentialLifespanRewards, const Consensus::Params& consensusParams, bool recalcGraph) {
+    int totalBeeLifespan = consensusParams.beeLifespanBlocks + consensusParams.beeGestationBlocks;
     immatureBees = immatureBCTs = matureBees = matureBCTs = 0;
     
     CBlockIndex* pindexPrev = chainActive.Tip();
     assert(pindexPrev != nullptr);
+    int tipHeight = pindexPrev->nHeight;
     potentialLifespanRewards = (consensusParams.beeLifespanBlocks * GetBlockSubsidy(pindexPrev->nHeight, consensusParams)) / consensusParams.hiveBlockSpacingTarget;
+
+    if (recalcGraph) {
+        for (int i = 0; i < totalBeeLifespan; i++) {
+            beePopGraph[i].block = tipHeight + i;
+            beePopGraph[i].immaturePop = 0;
+            beePopGraph[i].maturePop = 0;
+        }
+    }
 
     if (IsInitialBlockDownload())   // Refuse if we're downloading
         return false;
@@ -251,7 +263,7 @@ bool GetNetworkHiveInfo(int& immatureBees, int& immatureBCTs, int& matureBees, i
     CScript scriptPubKeyBCF = GetScriptForDestination(DecodeDestination(consensusParams.beeCreationAddress));
     CScript scriptPubKeyCF = GetScriptForDestination(DecodeDestination(consensusParams.hiveCommunityAddress));
 
-    for (int i = 0; i < consensusParams.beeGestationBlocks + consensusParams.beeLifespanBlocks; i++) {
+    for (int i = 0; i < totalBeeLifespan; i++) {
         if (fHavePruned && !(pindexPrev->nStatus & BLOCK_HAVE_DATA) && pindexPrev->nTx > 0) {
             LogPrintf("! GetBeeCount: Warn: Block not available (pruned data); can't calculate network bee count.");
             return false;
@@ -262,7 +274,8 @@ bool GetNetworkHiveInfo(int& immatureBees, int& immatureBCTs, int& matureBees, i
                 LogPrintf("! GetBeeCount: Warn: Block not available (not found on disk); can't calculate network bee count.");
                 return false;
             }
-            CAmount beeCost = GetBeeCost(pindexPrev->nHeight, consensusParams);
+            int blockHeight = pindexPrev->nHeight;
+            CAmount beeCost = GetBeeCost(blockHeight, consensusParams);
             if (block.vtx.size() > 0) {
                 for(const auto& tx : block.vtx) {
                     CAmount beeFeePaid;
@@ -281,6 +294,22 @@ bool GetNetworkHiveInfo(int& immatureBees, int& immatureBCTs, int& matureBees, i
                         } else {
                             matureBees += beeCount; 
                             matureBCTs++;
+                        }
+
+                        // Add these bees to pop graph
+                        if (recalcGraph) {
+                            int beeStart = blockHeight + consensusParams.beeGestationBlocks;
+                            int beeStop = beeStart + consensusParams.beeLifespanBlocks;
+                            beeStart -= tipHeight;
+                            beeStop -= tipHeight;
+                            for (int j = beeStart; j < beeStop; j++) {
+                                if (j > 0 && j < totalBeeLifespan) {
+                                    if (i < consensusParams.beeGestationBlocks)
+                                        beePopGraph[j].immaturePop += beeCount;
+                                    else
+                                        beePopGraph[j].maturePop += beeCount;
+                                }
+                            }
                         }
                     }
                 }

@@ -150,6 +150,7 @@ QT_MOC_CPP = \
   qt/moc_bantablemodel.cpp \
   qt/moc_bitcoinaddressvalidator.cpp \
   qt/moc_bitcoinamountfield.cpp \
+  qt/moc_qcustomplot.cpp \
   qt/moc_bitcoingui.cpp \
   qt/moc_bitcoinunits.cpp \
   qt/moc_callback.cpp \
@@ -221,6 +222,7 @@ BITCOIN_QT_H = \
   qt/bantablemodel.h \
   qt/bitcoinaddressvalidator.h \
   qt/bitcoinamountfield.h \
+  qt/qcustomplot.h \
   qt/tinypie.h \
   qt/bitcoingui.h \
   qt/bitcoinunits.h \
@@ -335,6 +337,7 @@ RES_ICONS = \
   qt/res/icons/beestatus_immature.png \
   qt/res/icons/beestatus_crown.png \
   qt/res/icons/beestatus_dead.png \
+  qt/res/icons/refresh.png \
   qt/res/icons/hivestatus_disabled.png \
   qt/res/icons/hivestatus_clear.png \
   qt/res/icons/hivestatus_red.png \
@@ -350,6 +353,7 @@ BITCOIN_QT_BASE_CPP = \
   qt/bantablemodel.cpp \
   qt/bitcoinaddressvalidator.cpp \
   qt/bitcoinamountfield.cpp \
+  qt/qcustomplot.cpp \
   qt/tinypie.cpp \
   qt/bitcoingui.cpp \
   qt/bitcoinunits.cpp \

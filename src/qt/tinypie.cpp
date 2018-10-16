@@ -4,8 +4,8 @@
 
 TinyPie::TinyPie(QWidget *parent) : QWidget(parent) {
     normalisedVal = 0;
-    foregroundCol = QColor(247,213,33);
-    backgroundCol = QColor(42,182,67);
+    foregroundCol = QColor(247, 213, 33);
+    backgroundCol = QColor(42, 182, 67);
     borderCol = Qt::white;
 }
 

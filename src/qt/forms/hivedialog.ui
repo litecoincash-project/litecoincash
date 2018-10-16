@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>923</width>
-    <height>555</height>
+    <width>1000</width>
+    <height>592</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -343,7 +343,7 @@ still fully unlock it to send funds.</string>
           </property>
           <property name="icon">
            <iconset resource="../bitcoin.qrc">
-            <normaloff>:/icons/warning</normaloff>:/icons/warning</iconset>
+            <normaloff>:/icons/lock_closed</normaloff>:/icons/lock_closed</iconset>
           </property>
          </widget>
         </item>
@@ -412,24 +412,67 @@ still fully unlock it to send funds.</string>
     </spacer>
    </item>
    <item>
-    <widget class="QLabel" name="globalNetworkHiveTitleLabel">
-     <property name="font">
-      <font>
-       <weight>75</weight>
-       <bold>true</bold>
-      </font>
-     </property>
-     <property name="text">
-      <string>Global Network Hive</string>
-     </property>
-    </widget>
+    <layout class="QHBoxLayout" name="yourHiveHeader_2">
+     <item>
+      <widget class="QLabel" name="globalNetworkHiveTitleLabel">
+       <property name="font">
+        <font>
+         <weight>75</weight>
+         <bold>true</bold>
+        </font>
+       </property>
+       <property name="text">
+        <string>Global Network Hive</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <spacer name="horizontalSpacer_20">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>0</width>
+         <height>0</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item>
+      <widget class="QCheckBox" name="showAdvancedStatsCheckbox">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>1000</width>
+         <height>16777215</height>
+        </size>
+       </property>
+       <property name="focusPolicy">
+        <enum>Qt::StrongFocus</enum>
+       </property>
+       <property name="toolTip">
+        <string>If ticked, advanced global network hive stats will be displayed</string>
+       </property>
+       <property name="text">
+        <string>Show bee population graph</string>
+       </property>
+       <property name="checked">
+        <bool>false</bool>
+       </property>
+      </widget>
+     </item>
+    </layout>
    </item>
    <item>
     <widget class="QFrame" name="globalHiveSummary">
      <property name="styleSheet">
-      <string notr="true">#globalHiveSummary {
-background-color:white;
-}</string>
+      <string notr="true">#globalHiveSummary {background-color:white;}</string>
      </property>
      <property name="frameShape">
       <enum>QFrame::StyledPanel</enum>
@@ -437,256 +480,306 @@ background-color:white;
      <property name="frameShadow">
       <enum>QFrame::Sunken</enum>
      </property>
-     <layout class="QHBoxLayout" name="horizontalLayout">
+     <layout class="QVBoxLayout" name="verticalLayout_2">
       <property name="spacing">
        <number>0</number>
       </property>
+      <property name="leftMargin">
+       <number>0</number>
+      </property>
+      <property name="topMargin">
+       <number>0</number>
+      </property>
+      <property name="rightMargin">
+       <number>0</number>
+      </property>
+      <property name="bottomMargin">
+       <number>0</number>
+      </property>
       <item>
-       <widget class="QLabel" name="label_6">
-        <property name="toolTip">
-         <string>The total number of immature bees across the whole network</string>
+       <widget class="QFrame" name="globalHiveSummaryTextRow">
+        <property name="styleSheet">
+         <string notr="true"/>
         </property>
-        <property name="text">
-         <string>Immature bees: </string>
+        <property name="frameShape">
+         <enum>QFrame::StyledPanel</enum>
         </property>
-        <property name="alignment">
-         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        <property name="frameShadow">
+         <enum>QFrame::Raised</enum>
         </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QLabel" name="globalImmatureLabel">
-        <property name="toolTip">
-         <string>The total number of immature bees across the whole network</string>
-        </property>
-        <property name="text">
-         <string>0</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <spacer name="immatureLabelSpacer_2">
-        <property name="orientation">
-         <enum>Qt::Horizontal</enum>
-        </property>
-        <property name="sizeType">
-         <enum>QSizePolicy::Fixed</enum>
-        </property>
-        <property name="sizeHint" stdset="0">
-         <size>
-          <width>10</width>
-          <height>0</height>
-         </size>
-        </property>
-       </spacer>
-      </item>
-      <item>
-       <widget class="QLabel" name="label_12">
-        <property name="toolTip">
-         <string>The total number of mature bees across the whole network</string>
-        </property>
-        <property name="text">
-         <string>Mature bees: </string>
-        </property>
-        <property name="alignment">
-         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QLabel" name="globalMatureLabel">
-        <property name="toolTip">
-         <string>The total number of mature bees across the whole network</string>
-        </property>
-        <property name="text">
-         <string>0</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <spacer name="immatureLabelSpacer_3">
-        <property name="orientation">
-         <enum>Qt::Horizontal</enum>
-        </property>
-        <property name="sizeType">
-         <enum>QSizePolicy::Fixed</enum>
-        </property>
-        <property name="sizeHint" stdset="0">
-         <size>
-          <width>10</width>
-          <height>0</height>
-         </size>
-        </property>
-       </spacer>
-      </item>
-      <item>
-       <widget class="QLabel" name="label_11">
-        <property name="toolTip">
-         <string>The total block rewards available on the network over the lifespan of a single bee</string>
-        </property>
-        <property name="text">
-         <string>Honey pot: </string>
-        </property>
-        <property name="alignment">
-         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QLabel" name="potentialRewardsLabel">
-        <property name="toolTip">
-         <string>The total block rewards available on the network over the lifespan of a single bee</string>
-        </property>
-        <property name="text">
-         <string>0</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <spacer name="immatureLabelSpacer_5">
-        <property name="orientation">
-         <enum>Qt::Horizontal</enum>
-        </property>
-        <property name="sizeType">
-         <enum>QSizePolicy::Fixed</enum>
-        </property>
-        <property name="sizeHint" stdset="0">
-         <size>
-          <width>10</width>
-          <height>0</height>
-         </size>
-        </property>
-       </spacer>
-      </item>
-      <item>
-       <widget class="QLabel" name="label_16">
-        <property name="toolTip">
-         <string>The Gashi Index is a measure of network bee population. At a value of 100,
+        <layout class="QHBoxLayout" name="horizontalLayout">
+         <property name="spacing">
+          <number>0</number>
+         </property>
+         <item>
+          <widget class="QLabel" name="label_6">
+           <property name="toolTip">
+            <string>The total number of immature bees across the whole network</string>
+           </property>
+           <property name="text">
+            <string>Immature bees: </string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLabel" name="globalImmatureLabel">
+           <property name="toolTip">
+            <string>The total number of immature bees across the whole network</string>
+           </property>
+           <property name="text">
+            <string>0</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <spacer name="immatureLabelSpacer_2">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeType">
+            <enum>QSizePolicy::Fixed</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>10</width>
+             <height>0</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+         <item>
+          <widget class="QLabel" name="label_12">
+           <property name="toolTip">
+            <string>The total number of mature bees across the whole network</string>
+           </property>
+           <property name="text">
+            <string>Mature bees: </string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLabel" name="globalMatureLabel">
+           <property name="toolTip">
+            <string>The total number of mature bees across the whole network</string>
+           </property>
+           <property name="text">
+            <string>0</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <spacer name="immatureLabelSpacer_3">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeType">
+            <enum>QSizePolicy::Fixed</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>10</width>
+             <height>0</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+         <item>
+          <widget class="QLabel" name="label_11">
+           <property name="toolTip">
+            <string>The total block rewards available on the network over the lifespan of a single bee</string>
+           </property>
+           <property name="text">
+            <string>Honey pot: </string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLabel" name="potentialRewardsLabel">
+           <property name="toolTip">
+            <string>The total block rewards available on the network over the lifespan of a single bee</string>
+           </property>
+           <property name="text">
+            <string>0</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <spacer name="immatureLabelSpacer_5">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeType">
+            <enum>QSizePolicy::Fixed</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>10</width>
+             <height>0</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+         <item>
+          <widget class="QLabel" name="label_16">
+           <property name="toolTip">
+            <string>The Gashi Index is a measure of network bee population. At a value of 100,
 the network is saturated with the maximum number of bees that are expected
 to make back their cost. At values below 100, it is expected at all bees will be profitable.</string>
-        </property>
-        <property name="text">
-         <string>&lt;a href=&quot;https://hive.litecoinca.sh/whitepaper.pdf&quot;&gt;&lt;span style=&quot;text-decoration: underline;&quot;&gt;Gashi index&lt;/span&gt;&lt;/a&gt;: </string>
-        </property>
-        <property name="alignment">
-         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-        </property>
-        <property name="openExternalLinks">
-         <bool>true</bool>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QLabel" name="beePopIndexLabel">
-        <property name="toolTip">
-         <string>The Gashi Index is a measure of network bee population. At a value of 100,
+           </property>
+           <property name="text">
+            <string>&lt;a href=&quot;https://hive.litecoinca.sh/whitepaper.pdf&quot;&gt;&lt;span style=&quot;text-decoration: underline;&quot;&gt;Gashi index&lt;/span&gt;&lt;/a&gt;: </string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+           </property>
+           <property name="openExternalLinks">
+            <bool>true</bool>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLabel" name="beePopIndexLabel">
+           <property name="toolTip">
+            <string>The Gashi Index is a measure of network bee population. At a value of 100,
 the network is saturated with the maximum number of bees that are expected
 to make back their cost. At values below 100, it is expected at all bees will be profitable.</string>
-        </property>
-        <property name="text">
-         <string>0</string>
-        </property>
+           </property>
+           <property name="text">
+            <string>0</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <spacer name="immatureLabelSpacer_6">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeType">
+            <enum>QSizePolicy::Fixed</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>10</width>
+             <height>0</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+         <item>
+          <widget class="TinyPie" name="beePopIndexPie" native="true">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="minimumSize">
+            <size>
+             <width>20</width>
+             <height>20</height>
+            </size>
+           </property>
+           <property name="toolTip">
+            <string>The Gashi Index is a measure of network bee population. At a value of 100,
+the network is saturated with the maximum number of bees that are expected
+to make back their cost. At values below 100, it is expected at all bees will be profitable.</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <spacer name="horizontalSpacer_12">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>0</width>
+             <height>0</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+         <item>
+          <widget class="QLabel" name="label_13">
+           <property name="toolTip">
+            <string>Global network hive stats are automatically refreshed every 10 blocks</string>
+           </property>
+           <property name="text">
+            <string>(Stats refresh: </string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLabel" name="blocksTillGlobalRefresh">
+           <property name="text">
+            <string>10</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLabel" name="label_15">
+           <property name="toolTip">
+            <string>Global network hive stats are automatically refreshed every 10 blocks</string>
+           </property>
+           <property name="text">
+            <string> blocks) </string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="refreshGlobalSummaryButton">
+           <property name="minimumSize">
+            <size>
+             <width>75</width>
+             <height>0</height>
+            </size>
+           </property>
+           <property name="toolTip">
+            <string>Refresh global hive stats now</string>
+           </property>
+           <property name="text">
+            <string>Refresh</string>
+           </property>
+           <property name="icon">
+            <iconset resource="../bitcoin.qrc">
+             <normaloff>:/icons/refresh</normaloff>:/icons/refresh</iconset>
+           </property>
+          </widget>
+         </item>
+        </layout>
        </widget>
       </item>
       <item>
-       <spacer name="immatureLabelSpacer_6">
-        <property name="orientation">
-         <enum>Qt::Horizontal</enum>
-        </property>
-        <property name="sizeType">
-         <enum>QSizePolicy::Fixed</enum>
-        </property>
-        <property name="sizeHint" stdset="0">
-         <size>
-          <width>10</width>
-          <height>0</height>
-         </size>
-        </property>
-       </spacer>
-      </item>
-      <item>
-       <widget class="TinyPie" name="beePopIndexPie" native="true">
+       <widget class="QCustomPlot" name="beePopGraph" native="true">
         <property name="sizePolicy">
-         <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
           <horstretch>0</horstretch>
           <verstretch>0</verstretch>
          </sizepolicy>
         </property>
         <property name="minimumSize">
          <size>
-          <width>20</width>
-          <height>20</height>
-         </size>
-        </property>
-        <property name="toolTip">
-         <string>The Gashi Index is a measure of network bee population. At a value of 100,
-the network is saturated with the maximum number of bees that are expected
-to make back their cost. At values below 100, it is expected at all bees will be profitable.</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <spacer name="horizontalSpacer_12">
-        <property name="orientation">
-         <enum>Qt::Horizontal</enum>
-        </property>
-        <property name="sizeHint" stdset="0">
-         <size>
           <width>0</width>
-          <height>0</height>
+          <height>100</height>
          </size>
-        </property>
-       </spacer>
-      </item>
-      <item>
-       <widget class="QLabel" name="label_13">
-        <property name="toolTip">
-         <string>Global network hive stats are automatically refreshed every 10 blocks</string>
-        </property>
-        <property name="text">
-         <string>(Stats refresh: </string>
-        </property>
-        <property name="alignment">
-         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QLabel" name="blocksTillGlobalRefresh">
-        <property name="text">
-         <string>10</string>
-        </property>
-        <property name="alignment">
-         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QLabel" name="label_15">
-        <property name="toolTip">
-         <string>Global network hive stats are automatically refreshed every 10 blocks</string>
-        </property>
-        <property name="text">
-         <string> blocks) </string>
-        </property>
-        <property name="alignment">
-         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QPushButton" name="refreshGlobalSummaryButton">
-        <property name="minimumSize">
-         <size>
-          <width>75</width>
-          <height>0</height>
-         </size>
-        </property>
-        <property name="toolTip">
-         <string>Refresh global hive stats now</string>
-        </property>
-        <property name="text">
-         <string>Refresh now</string>
         </property>
        </widget>
       </item>
@@ -1193,6 +1286,12 @@ your hive's chance of mining any given hivemineable block.</string>
    <class>TinyPie</class>
    <extends>QWidget</extends>
    <header>qt/tinypie.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>QCustomPlot</class>
+   <extends>QWidget</extends>
+   <header>qt/qcustomplot.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

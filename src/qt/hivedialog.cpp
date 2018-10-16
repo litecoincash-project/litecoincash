@@ -19,6 +19,7 @@
 #include <qt/hivetablemodel.h>
 #include <qt/walletmodel.h>
 #include <qt/tinypie.h>
+#include <qt/qcustomplot.h>
 
 #include <QAction>
 #include <QCursor>
@@ -58,6 +59,9 @@ HiveDialog::HiveDialog(const PlatformStyle *_platformStyle, QWidget *parent) :
     ui->hiveWeightPie->foregroundCol = ui->hiveWeightPie->backgroundCol;
     ui->hiveWeightPie->backgroundCol = temp;
     ui->hiveWeightPie->borderCol = palette().color(backgroundRole());
+
+    initGraph();
+    ui->beePopGraph->hide();
 }
 
 void HiveDialog::setClientModel(ClientModel *_clientModel) {
@@ -115,11 +119,7 @@ HiveDialog::~HiveDialog() {
 
 void HiveDialog::setBalance(const CAmount& balance, const CAmount& unconfirmedBalance, const CAmount& immatureBalance, const CAmount& watchOnlyBalance, const CAmount& watchUnconfBalance, const CAmount& watchImmatureBalance) {
     currentBalance = balance;
-    ui->currentBalance->setText(
-        BitcoinUnits::format(model->getOptionsModel()->getDisplayUnit(), currentBalance)
-        + " "
-        + BitcoinUnits::shortName(model->getOptionsModel()->getDisplayUnit())
-    );
+    setAmountField(ui->currentBalance, currentBalance);
 }
 
 void HiveDialog::setEncryptionStatus(int status) {
@@ -133,6 +133,14 @@ void HiveDialog::setEncryptionStatus(int status) {
             break;
     }
     updateData();
+}
+
+void HiveDialog::setAmountField(QLabel *field, CAmount value) {
+    field->setText(
+        BitcoinUnits::format(model->getOptionsModel()->getDisplayUnit(), value)
+        + " "
+        + BitcoinUnits::shortName(model->getOptionsModel()->getDisplayUnit())
+    );
 }
 
 void HiveDialog::updateData(bool forceGlobalSummaryUpdate) {
@@ -149,21 +157,9 @@ void HiveDialog::updateData(bool forceGlobalSummaryUpdate) {
         model->getHiveTableModel()->getSummaryValues(immature, mature, dead, blocksFound, cost, rewardsPaid, profit);
         
         // Update labels
-        ui->rewardsPaidLabel->setText(
-            BitcoinUnits::format(model->getOptionsModel()->getDisplayUnit(), rewardsPaid)
-            + " "
-            + BitcoinUnits::shortName(model->getOptionsModel()->getDisplayUnit())
-        );
-        ui->costLabel->setText(
-            BitcoinUnits::format(model->getOptionsModel()->getDisplayUnit(), cost)
-            + " "
-            + BitcoinUnits::shortName(model->getOptionsModel()->getDisplayUnit())
-        );
-        ui->profitLabel->setText(
-            BitcoinUnits::format(model->getOptionsModel()->getDisplayUnit(), profit)
-            + " "
-            + BitcoinUnits::shortName(model->getOptionsModel()->getDisplayUnit())
-        );
+        setAmountField(ui->rewardsPaidLabel, rewardsPaid);
+        setAmountField(ui->costLabel, cost);
+        setAmountField(ui->profitLabel, profit);
         ui->matureLabel->setText(QString::number(mature));
         ui->immatureLabel->setText(QString::number(immature));
         ui->blocksFoundLabel->setText(QString::number(blocksFound));
@@ -206,16 +202,12 @@ void HiveDialog::updateData(bool forceGlobalSummaryUpdate) {
     }
 
     beeCost = GetBeeCost(chainActive.Tip()->nHeight, consensusParams);
-    ui->beeCostLabel->setText(
-        BitcoinUnits::format(model->getOptionsModel()->getDisplayUnit(), beeCost)
-        + " "
-        + BitcoinUnits::shortName(model->getOptionsModel()->getDisplayUnit())
-    );
+    setAmountField(ui->beeCostLabel, beeCost);
     updateTotalCostDisplay();
 
     if (forceGlobalSummaryUpdate || chainActive.Tip()->nHeight >= lastGlobalCheckHeight + 10) { // Don't update global summary every block
         int globalImmatureBees, globalImmatureBCTs, globalMatureBees, globalMatureBCTs;
-        if (!GetNetworkHiveInfo(globalImmatureBees, globalImmatureBCTs, globalMatureBees, globalMatureBCTs, potentialRewards, consensusParams)) {
+        if (!GetNetworkHiveInfo(globalImmatureBees, globalImmatureBCTs, globalMatureBees, globalMatureBCTs, potentialRewards, consensusParams, true)) {
             ui->globalHiveSummary->hide();
             ui->globalHiveSummaryError->show();
         } else {
@@ -230,13 +222,11 @@ void HiveDialog::updateData(bool forceGlobalSummaryUpdate) {
                 ui->globalMatureLabel->setText("0");
             else
                 ui->globalMatureLabel->setText(QString::number(globalMatureBees) + " (" + QString::number(globalMatureBCTs) + " transactions)");
+
+            updateGraph();
         }
 
-        ui->potentialRewardsLabel->setText(
-            BitcoinUnits::format(model->getOptionsModel()->getDisplayUnit(), potentialRewards)
-            + " "
-            + BitcoinUnits::shortName(model->getOptionsModel()->getDisplayUnit())
-        );
+        setAmountField(ui->potentialRewardsLabel, potentialRewards);
 
         double hiveWeight = mature / (double)globalMatureBees;
         ui->localHiveWeightLabel->setText((mature == 0 || globalMatureBees == 0) ? "0" : QString::number(hiveWeight, 'f', 3));
@@ -255,36 +245,13 @@ void HiveDialog::updateData(bool forceGlobalSummaryUpdate) {
 
 void HiveDialog::updateDisplayUnit() {
     if(model && model->getOptionsModel()) {
-        ui->beeCostLabel->setText(
-            BitcoinUnits::format(model->getOptionsModel()->getDisplayUnit(), beeCost)
-            + " "
-            + BitcoinUnits::shortName(model->getOptionsModel()->getDisplayUnit())
-        );
-        ui->rewardsPaidLabel->setText(
-            BitcoinUnits::format(model->getOptionsModel()->getDisplayUnit(), rewardsPaid)
-            + " "
-            + BitcoinUnits::shortName(model->getOptionsModel()->getDisplayUnit())
-        );
-        ui->costLabel->setText(
-            BitcoinUnits::format(model->getOptionsModel()->getDisplayUnit(), cost)
-            + " "
-            + BitcoinUnits::shortName(model->getOptionsModel()->getDisplayUnit())
-        );
-        ui->profitLabel->setText(
-            BitcoinUnits::format(model->getOptionsModel()->getDisplayUnit(), profit)
-            + " "
-            + BitcoinUnits::shortName(model->getOptionsModel()->getDisplayUnit())
-        );
-        ui->potentialRewardsLabel->setText(
-            BitcoinUnits::format(model->getOptionsModel()->getDisplayUnit(), potentialRewards)
-            + " "
-            + BitcoinUnits::shortName(model->getOptionsModel()->getDisplayUnit())
-        );
-        ui->currentBalance->setText(
-            BitcoinUnits::format(model->getOptionsModel()->getDisplayUnit(), currentBalance)
-            + " "
-            + BitcoinUnits::shortName(model->getOptionsModel()->getDisplayUnit())
-        );        
+        setAmountField(ui->beeCostLabel, beeCost);
+        setAmountField(ui->rewardsPaidLabel, rewardsPaid);
+        setAmountField(ui->costLabel, cost);
+        setAmountField(ui->profitLabel, profit);
+        setAmountField(ui->potentialRewardsLabel, potentialRewards);
+        setAmountField(ui->currentBalance, currentBalance);
+        setAmountField(ui->totalCostLabel, totalCost);
     }
 
     updateTotalCostDisplay();
@@ -294,12 +261,8 @@ void HiveDialog::updateTotalCostDisplay() {
     totalCost = beeCost * ui->beeCountSpinner->value();
 
     if(model && model->getOptionsModel()) {
-        ui->totalCostLabel->setText(
-            BitcoinUnits::format(model->getOptionsModel()->getDisplayUnit(), totalCost)
-            + " "
-            + BitcoinUnits::shortName(model->getOptionsModel()->getDisplayUnit())
-        );
-
+        setAmountField(ui->totalCostLabel, totalCost);
+        
         if (totalCost > model->getBalance())
             ui->beeCountSpinner->setStyleSheet("QSpinBox{background:#FF8080;}");
         else
@@ -313,6 +276,13 @@ void HiveDialog::on_beeCountSpinner_valueChanged(int i) {
 
 void HiveDialog::on_includeDeadBeesCheckbox_stateChanged() {
     updateData();
+}
+
+void HiveDialog::on_showAdvancedStatsCheckbox_stateChanged() {
+    if(ui->showAdvancedStatsCheckbox->isChecked())
+        ui->beePopGraph->show();
+    else
+        ui->beePopGraph->hide();
 }
 
 void HiveDialog::on_retryGlobalSummaryButton_clicked() {
@@ -336,34 +306,98 @@ void HiveDialog::on_createBeesButton_clicked() {
         }
 		WalletModel::UnlockContext ctx(model->requestUnlock());
 		if(!ctx.isValid())
-		{
-			// Unlock wallet was cancelled
-			return;
-		}
+			return;     // Unlock wallet was cancelled
         model->createBees(ui->beeCountSpinner->value(), ui->donateCommunityFundCheckbox->isChecked(), this);
     }
 }
 
-// We override the virtual resizeEvent of the QWidget to adjust tables column
-// sizes as the tables width is proportional to the dialogs width.
-void HiveDialog::resizeEvent(QResizeEvent *event)
-{
-    QWidget::resizeEvent(event);
-    columnResizingFixer->stretchColumnWidth(HiveTableModel::Rewards);
+void HiveDialog::initGraph() {
+    ui->beePopGraph->addGraph();
+    ui->beePopGraph->graph()->setLineStyle(QCPGraph::lsLine);
+    ui->beePopGraph->graph()->setPen(QPen(Qt::black));
+    QColor color(42, 182, 67);
+    color.setAlphaF(0.35);
+    ui->beePopGraph->graph()->setBrush(QBrush(color));
+
+    QSharedPointer<QCPAxisTickerDateTime> dateTicker(new QCPAxisTickerDateTime);
+    dateTicker->setTickStepStrategy(QCPAxisTicker::TickStepStrategy::tssMeetTickCount);
+    dateTicker->setTickCount(8);
+    dateTicker->setDateTimeFormat("ddd d MMM");
+    ui->beePopGraph->xAxis->setTicker(dateTicker);    
+
+    ui->beePopGraph->yAxis->setLabel("Bees (x 1000)");
+
+    ui->beePopGraph->xAxis->setTickLabelFont(QFont(QFont().family(), 8));
+    ui->beePopGraph->xAxis2->setTickLabelFont(QFont(QFont().family(), 8));
+    ui->beePopGraph->yAxis->setTickLabelFont(QFont(QFont().family(), 8));
+    ui->beePopGraph->yAxis2->setTickLabelFont(QFont(QFont().family(), 8));
+
+    connect(ui->beePopGraph->xAxis, SIGNAL(rangeChanged(QCPRange)), ui->beePopGraph->xAxis2, SLOT(setRange(QCPRange)));
+    connect(ui->beePopGraph->yAxis, SIGNAL(rangeChanged(QCPRange)), ui->beePopGraph->yAxis2, SLOT(setRange(QCPRange)));
+    connect(ui->beePopGraph, SIGNAL(mouseMove(QMouseEvent*)), this, SLOT(onMouseMove(QMouseEvent*)));
+
+    gashiMarkerLine = new QCPItemLine(ui->beePopGraph);
+    gashiMarkerLine->setPen(QPen(Qt::blue, 1, Qt::DashLine));
+    
+    graphTracer = new QCPItemTracer(ui->beePopGraph);
+    graphTracer->setGraph(ui->beePopGraph->graph(0));
+
+    graphMouseoverText = new QCPItemText(ui->beePopGraph);
+
+    gashiMarkerText = QSharedPointer<QCPAxisTickerText>(new QCPAxisTickerText);
+    ui->beePopGraph->yAxis2->setTicker(gashiMarkerText);
+    ui->beePopGraph->yAxis2->setVisible(true);    
 }
 
-void HiveDialog::keyPressEvent(QKeyEvent *event)
-{
-    if (event->key() == Qt::Key_Return)
-    {
-        /*
-        // press return -> submit form
-        if (ui->beeCountSpinner->hasFocus()) {
-            event->ignore();
-            on_createBeesButton_clicked();
-            return;
-        }*/
-    }
+void HiveDialog::updateGraph() {
+    const Consensus::Params& consensusParams = Params().GetConsensus();
 
-    this->QDialog::keyPressEvent(event);
+    ui->beePopGraph->graph()->data()->clear();
+    double now = QDateTime::currentDateTime().toTime_t();
+    int totalLifespan = consensusParams.beeGestationBlocks + consensusParams.beeLifespanBlocks;
+    QVector<QCPGraphData> data(totalLifespan);
+    for (int i = 0; i < totalLifespan; i++) {
+        data[i].key = now + consensusParams.nPowTargetSpacing / 2 * i;
+        data[i].value = (double)beePopGraph[i].maturePop / 1000;
+    }
+    ui->beePopGraph->graph()->data()->set(data);
+
+    double gashi100 = (double)potentialRewards / beeCost;
+    gashi100 /= 1000;
+    gashiMarkerText->setTicks(QVector<double>() << gashi100, QVector<QString>() << "Gashi=100");
+
+    gashiMarkerLine->start->setCoords(now, gashi100);
+    gashiMarkerLine->end->setCoords(now + consensusParams.nPowTargetSpacing / 2 * totalLifespan, gashi100);
+    ui->beePopGraph->rescaleAxes();
+    ui->beePopGraph->replot();
+}
+
+void HiveDialog::onMouseMove(QMouseEvent *event) {
+    QCustomPlot* customPlot = qobject_cast<QCustomPlot*>(sender());
+
+    int x = (int)customPlot->xAxis->pixelToCoord(event->pos().x());
+    int y = (int)customPlot->yAxis->pixelToCoord(event->pos().y());
+
+    QDateTime xDateTime = QDateTime::fromTime_t(x);
+    int gashi100 = (int)((double)potentialRewards / beeCost);
+    int beeCount = (int)graphTracer->position->value() * 1000;
+    QColor traceCol = beeCount >= gashi100 ? Qt::red : Qt::black;
+
+    graphTracer->setGraphKey(x);
+    graphTracer->setPen(QPen(traceCol, 1, Qt::DashLine));    
+
+    graphMouseoverText->setText(xDateTime.toString("ddd d MMM") + " " + xDateTime.time().toString() + ":\n" + QString::number(beeCount) + " mature bees");
+    graphMouseoverText->setFont(QFont(font().family(), 10));
+    graphMouseoverText->setColor(traceCol);
+    graphMouseoverText->position->setCoords(QPointF(x, y));
+    QPointF pixelPos = graphMouseoverText->position->pixelPosition();
+    pixelPos.setY(pixelPos.y() - 20);
+    graphMouseoverText->position->setPixelPosition(pixelPos);
+
+    customPlot->replot();
+}
+
+void HiveDialog::resizeEvent(QResizeEvent *event) {
+    QWidget::resizeEvent(event);
+    columnResizingFixer->stretchColumnWidth(HiveTableModel::Rewards);
 }

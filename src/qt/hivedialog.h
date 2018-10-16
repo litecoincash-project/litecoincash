@@ -15,6 +15,9 @@
 #include <QPoint>
 #include <QVariant>
 
+#include <pow.h>
+#include <qt/qcustomplot.h>
+
 class PlatformStyle;
 class ClientModel;
 class WalletModel;
@@ -26,6 +29,8 @@ namespace Ui {
 QT_BEGIN_NAMESPACE
 class QModelIndex;
 QT_END_NAMESPACE
+
+extern BeePopGraphPoint beePopGraph[12000];
 
 class HiveDialog : public QDialog
 {
@@ -56,9 +61,6 @@ public Q_SLOTS:
 
 Q_SIGNALS:
     void hiveStatusIconChanged(QString icon, QString tooltip);    
-    
-protected:
-    virtual void keyPressEvent(QKeyEvent *event);
 
 private:
     Ui::HiveDialog *ui;
@@ -73,17 +75,27 @@ private:
     CAmount currentBalance;
     int lastGlobalCheckHeight;
     virtual void resizeEvent(QResizeEvent *event);
+    QCPItemText *graphMouseoverText;
+    QCPItemTracer *graphTracer;
+    QCPItemLine *gashiMarkerLine;
+    QSharedPointer<QCPAxisTickerText> gashiMarkerText;
 
     void updateTotalCostDisplay();
+    void initGraph();
+    void updateGraph();
+    void showPointToolTip(QMouseEvent *event);
+    void setAmountField(QLabel *field, CAmount value);
 
 private Q_SLOTS:
     void on_createBeesButton_clicked();
     void on_beeCountSpinner_valueChanged(int i);
     void on_includeDeadBeesCheckbox_stateChanged();
+    void on_showAdvancedStatsCheckbox_stateChanged();
     void updateDisplayUnit();
     void on_retryGlobalSummaryButton_clicked();
     void on_refreshGlobalSummaryButton_clicked();
     void on_releaseSwarmButton_clicked();
+    void onMouseMove(QMouseEvent* event);
 };
 
 #endif // BITCOIN_QT_HIVEDIALOG_H
