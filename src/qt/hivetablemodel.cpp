@@ -19,7 +19,7 @@ HiveTableModel::HiveTableModel(const PlatformStyle *_platformStyle, CWallet *wal
     Q_UNUSED(wallet);
 
     // Set column headings
-    columns << tr("Created") << tr("Bee count") << tr("Bee status") << tr("Estimated time until status change") << tr("Fee paid") << tr("Rewards earned");
+    columns << tr("Created") << tr("Bee count") << tr("Bee status") << tr("Estimated time until status change") << tr("Bee cost") << tr("Rewards earned");
 
     sortOrder = Qt::DescendingOrder;
     sortColumn = 0;
@@ -50,7 +50,7 @@ void HiveTableModel::updateBCTs(bool includeDeadBees) {
                 mature += bct.beeCount;
             else if (bct.beeStatus == "immature")
                 immature += bct.beeCount;
-            else if (bct.beeStatus == "dead")
+            else if (bct.beeStatus == "expired")
                 dead += bct.beeCount;
 
             blocksFound += bct.blocksFound;
@@ -128,36 +128,34 @@ QVariant HiveTableModel::data(const QModelIndex &index, int role) const {
                     + " " + BitcoinUnits::shortName(this->walletModel->getOptionsModel()->getDisplayUnit()) 
                     + " (" + QString::number(rec->blocksFound) + " blocks mined)";
         }
-    }
-    else if (role == Qt::TextAlignmentRole)
-    {
+    } else if (role == Qt::TextAlignmentRole) {
         /*if (index.column() == Rewards && rec->blocksFound == 0)
             return (int)(Qt::AlignCenter|Qt::AlignVCenter);
         else*/ if (index.column() == Cost || index.column() == Rewards || index.column() == Count)
             return (int)(Qt::AlignRight|Qt::AlignVCenter);
         else
             return (int)(Qt::AlignCenter|Qt::AlignVCenter);
-    }
-    else if (role == Qt::ForegroundRole)
-    {
+    } else if (role == Qt::ForegroundRole) {
         const CBeeCreationTransactionInfo *rec = &list[index.row()];
 
         if (index.column() == Rewards) {
             if (rec->blocksFound == 0)
-                return QColor(139, 0, 0);
+                return QColor(200, 0, 0);
             if (rec->profit < 0)
-                return QColor(128, 70, 0);
-            return QColor(27, 104, 45);
+                return QColor(170, 70, 0);
+            return QColor(27, 170, 45);
+        }
+        
+        if (index.column() == Status) {
+            if (rec->beeStatus == "expired")
+                return QColor(200, 0, 0);
+            if (rec->beeStatus == "immature")
+                return QColor(170, 70, 0);
+            return QColor(27, 170, 45);
         }
 
-        if (rec->beeStatus == "dead")
-            return QColor(139, 0, 0);
-        if (rec->beeStatus == "immature")
-            return QColor(128, 70, 0);
-        return QColor(27, 104, 45);
-    }
-    else if (role == Qt::DecorationRole)
-    {
+        return QColor(0, 0, 0);
+    } else if (role == Qt::DecorationRole) {
         const CBeeCreationTransactionInfo *rec = &list[index.row()];
         if (index.column() == Status) {
             QString iconStr = ":/icons/beestatus_dead";    // Dead

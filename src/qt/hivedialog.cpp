@@ -313,11 +313,18 @@ void HiveDialog::on_createBeesButton_clicked() {
 
 void HiveDialog::initGraph() {
     ui->beePopGraph->addGraph();
-    ui->beePopGraph->graph()->setLineStyle(QCPGraph::lsLine);
-    ui->beePopGraph->graph()->setPen(QPen(Qt::black));
-    QColor color(42, 182, 67);
+    ui->beePopGraph->graph(0)->setLineStyle(QCPGraph::lsLine);
+    ui->beePopGraph->graph(0)->setPen(QPen(Qt::blue));
+    QColor color(42, 67, 182);
     color.setAlphaF(0.35);
-    ui->beePopGraph->graph()->setBrush(QBrush(color));
+    ui->beePopGraph->graph(0)->setBrush(QBrush(color));
+
+    ui->beePopGraph->addGraph();
+    ui->beePopGraph->graph(1)->setLineStyle(QCPGraph::lsLine);
+    ui->beePopGraph->graph(1)->setPen(QPen(Qt::black));
+    QColor color1(42, 182, 67);
+    color1.setAlphaF(0.35);
+    ui->beePopGraph->graph(1)->setBrush(QBrush(color1));
 
     QSharedPointer<QCPAxisTickerDateTime> dateTicker(new QCPAxisTickerDateTime);
     dateTicker->setTickStepStrategy(QCPAxisTicker::TickStepStrategy::tssMeetTickCount);
@@ -339,8 +346,10 @@ void HiveDialog::initGraph() {
     gashiMarkerLine = new QCPItemLine(ui->beePopGraph);
     gashiMarkerLine->setPen(QPen(Qt::blue, 1, Qt::DashLine));
     
-    graphTracer = new QCPItemTracer(ui->beePopGraph);
-    graphTracer->setGraph(ui->beePopGraph->graph(0));
+    graphTracerImmature = new QCPItemTracer(ui->beePopGraph);
+    graphTracerImmature->setGraph(ui->beePopGraph->graph(0));
+    graphTracerMature = new QCPItemTracer(ui->beePopGraph);
+    graphTracerMature->setGraph(ui->beePopGraph->graph(1));
 
     graphMouseoverText = new QCPItemText(ui->beePopGraph);
 
@@ -355,12 +364,17 @@ void HiveDialog::updateGraph() {
     ui->beePopGraph->graph()->data()->clear();
     double now = QDateTime::currentDateTime().toTime_t();
     int totalLifespan = consensusParams.beeGestationBlocks + consensusParams.beeLifespanBlocks;
-    QVector<QCPGraphData> data(totalLifespan);
+    QVector<QCPGraphData> dataMature(totalLifespan);
+    QVector<QCPGraphData> dataImmature(totalLifespan);
     for (int i = 0; i < totalLifespan; i++) {
-        data[i].key = now + consensusParams.nPowTargetSpacing / 2 * i;
-        data[i].value = (double)beePopGraph[i].maturePop / 1000;
+        dataImmature[i].key = now + consensusParams.nPowTargetSpacing / 2 * i;
+        dataImmature[i].value = (double)beePopGraph[i].immaturePop / 1000;
+
+        dataMature[i].key = dataImmature[i].key;
+        dataMature[i].value = (double)beePopGraph[i].maturePop / 1000;
     }
-    ui->beePopGraph->graph()->data()->set(data);
+    ui->beePopGraph->graph(0)->data()->set(dataImmature);
+    ui->beePopGraph->graph(1)->data()->set(dataMature);
 
     double gashi100 = (double)potentialRewards / beeCost;
     gashi100 /= 1000;
@@ -378,20 +392,25 @@ void HiveDialog::onMouseMove(QMouseEvent *event) {
     int x = (int)customPlot->xAxis->pixelToCoord(event->pos().x());
     int y = (int)customPlot->yAxis->pixelToCoord(event->pos().y());
 
+    graphTracerImmature->setGraphKey(x);
+    graphTracerMature->setGraphKey(x);
+    int beeCountImmature = (int)graphTracerImmature->position->value() * 1000;
+    int beeCountMature = (int)graphTracerMature->position->value() * 1000;      
+
     QDateTime xDateTime = QDateTime::fromTime_t(x);
     int gashi100 = (int)((double)potentialRewards / beeCost);
-    int beeCount = (int)graphTracer->position->value() * 1000;
-    QColor traceCol = beeCount >= gashi100 ? Qt::red : Qt::black;
+    QColor traceColMature = beeCountMature >= gashi100 ? Qt::red : Qt::black;
+    QColor traceColImmature = beeCountImmature >= gashi100 ? Qt::red : Qt::black;
 
-    graphTracer->setGraphKey(x);
-    graphTracer->setPen(QPen(traceCol, 1, Qt::DashLine));    
+    graphTracerImmature->setPen(QPen(traceColImmature, 1, Qt::DashLine));    
+    graphTracerMature->setPen(QPen(traceColMature, 1, Qt::DashLine));
 
-    graphMouseoverText->setText(xDateTime.toString("ddd d MMM") + " " + xDateTime.time().toString() + ":\n" + QString::number(beeCount) + " mature bees");
+    graphMouseoverText->setText(xDateTime.toString("ddd d MMM") + " " + xDateTime.time().toString() + ":\n" + QString::number(beeCountMature) + " mature bees\n" + QString::number(beeCountImmature) + " immature bees");
     graphMouseoverText->setFont(QFont(font().family(), 10));
-    graphMouseoverText->setColor(traceCol);
+    graphMouseoverText->setColor(traceColMature);
     graphMouseoverText->position->setCoords(QPointF(x, y));
     QPointF pixelPos = graphMouseoverText->position->pixelPosition();
-    pixelPos.setY(pixelPos.y() - 20);
+    pixelPos.setY(pixelPos.y() - 30);
     graphMouseoverText->position->setPixelPosition(pixelPos);
 
     customPlot->replot();

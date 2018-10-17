@@ -913,7 +913,7 @@ background-color:white;
         <string>If ticked, your hive display and summary will include bees that have expired as well as bees that are currently living.</string>
        </property>
        <property name="text">
-        <string>Include dead bees</string>
+        <string>Include expired bees</string>
        </property>
        <property name="checked">
         <bool>false</bool>

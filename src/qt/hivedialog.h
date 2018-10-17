@@ -76,7 +76,8 @@ private:
     int lastGlobalCheckHeight;
     virtual void resizeEvent(QResizeEvent *event);
     QCPItemText *graphMouseoverText;
-    QCPItemTracer *graphTracer;
+    QCPItemTracer *graphTracerMature;
+    QCPItemTracer *graphTracerImmature;
     QCPItemLine *gashiMarkerLine;
     QSharedPointer<QCPAxisTickerText> gashiMarkerText;
 

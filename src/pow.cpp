@@ -265,13 +265,13 @@ bool GetNetworkHiveInfo(int& immatureBees, int& immatureBCTs, int& matureBees, i
 
     for (int i = 0; i < totalBeeLifespan; i++) {
         if (fHavePruned && !(pindexPrev->nStatus & BLOCK_HAVE_DATA) && pindexPrev->nTx > 0) {
-            LogPrintf("! GetBeeCount: Warn: Block not available (pruned data); can't calculate network bee count.");
+            LogPrintf("! GetNetworkHiveInfo: Warn: Block not available (pruned data); can't calculate network bee count.");
             return false;
         }
 
         if (!pindexPrev->GetBlockHeader().IsHiveMined(consensusParams)) {                          // Don't check Hivemined blocks (no BCTs will be found in them)
             if (!ReadBlockFromDisk(block, pindexPrev, consensusParams)) {
-                LogPrintf("! GetBeeCount: Warn: Block not available (not found on disk); can't calculate network bee count.");
+                LogPrintf("! GetNetworkHiveInfo: Warn: Block not available (not found on disk); can't calculate network bee count.");
                 return false;
             }
             int blockHeight = pindexPrev->nHeight;
@@ -298,16 +298,29 @@ bool GetNetworkHiveInfo(int& immatureBees, int& immatureBCTs, int& matureBees, i
 
                         // Add these bees to pop graph
                         if (recalcGraph) {
+                            /*
                             int beeStart = blockHeight + consensusParams.beeGestationBlocks;
                             int beeStop = beeStart + consensusParams.beeLifespanBlocks;
                             beeStart -= tipHeight;
                             beeStop -= tipHeight;
                             for (int j = beeStart; j < beeStop; j++) {
                                 if (j > 0 && j < totalBeeLifespan) {
-                                    if (i < consensusParams.beeGestationBlocks)
+                                    if (i < consensusParams.beeGestationBlocks) // THIS IS WRONG
                                         beePopGraph[j].immaturePop += beeCount;
                                     else
                                         beePopGraph[j].maturePop += beeCount;
+                                }
+                            }*/
+                            int beeBornBlock = blockHeight;
+                            int beeMaturesBlock = beeBornBlock + consensusParams.beeGestationBlocks;
+                            int beeDiesBlock = beeMaturesBlock + consensusParams.beeLifespanBlocks;
+                            for (int j = beeBornBlock; j < beeDiesBlock; j++) {
+                                int graphPos = j - tipHeight;
+                                if (graphPos > 0 && graphPos < totalBeeLifespan) {
+                                    if (j < beeMaturesBlock)
+                                        beePopGraph[graphPos].immaturePop += beeCount;
+                                    else
+                                        beePopGraph[graphPos].maturePop += beeCount;
                                 }
                             }
                         }

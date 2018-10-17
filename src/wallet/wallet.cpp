@@ -2750,7 +2750,7 @@ std::vector<CBeeCreationTransactionInfo> CWallet::GetBCTs(bool includeDead, bool
             if (!includeDead)   // Skip dead bees unless explicitly including them
                 continue;
             blocksLeft = 0;
-            status = "dead";
+            status = "expired";
             isMature = true;    // We still want to calc rewards
         } else {
             if (depth > consensusParams.beeGestationBlocks) {
