@@ -1088,10 +1088,10 @@ your hive's chance of mining any given hivemineable block.</string>
      <item>
       <widget class="QLabel" name="deadTitleLabel">
        <property name="toolTip">
-        <string>Current number of dead bees in your hive</string>
+        <string>Current number of expired bees in your hive</string>
        </property>
        <property name="text">
-        <string>Dead:</string>
+        <string>Expired:</string>
        </property>
        <property name="alignment">
         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -1101,7 +1101,7 @@ your hive's chance of mining any given hivemineable block.</string>
      <item>
       <widget class="QLabel" name="deadLabel">
        <property name="toolTip">
-        <string>Current number of dead bees in your hive</string>
+        <string>Current number of expired bees in your hive</string>
        </property>
        <property name="text">
         <string>0</string>
