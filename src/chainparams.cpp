@@ -260,7 +260,7 @@ public:
         consensus.hiveCommunityAddress = "tCY5JWV4LYe64ivrAE2rD6P3bYxYtcoTsz";      // Community fund address
         consensus.communityContribFactor = 10;              // Optionally, donate bct_value/maxCommunityContribFactor to community fund
         consensus.beeGestationBlocks = 48*24;               // The number of blocks for a new bee to mature
-        consensus.beeLifespanBlocks = 1152*7;               // The number of blocks a bee lives for after maturation
+        consensus.beeLifespanBlocks = 48*24*7*4;            // The number of blocks a bee lives for after maturation
         consensus.powLimitHive = uint256S("0fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");  // Highest (easiest) bee hash target
         consensus.hiveVersionBit = 12;                      // Hive nVersion block marker bit
         consensus.minHiveCheckBlock = 100;                  // Don't bother checking below this height for Hive blocks (not used for consensus/validation checks, just efficiency when looking for potential BCTs)

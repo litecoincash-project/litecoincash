@@ -34,8 +34,12 @@ extern BeePopGraphPoint beePopGraph[12000];
 
 class QCPAxisTickerGI : public QCPAxisTicker 
 {
+public:
+    double gashi100;
+
     QString getTickLabel(double tick, const QLocale &locale, QChar formatChar, int precision) {
-        return locale.toString(tick / 100000, formatChar.toLatin1(), precision);
+        tick = (tick / gashi100 * 100); // At tick = gashi100, scale is 100
+        return QString::number((int)tick);
     }
 };
 
@@ -88,6 +92,7 @@ private:
     QCPItemTracer *graphTracerMature;
     QCPItemTracer *graphTracerImmature;
     QCPItemLine *gashiMarkerLine;
+    QSharedPointer<QCPAxisTickerGI> giTicker;
 
     void updateTotalCostDisplay();
     void initGraph();

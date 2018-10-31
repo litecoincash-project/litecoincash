@@ -350,11 +350,8 @@ void HiveDialog::initGraph() {
     ui->beePopGraph->xAxis->setTicker(dateTicker);
 
     ui->beePopGraph->yAxis->setLabel("Bees");
-/*  QSharedPointer<QCPAxisTickerFixed> beeTicker(new QCPAxisTickerFixed);
-    beeTicker->setNumberFormat("f");
-    ui->beePopGraph->yAxis->setTicker(beeTicker);*/
 
-    QSharedPointer<QCPAxisTickerGI> giTicker(new QCPAxisTickerGI);
+    giTicker = QSharedPointer<QCPAxisTickerGI>(new QCPAxisTickerGI);
     ui->beePopGraph->yAxis2->setTicker(giTicker);
     ui->beePopGraph->yAxis2->setLabel("Gashi index");
     ui->beePopGraph->yAxis2->setVisible(true);
@@ -400,6 +397,7 @@ void HiveDialog::updateGraph() {
     double gashi100 = (double)potentialRewards / beeCost;
     gashiMarkerLine->start->setCoords(now, gashi100);
     gashiMarkerLine->end->setCoords(now + consensusParams.nPowTargetSpacing / 2 * totalLifespan, gashi100);
+    giTicker->gashi100 = gashi100;
     ui->beePopGraph->rescaleAxes();
     ui->beePopGraph->replot();
 }

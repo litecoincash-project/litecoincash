@@ -19,7 +19,7 @@
 #include <validation.h>         // LitecoinCash: Hive
 #include <utilstrencodings.h>   // LitecoinCash: Hive
 
-BeePopGraphPoint beePopGraph[12000];       // LitecoinCash: Hive
+BeePopGraphPoint beePopGraph[1024*40];       // LitecoinCash: Hive
 
 // LitecoinCash: DarkGravity V3 (https://github.com/dashpay/dash/blob/master/src/pow.cpp#L82)
 // By Evan Duffield <evan@dash.org>
