@@ -8,6 +8,7 @@
 #include <qt/guiutil.h>
 #include <qt/optionsmodel.h>
 #include <qt/platformstyle.h>
+#include <qt/hivedialog.h>  // For formatLargeNoLocale()
 
 #include <clientversion.h>
 #include <streams.h>
@@ -102,7 +103,7 @@ QVariant HiveTableModel::data(const QModelIndex &index, int role) const {
             case Created:
                 return (rec->time == 0) ? "Not in chain yet" : GUIUtil::dateTimeStr(rec->time);
             case Count:
-                return QString::number(rec->beeCount);
+                return HiveDialog::formatLargeNoLocale(rec->beeCount);
             case Status:
                 {
                     QString status = QString::fromStdString(rec->beeStatus);

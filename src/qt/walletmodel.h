@@ -211,7 +211,7 @@ public:
     bool saveReceiveRequest(const std::string &sAddress, const int64_t nId, const std::string &sRequest);
 
     void getBCTs(std::vector<CBeeCreationTransactionInfo>& vBeeCreationTransactions, bool includeDeadBees);     // LitecoinCash: Hive
-    bool createBees(int beeCount, bool communityContrib, QWidget *parent);                                      // LitecoinCash: Hive
+    bool createBees(int beeCount, bool communityContrib, QWidget *parent, double beePopIndex);                  // LitecoinCash: Hive
     bool isHiveEnabled();                                                                                       // LitecoinCash: Hive
 
     bool transactionCanBeAbandoned(uint256 hash) const;

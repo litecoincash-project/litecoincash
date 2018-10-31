@@ -689,12 +689,13 @@ UniValue gethiveinfo(const JSONRPCRequest& request)
     if (!EnsureWalletIsAvailable(pwallet, request.fHelp))
         return NullUniValue;
 
-    if (request.fHelp || request.params.size() > 1)
+    if (request.fHelp || request.params.size() > 2)
         throw std::runtime_error(
             "gethiveinfo ( include_dead )\n"
             "\nLists the status of your current hive, broken down by bee creation transaction.\n"
             "\nArguments:\n"
             "1. include_dead           (boolean, optional, default=false) Include bees whose lifespans have expired\n"
+            "2. min_honey_confirms     (numeric, optional, default=1) Only include honey rewards with at least this many confirmations\n"
             "\nResult:\n"
             "{\n"
             "    summary: {\n"
@@ -743,10 +744,16 @@ UniValue gethiveinfo(const JSONRPCRequest& request)
         includeDead = request.params[0].get_bool();
     }
 
+    int minHoneyConfirms = 1;
+    if (!request.params[1].isNull()) {
+        RPCTypeCheckArgument(request.params[1], UniValue::VNUM);
+        minHoneyConfirms = request.params[1].get_int();
+    }
+
     LOCK2(cs_main, pwallet->cs_wallet);
 
     // Iterate wallet txs looking for bee creation txs (BCTs)
-    std::vector<CBeeCreationTransactionInfo> bcts = pwallet->GetBCTs(includeDead, true, consensusParams);
+    std::vector<CBeeCreationTransactionInfo> bcts = pwallet->GetBCTs(includeDead, true, consensusParams, minHoneyConfirms);
     UniValue bctList(UniValue::VARR);
 
     int totalBees = 0;
@@ -3885,8 +3892,8 @@ static const CRPCCommand commands[] =
 { //  category              name                        actor (function)           argNames
     //  --------------------- ------------------------    -----------------------  ----------
     { "wallet",             "getbeecost",               &getbeecost,               {"height"} },                                            // LitecoinCash: Hive: Get bee cost for given height (defaults to tipheight)
-    { "wallet",             "createbees",               &createbees,               {"bee_count","community_contrib","honey_address"} },    // LitecoinCash: Hive: Create bee(s)
-    { "wallet",             "gethiveinfo",              &gethiveinfo,              {"include_dead"} },                                      // LitecoinCash: Hive: Get current hive info
+    { "wallet",             "createbees",               &createbees,               {"bee_count","community_contrib","honey_address"} },     // LitecoinCash: Hive: Create bee(s)
+    { "wallet",             "gethiveinfo",              &gethiveinfo,              {"include_dead","min_honey_confirms"} },                 // LitecoinCash: Hive: Get current hive info
     { "wallet",             "getnetworkhiveinfo",       &getnetworkhiveinfo,       {} },                                                    // LitecoinCash: Hive: Get current bee populations across whole network
     { "rawtransactions",    "fundrawtransaction",       &fundrawtransaction,       {"hexstring","options","iswitness"} },
     { "hidden",             "resendwallettransactions", &resendwallettransactions, {} },

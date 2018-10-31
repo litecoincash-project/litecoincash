@@ -32,6 +32,13 @@ QT_END_NAMESPACE
 
 extern BeePopGraphPoint beePopGraph[12000];
 
+class QCPAxisTickerGI : public QCPAxisTicker 
+{
+    QString getTickLabel(double tick, const QLocale &locale, QChar formatChar, int precision) {
+        return locale.toString(tick / 100000, formatChar.toLatin1(), precision);
+    }
+};
+
 class HiveDialog : public QDialog
 {
     Q_OBJECT
@@ -52,6 +59,7 @@ public:
 
     void setClientModel(ClientModel *_clientModel);
     void setModel(WalletModel *model);
+    static QString formatLargeNoLocale(int i);
 
 public Q_SLOTS:
     void updateData(bool forceGlobalSummaryUpdate = false);
@@ -73,13 +81,13 @@ private:
     CAmount rewardsPaid, cost, profit;
     CAmount potentialRewards;
     CAmount currentBalance;
+    double beePopIndex;
     int lastGlobalCheckHeight;
     virtual void resizeEvent(QResizeEvent *event);
     QCPItemText *graphMouseoverText;
     QCPItemTracer *graphTracerMature;
     QCPItemTracer *graphTracerImmature;
     QCPItemLine *gashiMarkerLine;
-    QSharedPointer<QCPAxisTickerText> gashiMarkerText;
 
     void updateTotalCostDisplay();
     void initGraph();

@@ -49,6 +49,7 @@ HiveDialog::HiveDialog(const PlatformStyle *_platformStyle, QWidget *parent) :
     lastGlobalCheckHeight = 0;
     potentialRewards = 0;
     currentBalance = 0;
+    beePopIndex = 0;
 
     ui->globalHiveSummaryError->hide();
 
@@ -69,6 +70,7 @@ void HiveDialog::setClientModel(ClientModel *_clientModel) {
 
     if (_clientModel) {
         connect(_clientModel, SIGNAL(numBlocksChanged(int,QDateTime,double,bool)), this, SLOT(updateData()));
+        connect(_clientModel, SIGNAL(numConnectionsChanged(int)), this, SLOT(updateData()));    // TODO: This may be too expensive to call here, and the only point is to update the hive status icon.
     }
 }
 
@@ -143,6 +145,18 @@ void HiveDialog::setAmountField(QLabel *field, CAmount value) {
     );
 }
 
+QString HiveDialog::formatLargeNoLocale(int i) {
+    QString i_str = QString::number(i);
+
+    // Use SI-style thin space separators as these are locale independent and can't be confused with the decimal marker.
+    QChar thin_sp(THIN_SP_CP);
+    int i_size = i_str.size();
+    for (int i = 3; i < i_size; i += 3)
+        i_str.insert(i_size - i, thin_sp);
+
+    return i_str;
+}
+
 void HiveDialog::updateData(bool forceGlobalSummaryUpdate) {
     if(IsInitialBlockDownload() || chainActive.Height() == 0) {
         ui->globalHiveSummary->hide();
@@ -160,8 +174,8 @@ void HiveDialog::updateData(bool forceGlobalSummaryUpdate) {
         setAmountField(ui->rewardsPaidLabel, rewardsPaid);
         setAmountField(ui->costLabel, cost);
         setAmountField(ui->profitLabel, profit);
-        ui->matureLabel->setText(QString::number(mature));
-        ui->immatureLabel->setText(QString::number(immature));
+        ui->matureLabel->setText(formatLargeNoLocale(mature));
+        ui->immatureLabel->setText(formatLargeNoLocale(immature));
         ui->blocksFoundLabel->setText(QString::number(blocksFound));
 
         if(dead == 0) {
@@ -169,7 +183,7 @@ void HiveDialog::updateData(bool forceGlobalSummaryUpdate) {
             ui->deadTitleLabel->hide();
             ui->deadLabelSpacer->changeSize(0, 0, QSizePolicy::Fixed, QSizePolicy::Fixed);
         } else {
-            ui->deadLabel->setText(QString::number(dead));
+            ui->deadLabel->setText(formatLargeNoLocale(dead));
             ui->deadLabel->show();
             ui->deadTitleLabel->show();
             ui->deadLabelSpacer->changeSize(ui->immatureLabelSpacer->geometry().width(), 0, QSizePolicy::Fixed, QSizePolicy::Fixed);
@@ -177,7 +191,10 @@ void HiveDialog::updateData(bool forceGlobalSummaryUpdate) {
 
         // Set icon and tooltip for tray icon
         QString tooltip, icon;
-        if (!model->isHiveEnabled()) {
+        if (clientModel && clientModel->getNumConnections() == 0) {
+            tooltip = "Litecoin Cash is not connected";
+            icon = ":/icons/hivestatus_disabled";
+        } else if (!model->isHiveEnabled()) {
             tooltip = "The Hive is not enabled on the network";
             icon = ":/icons/hivestatus_disabled";
         } else {
@@ -216,12 +233,12 @@ void HiveDialog::updateData(bool forceGlobalSummaryUpdate) {
             if (globalImmatureBees == 0)
                 ui->globalImmatureLabel->setText("0");
             else
-                ui->globalImmatureLabel->setText(QString::number(globalImmatureBees) + " (" + QString::number(globalImmatureBCTs) + " transactions)");
+                ui->globalImmatureLabel->setText(formatLargeNoLocale(globalImmatureBees) + " (" + QString::number(globalImmatureBCTs) + " transactions)");
 
             if (globalMatureBees == 0)
                 ui->globalMatureLabel->setText("0");
             else
-                ui->globalMatureLabel->setText(QString::number(globalMatureBees) + " (" + QString::number(globalMatureBCTs) + " transactions)");
+                ui->globalMatureLabel->setText(formatLargeNoLocale(globalMatureBees) + " (" + QString::number(globalMatureBCTs) + " transactions)");
 
             updateGraph();
         }
@@ -232,7 +249,7 @@ void HiveDialog::updateData(bool forceGlobalSummaryUpdate) {
         ui->localHiveWeightLabel->setText((mature == 0 || globalMatureBees == 0) ? "0" : QString::number(hiveWeight, 'f', 3));
         ui->hiveWeightPie->setValue(hiveWeight);
 
-        double beePopIndex = ((beeCost * globalMatureBees) / (double)potentialRewards) * 100.0;
+        beePopIndex = ((beeCost * globalMatureBees) / (double)potentialRewards) * 100.0;
         if (beePopIndex > 200) beePopIndex = 200;
         ui->beePopIndexLabel->setText(QString::number(floor(beePopIndex)));
         ui->beePopIndexPie->setValue(beePopIndex / 100);
@@ -307,7 +324,7 @@ void HiveDialog::on_createBeesButton_clicked() {
 		WalletModel::UnlockContext ctx(model->requestUnlock());
 		if(!ctx.isValid())
 			return;     // Unlock wallet was cancelled
-        model->createBees(ui->beeCountSpinner->value(), ui->donateCommunityFundCheckbox->isChecked(), this);
+        model->createBees(ui->beeCountSpinner->value(), ui->donateCommunityFundCheckbox->isChecked(), this, beePopIndex);
     }
 }
 
@@ -330,9 +347,17 @@ void HiveDialog::initGraph() {
     dateTicker->setTickStepStrategy(QCPAxisTicker::TickStepStrategy::tssMeetTickCount);
     dateTicker->setTickCount(8);
     dateTicker->setDateTimeFormat("ddd d MMM");
-    ui->beePopGraph->xAxis->setTicker(dateTicker);    
+    ui->beePopGraph->xAxis->setTicker(dateTicker);
 
-    ui->beePopGraph->yAxis->setLabel("Bees (x 1000)");
+    ui->beePopGraph->yAxis->setLabel("Bees");
+/*  QSharedPointer<QCPAxisTickerFixed> beeTicker(new QCPAxisTickerFixed);
+    beeTicker->setNumberFormat("f");
+    ui->beePopGraph->yAxis->setTicker(beeTicker);*/
+
+    QSharedPointer<QCPAxisTickerGI> giTicker(new QCPAxisTickerGI);
+    ui->beePopGraph->yAxis2->setTicker(giTicker);
+    ui->beePopGraph->yAxis2->setLabel("Gashi index");
+    ui->beePopGraph->yAxis2->setVisible(true);
 
     ui->beePopGraph->xAxis->setTickLabelFont(QFont(QFont().family(), 8));
     ui->beePopGraph->xAxis2->setTickLabelFont(QFont(QFont().family(), 8));
@@ -352,10 +377,6 @@ void HiveDialog::initGraph() {
     graphTracerMature->setGraph(ui->beePopGraph->graph(1));
 
     graphMouseoverText = new QCPItemText(ui->beePopGraph);
-
-    gashiMarkerText = QSharedPointer<QCPAxisTickerText>(new QCPAxisTickerText);
-    ui->beePopGraph->yAxis2->setTicker(gashiMarkerText);
-    ui->beePopGraph->yAxis2->setVisible(true);    
 }
 
 void HiveDialog::updateGraph() {
@@ -368,18 +389,15 @@ void HiveDialog::updateGraph() {
     QVector<QCPGraphData> dataImmature(totalLifespan);
     for (int i = 0; i < totalLifespan; i++) {
         dataImmature[i].key = now + consensusParams.nPowTargetSpacing / 2 * i;
-        dataImmature[i].value = (double)beePopGraph[i].immaturePop / 1000;
+        dataImmature[i].value = (double)beePopGraph[i].immaturePop;
 
         dataMature[i].key = dataImmature[i].key;
-        dataMature[i].value = (double)beePopGraph[i].maturePop / 1000;
+        dataMature[i].value = (double)beePopGraph[i].maturePop;
     }
     ui->beePopGraph->graph(0)->data()->set(dataImmature);
     ui->beePopGraph->graph(1)->data()->set(dataMature);
 
     double gashi100 = (double)potentialRewards / beeCost;
-    gashi100 /= 1000;
-    gashiMarkerText->setTicks(QVector<double>() << gashi100, QVector<QString>() << "Gashi=100");
-
     gashiMarkerLine->start->setCoords(now, gashi100);
     gashiMarkerLine->end->setCoords(now + consensusParams.nPowTargetSpacing / 2 * totalLifespan, gashi100);
     ui->beePopGraph->rescaleAxes();
@@ -394,8 +412,8 @@ void HiveDialog::onMouseMove(QMouseEvent *event) {
 
     graphTracerImmature->setGraphKey(x);
     graphTracerMature->setGraphKey(x);
-    int beeCountImmature = (int)graphTracerImmature->position->value() * 1000;
-    int beeCountMature = (int)graphTracerMature->position->value() * 1000;      
+    int beeCountImmature = (int)graphTracerImmature->position->value();
+    int beeCountMature = (int)graphTracerMature->position->value();      
 
     QDateTime xDateTime = QDateTime::fromTime_t(x);
     int gashi100 = (int)((double)potentialRewards / beeCost);
@@ -405,12 +423,33 @@ void HiveDialog::onMouseMove(QMouseEvent *event) {
     graphTracerImmature->setPen(QPen(traceColImmature, 1, Qt::DashLine));    
     graphTracerMature->setPen(QPen(traceColMature, 1, Qt::DashLine));
 
-    graphMouseoverText->setText(xDateTime.toString("ddd d MMM") + " " + xDateTime.time().toString() + ":\n" + QString::number(beeCountMature) + " mature bees\n" + QString::number(beeCountImmature) + " immature bees");
-    graphMouseoverText->setFont(QFont(font().family(), 10));
+    graphMouseoverText->setText(xDateTime.toString("ddd d MMM") + " " + xDateTime.time().toString() + ":\n" + formatLargeNoLocale(beeCountMature) + " mature bees\n" + formatLargeNoLocale(beeCountImmature) + " immature bees");
     graphMouseoverText->setColor(traceColMature);
     graphMouseoverText->position->setCoords(QPointF(x, y));
     QPointF pixelPos = graphMouseoverText->position->pixelPosition();
-    pixelPos.setY(pixelPos.y() - 30);
+
+    int xoffs, yoffs;
+    if (ui->beePopGraph->height() > 150) {
+        graphMouseoverText->setFont(QFont(font().family(), 10));
+        xoffs = 80;
+        yoffs = 30;
+    } else {
+        graphMouseoverText->setFont(QFont(font().family(), 8));
+        xoffs = 70;
+        yoffs = 20;
+    }
+
+    if (pixelPos.y() > ui->beePopGraph->height() / 2)
+        pixelPos.setY(pixelPos.y() - yoffs);
+    else
+        pixelPos.setY(pixelPos.y() + yoffs);
+
+    if (pixelPos.x() > ui->beePopGraph->width() / 2)
+        pixelPos.setX(pixelPos.x() - xoffs);
+    else
+        pixelPos.setX(pixelPos.x() + xoffs);
+
+    
     graphMouseoverText->position->setPixelPosition(pixelPos);
 
     customPlot->replot();

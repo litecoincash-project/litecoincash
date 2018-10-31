@@ -34,7 +34,7 @@
 #include <wallet/wallet.h>  // LitecoinCash: Hive
 #include <rpc/server.h>     // LitecoinCash: Hive
 #include <base58.h>         // LitecoinCash: Hive
-#include <sync.h>         // LitecoinCash: Hive
+#include <sync.h>           // LitecoinCash: Hive
 
 //////////////////////////////////////////////////////////////////////////////
 //

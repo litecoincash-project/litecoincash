@@ -15,6 +15,7 @@
 #include <qt/transactiontablemodel.h>
 #include <qt/walletmodel.h>
 #include <qt/hivetablemodel.h>  // LitecoinCash: Hive
+#include <qt/hivedialog.h>      // LitecoinCash: Hive: For formatLargeNoLocale()
 
 #include <QAbstractItemDelegate>
 #include <QPainter>
@@ -273,12 +274,12 @@ void OverviewPage::updateHiveSummary() {
             + " "
             + BitcoinUnits::shortName(walletModel->getOptionsModel()->getDisplayUnit())
         );
-        ui->matureLabel->setText(QString::number(mature));
-        ui->immatureLabel->setText(QString::number(immature));
-        ui->blocksFoundLabel->setText(QString::number(blocksFound));
+        ui->matureLabel->setText(HiveDialog::formatLargeNoLocale(mature));
+        ui->immatureLabel->setText(HiveDialog::formatLargeNoLocale(immature));
+        ui->blocksFoundLabel->setText(HiveDialog::formatLargeNoLocale(blocksFound));
         
         if (dead > 0) {
-            ui->deadLabel->setText(QString::number(dead));
+            ui->deadLabel->setText(HiveDialog::formatLargeNoLocale(dead));
             ui->deadLabel->setVisible(true);
             ui->deadPreLabel->setVisible(true);
             ui->deadPostLabel->setVisible(true);

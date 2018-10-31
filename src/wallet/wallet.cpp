@@ -2700,7 +2700,7 @@ OutputType CWallet::TransactionChangeType(OutputType change_type, const std::vec
 bool fWalletUnlockHiveMiningOnly = false;  // LitecoinCash: Hive: Unlock for hive mining purposes only.
 
 // LitecoinCash: Hive: Return all BCTs known by this wallet, optionally including dead bees and optionally scanning for blocks minted by bees from each BCT
-std::vector<CBeeCreationTransactionInfo> CWallet::GetBCTs(bool includeDead, bool scanRewards, const Consensus::Params& consensusParams) {
+std::vector<CBeeCreationTransactionInfo> CWallet::GetBCTs(bool includeDead, bool scanRewards, const Consensus::Params& consensusParams, int minHoneyConfirmations) {
     std::vector<CBeeCreationTransactionInfo> bcts;
 
     if (chainActive.Height() == 0)  // Don't continue if chainActive is invalid; we may be reindexing
@@ -2782,7 +2782,7 @@ std::vector<CBeeCreationTransactionInfo> CWallet::GetBCTs(bool includeDead, bool
                     continue;
 
                 // Skip unconfirmed transactions and orphans
-                if (wtx2.GetDepthInMainChain() < 1)
+                if (wtx2.GetDepthInMainChain() < minHoneyConfirmations)
                     continue;
 
                 // Grab the txid (bytes 14-78)

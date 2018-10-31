@@ -37,6 +37,7 @@
 #include <QSet>
 #include <QTimer>
 
+#include <policy/policy.h>  // LitecoinCash: Hive: For GetVirtualTransactionSize
 
 WalletModel::WalletModel(const PlatformStyle *platformStyle, CWallet *_wallet, OptionsModel *_optionsModel, QObject *parent) :
     QObject(parent), wallet(_wallet), optionsModel(_optionsModel), addressTableModel(0),
@@ -667,7 +668,7 @@ void WalletModel::getBCTs(std::vector<CBeeCreationTransactionInfo>& vBeeCreation
 }
 
 // LitecoinCash: Hive
-bool WalletModel::createBees(int beeCount, bool communityContrib, QWidget *parent) {
+bool WalletModel::createBees(int beeCount, bool communityContrib, QWidget *parent, double beePopIndex) {
     wallet->BlockUntilSyncedToCurrentChain();
 
     LOCK2(cs_main, wallet->cs_wallet);
@@ -684,21 +685,32 @@ bool WalletModel::createBees(int beeCount, bool communityContrib, QWidget *paren
 
     CAmount totalAmount = wtxNew.GetDebit(ISMINE_ALL) - wtxNew.GetCredit(ISMINE_ALL);
     CAmount txFee = wtxNew.GetDebit(ISMINE_ALL) - wtxNew.tx->GetValueOut();
+    CAmount amountWithoutFees = totalAmount - txFee;
 
-    QString questionString = tr("Do you wish to proceed with bee creation?");
+    QString questionString = tr("Are you sure you want to create bees?<br />");
+
+    if (beePopIndex > 90)
+        questionString.append("<br /><span style='color:#aa0000;'><b>WARNING:</b> Gashi Index is high and bees may not be profitable. Please ensure you understand the consequences before proceeding.</span><br />");
+
     questionString.append("<br />");
-    questionString.append("<table style=\"text-align: left;\">");
-    questionString.append("<tr><td>");
-    questionString.append(tr("Bee count:"));
-    questionString.append("</td><td>");
-    questionString.append(QString::number(beeCount));
-    questionString.append("</td></tr><tr><td>");
-    questionString.append(tr("Total cost:"));
-    questionString.append("</td><td>");
-    questionString.append(BitcoinUnits::formatHtmlWithUnit(optionsModel->getDisplayUnit(), totalAmount));
-    questionString.append("</td></tr><tr><td colspan=\"2\">");
-    questionString.append("(including " + BitcoinUnits::formatHtmlWithUnit(optionsModel->getDisplayUnit(), txFee) + " tx fee)");
-    questionString.append("</td></tr></table>");
+    questionString.append("<b>" + BitcoinUnits::formatHtmlWithUnit(optionsModel->getDisplayUnit(), amountWithoutFees) + "</b>");
+    questionString.append(" to create " + QString::number(beeCount) + " bees");
+
+    questionString.append("<hr /><span style='color:#aa0000;'>");
+    questionString.append(BitcoinUnits::formatHtmlWithUnit(optionsModel->getDisplayUnit(), txFee));
+    questionString.append("</span> ");
+    questionString.append(tr("added as transaction fee"));
+    questionString.append(" (" + QString::number((double)GetVirtualTransactionSize(*wtxNew.tx) / 1000) + " kB)");
+    questionString.append("<hr />");
+
+    questionString.append("Total Amount " + BitcoinUnits::formatHtmlWithUnit(optionsModel->getDisplayUnit(), totalAmount));
+    QStringList alternativeUnits;
+    for (BitcoinUnits::Unit u : BitcoinUnits::availableUnits()) {
+        if(u != optionsModel->getDisplayUnit())
+            alternativeUnits.append(BitcoinUnits::formatHtmlWithUnit(u, totalAmount));
+    }
+    questionString.append(QString("<span style='font-size:10pt;font-weight:normal;'><br />(=%1)</span>").arg(alternativeUnits.join(" " + tr("or") + "<br />")));
+
     SendConfirmationDialog confirmationDialog(tr("Confirm bee creation"), questionString);
     confirmationDialog.exec();
     QMessageBox::StandardButton retval = (QMessageBox::StandardButton)confirmationDialog.result();
