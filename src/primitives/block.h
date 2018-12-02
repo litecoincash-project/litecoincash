@@ -71,7 +71,7 @@ public:
 
     // LitecoinCash: Hive: Check if this block is hivemined
     bool IsHiveMined(const Consensus::Params& consensusParams) const {
-        return (nVersion & ((uint32_t)1 << consensusParams.hiveVersionBit));
+        return (nNonce == consensusParams.hiveNonceMarker);
     }
 };
 

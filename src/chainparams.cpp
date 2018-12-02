@@ -119,17 +119,17 @@ public:
 
         // LitecoinCash: Hive: Consensus Fields
         consensus.minBeeCost = 10000;                       // Minimum cost of a bee, used when no more block rewards
-        consensus.beeCostFactor = 250;                      // Bee cost is block_reward/beeCostFactor
+        consensus.beeCostFactor = 2500;                     // Bee cost is block_reward/beeCostFactor
         consensus.beeCreationAddress = "CReateLitecoinCashWorkerBeeXYs19YQ";        // Unspendable address for bee creation
         consensus.hiveCommunityAddress = "CashierDaZEsyBQkuvv4c2uPZFx6m2XTgT";      // Community fund address
         consensus.communityContribFactor = 10;              // Optionally, donate bct_value/maxCommunityContribFactor to community fund
-        consensus.beeGestationBlocks = 1152;                // The number of blocks for a new bee to mature
-        consensus.beeLifespanBlocks = 8064;                 // The number of blocks a bee lives for after maturation
+        consensus.beeGestationBlocks = 48*24;               // The number of blocks for a new bee to mature
+        consensus.beeLifespanBlocks = 48*24*14;             // The number of blocks a bee lives for after maturation
         consensus.powLimitHive = uint256S("0fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");  // Highest (easiest) bee hash target
-        consensus.hiveVersionBit = 12;                      // Hive nVersion block marker bit
-        consensus.minHiveCheckBlock = 1480000;              // Don't bother checking below this height for Hive blocks (not used for consensus/validation checks, just efficiency when looking for potential BCTs)
+        consensus.minHiveCheckBlock = 1528214;              // Don't bother checking below this height for Hive blocks (not used for consensus/validation checks, just efficiency when looking for potential BCTs)
         consensus.hiveTargetAdjustAggression = 30;          // Snap speed for bee hash target adjustment EMA
-        consensus.hiveBlockSpacingTarget = 2;               // Target Hive block frequency (1 per this many blocks)
+        consensus.hiveBlockSpacingTarget = 2;               // Target Hive block frequency (1 out of this many blocks should be Hivemined)
+        consensus.hiveNonceMarker = 192;                    // Nonce marker for hivemined blocks
 
         // The best chain should have at least this much work.
         consensus.nMinimumChainWork = uint256S("0x0000000000000000000000000000000000000000000000401b101e2e526d5821");  // LitecoinCash: At LAST_SCRYPT_BLOCK+1
@@ -213,10 +213,10 @@ public:
         strNetworkID = "test";
         consensus.nSubsidyHalvingInterval = 840000;
         consensus.BIP16Height = 0; // always enforce P2SH BIP16 on regtest
-        consensus.BIP34Height = 148;
-        consensus.BIP34Hash = uint256S("000000127e7eb0c2a6337d6f3858296e9c38b57b3b464ae4865c58716ddcbf15"); // Block hash at block 154
-        consensus.BIP65Height = 148;
-        consensus.BIP66Height = 148;
+        consensus.BIP34Height = 146;
+        consensus.BIP34Hash = uint256S("000000042bcd56d6ea0509230b76fe850f0a40a9110f7dba979fd5d707e47c8a"); // Block hash at block 146
+        consensus.BIP65Height = 146;
+        consensus.BIP66Height = 146;
         consensus.powLimit = uint256S("00000fffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
         consensus.nPowTargetTimespan = 3.5 * 24 * 60 * 60; // 3.5 days
         consensus.nPowTargetSpacing = 2.5 * 60;
@@ -244,7 +244,7 @@ public:
         consensus.vDeployments[Consensus::DEPLOYMENT_HIVE].nTimeout = 1535587200 + 31536000; // Start + 1 year
 
         // LitecoinCash fields
-        consensus.powForkTime = 1542312795;                 // Time of PoW hash method change (block 100)
+        consensus.powForkTime = 1543765622;                 // Time of PoW hash method change (block 100)
         consensus.lastScryptBlock = 100;                    // Height of last scrypt block
         consensus.powLimitSHA = uint256S("000000ffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");   // Initial hash target at fork
         consensus.slowStartBlocks = 40;                     // Scale post-fork block reward up over this many blocks
@@ -262,16 +262,16 @@ public:
         consensus.beeGestationBlocks = 48*24;               // The number of blocks for a new bee to mature
         consensus.beeLifespanBlocks = 48*24*14;             // The number of blocks a bee lives for after maturation
         consensus.powLimitHive = uint256S("0fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");  // Highest (easiest) bee hash target
-        consensus.hiveVersionBit = 12;                      // Hive nVersion block marker bit
         consensus.minHiveCheckBlock = 100;                  // Don't bother checking below this height for Hive blocks (not used for consensus/validation checks, just efficiency when looking for potential BCTs)
         consensus.hiveTargetAdjustAggression = 30;          // Snap speed for bee hash target adjustment EMA
         consensus.hiveBlockSpacingTarget = 2;               // Target Hive block frequency (1 out of this many blocks should be Hivemined)
+        consensus.hiveNonceMarker = 192;                    // Nonce marker for hivemined blocks
 
         // The best chain should have at least this much work.
-        consensus.nMinimumChainWork = uint256S("0x000000000000000000000000000000000000000000000000000000070aad02a2");  // LitecoinCash: 179
+        consensus.nMinimumChainWork = uint256S("0x000000000000000000000000000000000000000000000000000000014e21bb45");  // LitecoinCash: 179
 
         // By default assume that the signatures in ancestors of this block are valid.
-        consensus.defaultAssumeValid = uint256S("000000003f3ccadca6e6cd975a0e0b39d30aa46886a4e2660b91e35d659c98c7"); // LitecoinCash: 179
+        consensus.defaultAssumeValid = uint256S("00000001e6d34f6879ef8abecf6f4eaf7413700e6f6b37cfb0647606736fa7f0"); // LitecoinCash: 157
 
         pchMessageStart[0] = 0xb6;
         pchMessageStart[1] = 0xf5;
@@ -286,7 +286,7 @@ public:
         assert(genesis.hashMerkleRoot == uint256S("0x97ddfbbae6be97fd6cdf3e7ca13232a3afff2353e29badfab7f73011edd4ced9"));
 
         vFixedSeeds.clear();
-        vSeeds.clear();
+        vSeeds.emplace_back("testseeds.litecoinca.sh");
         
         base58Prefixes[PUBKEY_ADDRESS] = std::vector<unsigned char>(1,127);
         base58Prefixes[SCRIPT_ADDRESS] = std::vector<unsigned char>(1,196);
@@ -305,16 +305,16 @@ public:
 
         checkpointData = (CCheckpointData) {
             {
-                {100, uint256S("5149cc4e066097355c74f0ed9dc09cbfe2c0825c3345f3f0ad4fce747008d469")},    // Last Scrypt block
-                {148, uint256S("000000127e7eb0c2a6337d6f3858296e9c38b57b3b464ae4865c58716ddcbf15")},    // BIP34/BIP65/BIP66 activation
-                {179, uint256S("000000003f3ccadca6e6cd975a0e0b39d30aa46886a4e2660b91e35d659c98c7")}
+                {100, uint256S("f05a7f0666f3062464d25d9c2a87d6c235d03158ea593595dacd2ed6a22010d1")},    // Last Scrypt block
+                {146, uint256S("000000042bcd56d6ea0509230b76fe850f0a40a9110f7dba979fd5d707e47c8a")},    // BIP34/BIP65/BIP66 activation
+                {157, uint256S("00000001e6d34f6879ef8abecf6f4eaf7413700e6f6b37cfb0647606736fa7f0")}
             }
         };
 
-        chainTxData = ChainTxData{  // As at 179
-            1542313623,
-            180,
-            0.01
+        chainTxData = ChainTxData{  // As at 157
+            1543766363,
+            158,
+            0.01    // Assumed
         };
     }
 };

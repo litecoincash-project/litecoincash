@@ -98,10 +98,10 @@ struct Params {
     int beeGestationBlocks;             // The number of blocks for a new bee to mature
     int beeLifespanBlocks;              // The number of blocks a bee lives for after maturation
     uint256 powLimitHive;               // Highest (easiest) bee hash target
-    int hiveVersionBit;                 // Hive nVersion block marker bit
+    int hiveNonceMarker;                // Nonce marker for hivemined blocks
     int minHiveCheckBlock;              // Don't bother checking below this height for Hive blocks (not used for consensus/validation checks, just efficiency when looking for potential BCTs)
     int hiveTargetAdjustAggression;     // Snap speed for bee hash target adjustment EMA
-    int hiveBlockSpacingTarget;         // Target Hive block frequency (1 out of this many blocks should be Hive)
+    int hiveBlockSpacingTarget;         // Target Hive block frequency (1 out of this many blocks should be Hive)    
 };
 } // namespace Consensus
 

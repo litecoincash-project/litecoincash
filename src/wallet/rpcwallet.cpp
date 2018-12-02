@@ -640,6 +640,38 @@ UniValue createbees(const JSONRPCRequest& request)
         throw JSONRPCError(RPC_WALLET_BCT_FAIL, strError);
 }
 
+// LitecoinCash: Hive: Nonce finder
+UniValue findfreenonce(const JSONRPCRequest& request)
+{
+    if (request.fHelp || request.params.size() > 0)
+        throw std::runtime_error(
+            "findfreenonce\n"
+            "\nDev util function to find an unused nonce.\n"
+            "\nResult:\n"
+            "{\n"
+            "  clear_nonce     (numeric) A clear nonce\n"
+            "}\n"
+            "\nExamples:\n"
+            + HelpExampleCli("findfreenonce", "")
+            + HelpExampleRpc("findfreenonce", "")
+        );
+
+    UniValue jsonResults(UniValue::VOBJ);
+    uint32_t nonce = 0;
+    CBlockIndex* blk = chainActive.Tip();
+    while (blk->pprev) {
+        if (blk->nNonce == nonce) {
+            nonce++;
+            blk = chainActive.Tip();
+            LogPrintf("findfreenonce() : Trying... %i\n", nonce);
+        } else
+            blk = blk->pprev;        
+    }
+    LogPrintf("findfreenonce() : %i is clear\n", nonce);
+    jsonResults.push_back(Pair("clear_nonce", (uint64_t)nonce));
+    return jsonResults;
+}
+
 // LitecoinCash: Hive: Get network hive info
 UniValue getnetworkhiveinfo(const JSONRPCRequest& request)
 {
@@ -691,7 +723,7 @@ UniValue gethiveinfo(const JSONRPCRequest& request)
 
     if (request.fHelp || request.params.size() > 2)
         throw std::runtime_error(
-            "gethiveinfo ( include_dead )\n"
+            "gethiveinfo ( include_dead, min_honey_confirms )\n"
             "\nLists the status of your current hive, broken down by bee creation transaction.\n"
             "\nArguments:\n"
             "1. include_dead           (boolean, optional, default=false) Include bees whose lifespans have expired\n"
@@ -3895,6 +3927,7 @@ static const CRPCCommand commands[] =
     { "wallet",             "createbees",               &createbees,               {"bee_count","community_contrib","honey_address"} },     // LitecoinCash: Hive: Create bee(s)
     { "wallet",             "gethiveinfo",              &gethiveinfo,              {"include_dead","min_honey_confirms"} },                 // LitecoinCash: Hive: Get current hive info
     { "wallet",             "getnetworkhiveinfo",       &getnetworkhiveinfo,       {} },                                                    // LitecoinCash: Hive: Get current bee populations across whole network
+    { "wallet",             "findfreenonce",            &findfreenonce,            {} },                                                    // LitecoinCash: Hive: Find a free nonce (dev only)
     { "rawtransactions",    "fundrawtransaction",       &fundrawtransaction,       {"hexstring","options","iswitness"} },
     { "hidden",             "resendwallettransactions", &resendwallettransactions, {} },
     { "wallet",             "abandontransaction",       &abandontransaction,       {"txid"} },
