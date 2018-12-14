@@ -12,11 +12,13 @@
 
 #include <stdint.h>
 
-/* Seed OpenSSL PRNG with additional entropy data */
-void RandAddSeed();
-
 /**
- * Functions to gather random data via the OpenSSL PRNG
+ * Generate random data via the internal PRNG.
+ *
+ * These functions are designed to be fast (sub microsecond), but do not necessarily
+ * meaningfully add entropy to the PRNG state.
+ *
+ * Thread-safe.
  */
 void GetRandBytes(unsigned char* buf, int num);
 uint64_t GetRand(uint64_t nMax);
@@ -24,21 +26,30 @@ int GetRandInt(int nMax);
 uint256 GetRandHash();
 
 /**
- * Add a little bit of randomness to the output of GetStrongRangBytes.
- * This sleeps for a millisecond, so should only be called when there is
- * no other work to be done.
- */
-void RandAddSeedSleep();
-
-/**
- * Function to gather random data from multiple sources, failing whenever any
- * of those source fail to provide a result.
+ * Gather entropy from various sources, feed it into the internal PRNG, and
+ * generate random data using it.
+ *
+ * This function will cause failure whenever the OS RNG fails.
+ *
+ * Thread-safe.
  */
 void GetStrongRandBytes(unsigned char* buf, int num);
 
 /**
+* Generate random data via the internal PRNG.
+*
+* These functions are designed to be fast (sub microsecond), but do not necessarily
+* meaningfully add entropy to the PRNG state.
+*
+* Thread-safe.
+*/
+
+void RandAddSeedSleep();
+
+/**
  * Fast randomness source. This is seeded once with secure random data, but
- * is completely deterministic and insecure after that.
+ * is completely deterministic and does not gather more entropy after that.
+ *
  * This class is not thread-safe.
  */
 class FastRandomContext {
