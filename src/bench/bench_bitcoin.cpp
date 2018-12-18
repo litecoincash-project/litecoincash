@@ -6,8 +6,10 @@
 
 #include <crypto/sha256.h>
 #include <key.h>
+
 #include <validation.h>
 #include <util.h>
+#include <utilstrencodings.h>
 #include <random.h>
 
 #include <boost/lexical_cast.hpp>
@@ -43,7 +45,6 @@ main(int argc, char** argv)
     }
 
     SHA256AutoDetect();
-    RandomInit();
     SetupEnvironment();
     fPrintToDebugLog = false; // don't want to write to debug.log file
 

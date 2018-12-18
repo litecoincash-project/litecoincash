@@ -36,7 +36,7 @@ class prevector_tester {
         {
             local_check(a == b);
         }
-    void local_check(bool b) 
+    void local_check(bool b)
     {
         passed &= b;
     }
@@ -189,8 +189,8 @@ public:
 
     prevector_tester() {
         SeedInsecureRand();
-        rand_seed = insecure_rand_seed;
-        rand_cache = insecure_rand_ctx;
+        rand_seed = InsecureRand256();
+        rand_cache = FastRandomContext(rand_seed);
     }
 };
 

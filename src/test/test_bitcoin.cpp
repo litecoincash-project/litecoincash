@@ -32,23 +32,22 @@ void CConnmanTest::ClearNodes()
 }
 
 uint256 insecure_rand_seed = GetRandHash();
-FastRandomContext insecure_rand_ctx(insecure_rand_seed);
+FastRandomContext insecure_rand_ctx;
 
 extern bool fPrintToConsole;
 extern void noui_connect();
 
 BasicTestingSetup::BasicTestingSetup(const std::string& chainName)
 {
-        SHA256AutoDetect();
-        RandomInit();
-        SetupEnvironment();
-        SetupNetworking();
-        InitSignatureCache();
-        InitScriptExecutionCache();
-        fPrintToDebugLog = false; // don't want to write to debug.log file
-        fCheckBlockIndex = true;
-        SelectParams(chainName);
-        noui_connect();
+    SHA256AutoDetect();
+    SetupEnvironment();
+    SetupNetworking();
+    InitSignatureCache();
+    InitScriptExecutionCache();
+    fPrintToDebugLog = false; // don't want to write to debug.log file
+    fCheckBlockIndex = true;
+    SelectParams(chainName);
+    noui_connect();
 }
 
 BasicTestingSetup::~BasicTestingSetup() { }
