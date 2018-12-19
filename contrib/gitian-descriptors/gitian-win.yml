@@ -22,8 +22,8 @@ packages:
 - "ca-certificates"
 - "python"
 remotes:
-- "url": "https://github.com/litecoincash-project/litecoincash-hive.git"
-  "dir": "litecoincash-hive"
+- "url": "https://github.com/litecoincash-project/litecoincash.git"
+  "dir": "litecoincash"
 files: []
 script: |
   WRAP_DIR=$HOME/wrapped
