@@ -226,7 +226,7 @@ background-color:white;}</string>
            <string>The community fund works by diverting a portion of the unspendable bee creation fee to the spendable community fund address. This enables us to keep developing Litecoin Cash.</string>
           </property>
           <property name="text">
-           <string>Send 10% of bee fee to Community Fund (This costs you no extra, and you still get the same number of bees)</string>
+           <string>Send 10% of bee fee to Community Fund (Bee price remains the same and you still get the same number of bees)</string>
           </property>
           <property name="checked">
            <bool>true</bool>
