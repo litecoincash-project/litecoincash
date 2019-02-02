@@ -353,7 +353,7 @@ void HiveDialog::initGraph() {
 
     giTicker = QSharedPointer<QCPAxisTickerGI>(new QCPAxisTickerGI);
     ui->beePopGraph->yAxis2->setTicker(giTicker);
-    ui->beePopGraph->yAxis2->setLabel("Gashi index");
+    ui->beePopGraph->yAxis2->setLabel("Global index");
     ui->beePopGraph->yAxis2->setVisible(true);
 
     ui->beePopGraph->xAxis->setTickLabelFont(QFont(QFont().family(), 8));
@@ -365,8 +365,8 @@ void HiveDialog::initGraph() {
     connect(ui->beePopGraph->yAxis, SIGNAL(rangeChanged(QCPRange)), ui->beePopGraph->yAxis2, SLOT(setRange(QCPRange)));
     connect(ui->beePopGraph, SIGNAL(mouseMove(QMouseEvent*)), this, SLOT(onMouseMove(QMouseEvent*)));
 
-    gashiMarkerLine = new QCPItemLine(ui->beePopGraph);
-    gashiMarkerLine->setPen(QPen(Qt::blue, 1, Qt::DashLine));
+    globalMarkerLine = new QCPItemLine(ui->beePopGraph);
+    globalMarkerLine->setPen(QPen(Qt::blue, 1, Qt::DashLine));
     
     graphTracerImmature = new QCPItemTracer(ui->beePopGraph);
     graphTracerImmature->setGraph(ui->beePopGraph->graph(0));
@@ -394,10 +394,10 @@ void HiveDialog::updateGraph() {
     ui->beePopGraph->graph(0)->data()->set(dataImmature);
     ui->beePopGraph->graph(1)->data()->set(dataMature);
 
-    double gashi100 = (double)potentialRewards / beeCost;
-    gashiMarkerLine->start->setCoords(now, gashi100);
-    gashiMarkerLine->end->setCoords(now + consensusParams.nPowTargetSpacing / 2 * totalLifespan, gashi100);
-    giTicker->gashi100 = gashi100;
+    double global100 = (double)potentialRewards / beeCost;
+    globalMarkerLine->start->setCoords(now, global100);
+    globalMarkerLine->end->setCoords(now + consensusParams.nPowTargetSpacing / 2 * totalLifespan, global100);
+    giTicker->global100 = global100;
     ui->beePopGraph->rescaleAxes();
     ui->beePopGraph->replot();
 }
@@ -414,9 +414,9 @@ void HiveDialog::onMouseMove(QMouseEvent *event) {
     int beeCountMature = (int)graphTracerMature->position->value();      
 
     QDateTime xDateTime = QDateTime::fromTime_t(x);
-    int gashi100 = (int)((double)potentialRewards / beeCost);
-    QColor traceColMature = beeCountMature >= gashi100 ? Qt::red : Qt::black;
-    QColor traceColImmature = beeCountImmature >= gashi100 ? Qt::red : Qt::black;
+    int global100 = (int)((double)potentialRewards / beeCost);
+    QColor traceColMature = beeCountMature >= global100 ? Qt::red : Qt::black;
+    QColor traceColImmature = beeCountImmature >= global100 ? Qt::red : Qt::black;
 
     graphTracerImmature->setPen(QPen(traceColImmature, 1, Qt::DashLine));    
     graphTracerMature->setPen(QPen(traceColMature, 1, Qt::DashLine));

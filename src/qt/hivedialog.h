@@ -35,10 +35,10 @@ extern BeePopGraphPoint beePopGraph[12000];
 class QCPAxisTickerGI : public QCPAxisTicker 
 {
 public:
-    double gashi100;
+    double global100;
 
     QString getTickLabel(double tick, const QLocale &locale, QChar formatChar, int precision) {
-        tick = (tick / gashi100 * 100); // At tick = gashi100, scale is 100
+        tick = (tick / global100 * 100); // At tick = global100, scale is 100
         return QString::number((int)tick);
     }
 };
@@ -91,7 +91,7 @@ private:
     QCPItemText *graphMouseoverText;
     QCPItemTracer *graphTracerMature;
     QCPItemTracer *graphTracerImmature;
-    QCPItemLine *gashiMarkerLine;
+    QCPItemLine *globalMarkerLine;
     QSharedPointer<QCPAxisTickerGI> giTicker;
 
     void updateTotalCostDisplay();

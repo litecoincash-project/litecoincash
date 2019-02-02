@@ -947,7 +947,7 @@ std::string CopyrightHolders(const std::string& strPrefix)
 {
     // LitecoinCash: Add a row
     std::string strFirstPrefix = strPrefix;    
-    strFirstPrefix.replace(strFirstPrefix.find("2011-"), sizeof("2011-")-1, "");        
+    strFirstPrefix.replace(strFirstPrefix.find("2011-"), sizeof("2011-")-1, "2018-");        
     std::string strCopyrightHolders = strFirstPrefix + strprintf(_(COPYRIGHT_HOLDERS), _(COPYRIGHT_HOLDERS_SUBSTITUTION));
     
     // LitecoinCash: Check for untranslated substitution to make sure Litecion Core copyright is not removed by accident

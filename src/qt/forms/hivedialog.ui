@@ -631,12 +631,12 @@ still fully unlock it to send funds.</string>
          <item>
           <widget class="QLabel" name="label_16">
            <property name="toolTip">
-            <string>The Gashi Index is a measure of network bee population. At a value of 100,
+            <string>The Global Index is a measure of network bee population. At a value of 100,
 the network is saturated with the maximum number of bees that are expected
 to make back their cost. At values below 100, it is expected at all bees will be profitable.</string>
            </property>
            <property name="text">
-            <string>&lt;a href=&quot;https://hive.litecoinca.sh/gi/&quot;&gt;&lt;span style=&quot;text-decoration: underline;&quot;&gt;Gashi index&lt;/span&gt;&lt;/a&gt;: </string>
+            <string>&lt;a href=&quot;https://hive.litecoinca.sh/gi/&quot;&gt;&lt;span style=&quot;text-decoration: underline;&quot;&gt;Global index&lt;/span&gt;&lt;/a&gt;: </string>
            </property>
            <property name="alignment">
             <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -649,7 +649,7 @@ to make back their cost. At values below 100, it is expected at all bees will be
          <item>
           <widget class="QLabel" name="beePopIndexLabel">
            <property name="toolTip">
-            <string>The Gashi Index is a measure of network bee population. At a value of 100,
+            <string>The Global Index is a measure of network bee population. At a value of 100,
 the network is saturated with the maximum number of bees that are expected
 to make back their cost. At values below 100, it is expected at all bees will be profitable.</string>
            </property>
@@ -689,7 +689,7 @@ to make back their cost. At values below 100, it is expected at all bees will be
             </size>
            </property>
            <property name="toolTip">
-            <string>The Gashi Index is a measure of network bee population. At a value of 100,
+            <string>The Global Index is a measure of network bee population. At a value of 100,
 the network is saturated with the maximum number of bees that are expected
 to make back their cost. At values below 100, it is expected at all bees will be profitable.</string>
            </property>
