@@ -1955,6 +1955,10 @@ void ListTransactions(CWallet* const pwallet, const CWalletTx& wtx, const std::s
                 }
                 entry.push_back(Pair("account", account));
                 MaybePushAddress(entry, r.destination);
+
+                // LitecoinCash: Hive: Indicate whether this is honey (hive block coinbase tx)
+                entry.push_back(Pair("isHoney", wtx.IsHiveCoinBase()));
+                
                 if (wtx.IsCoinBase())
                 {
                     if (wtx.GetDepthInMainChain() < 1)
@@ -2021,6 +2025,7 @@ UniValue listtransactions(const JSONRPCRequest& request)
             "                                                It will be \"\" for the default account.\n"
             "    \"address\":\"address\",    (string) The litecoincash address of the transaction. Not present for \n"
             "                                                move transactions (category = move).\n"
+            "    \"ishoney\": xxx,           (bool) Whether this transaction is honey (hive block coinbase transaction)\n"
             "    \"category\":\"send|receive|move\", (string) The transaction category. 'move' is a local (off blockchain)\n"
             "                                                transaction between accounts, and not associated with an address,\n"
             "                                                transaction id or block. 'send' and 'receive' transactions are \n"
