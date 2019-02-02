@@ -1924,6 +1924,10 @@ void ListTransactions(CWallet* const pwallet, const CWalletTx& wtx, const std::s
             }
             entry.push_back(Pair("account", strSentAccount));
             MaybePushAddress(entry, s.destination);
+            
+            // LitecoinCash: Hive: Sent transactions are never honey
+            entry.push_back(Pair("ishoney", false));
+
             entry.push_back(Pair("category", "send"));
             entry.push_back(Pair("amount", ValueFromAmount(-s.amount)));
             if (pwallet->mapAddressBook.count(s.destination)) {
@@ -1957,7 +1961,7 @@ void ListTransactions(CWallet* const pwallet, const CWalletTx& wtx, const std::s
                 MaybePushAddress(entry, r.destination);
 
                 // LitecoinCash: Hive: Indicate whether this is honey (hive block coinbase tx)
-                entry.push_back(Pair("isHoney", wtx.IsHiveCoinBase()));
+                entry.push_back(Pair("ishoney", wtx.IsHiveCoinBase()));
                 
                 if (wtx.IsCoinBase())
                 {
@@ -2009,6 +2013,7 @@ UniValue listtransactions(const JSONRPCRequest& request)
         return NullUniValue;
     }
 
+    // LitecoinCash: Hive: Include ishoney in documentation
     if (request.fHelp || request.params.size() > 4)
         throw std::runtime_error(
             "listtransactions ( \"account\" count skip include_watchonly)\n"
