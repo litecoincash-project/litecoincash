@@ -249,7 +249,6 @@ bool GetNetworkHiveInfo(int& immatureBees, int& immatureBCTs, int& matureBees, i
 
     if (recalcGraph) {
         for (int i = 0; i < totalBeeLifespan; i++) {
-            beePopGraph[i].block = tipHeight + i;
             beePopGraph[i].immaturePop = 0;
             beePopGraph[i].maturePop = 0;
         }

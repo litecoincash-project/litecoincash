@@ -643,17 +643,21 @@ UniValue createbees(const JSONRPCRequest& request)
 // LitecoinCash: Hive: Get network hive info
 UniValue getnetworkhiveinfo(const JSONRPCRequest& request)
 {
-    if (request.fHelp || request.params.size() > 0)
+    if (request.fHelp || request.params.size() > 1)
         throw std::runtime_error(
-            "getnetworkhiveinfo\n"
-            "\nLists the mature and immature bee populations across the entire network.\n"
+            "getnetworkhiveinfo ( include_graph )\n"
+            "\nLists the mature and immature bee populations across the entire network. Optionally returns values to plot the future bee population.\n"
+            "\nArguments:\n"
+            "1. include_graph                  (boolean, optional, default=false) Include bee population graph\n"
             "\nResult:\n"
             "{\n"
-            "  immature_bee_count,     (numeric) The number of immature bees\n"
-            "  immature_bct_count,     (numeric) The number of immature Bee Creation Transactions\n"
-            "  mature_bee_count,       (numeric) The number of mature bees\n"
-            "  mature_bct_count,       (numeric) The number of mature Bee Creation Transactions\n"
-            "  honey_pot               (numeric) Total potential network rewards available during bee lifespan (in " + CURRENCY_UNIT + ")\n"
+            "  immature_bee_count,             (numeric) The number of immature bees\n"
+            "  immature_bct_count,             (numeric) The number of immature Bee Creation Transactions\n"
+            "  mature_bee_count,               (numeric) The number of mature bees\n"
+            "  mature_bct_count,               (numeric) The number of mature Bee Creation Transactions\n"
+            "  honey_pot,                      (numeric) Total potential network rewards available during bee lifespan (in " + CURRENCY_UNIT + ")\n"
+            "  mature_bee_pop_graph: [ ... ],  (numeric array) Graph points for mature bee population over upcoming bee gestation span + bee lifespan blocks\n"
+            "  immature_bee_pop_graph: [ ... ] (numeric array) Graph points for immature bee population over upcoming bee gestation span\n"
             "}\n"
             "\nExamples:\n"
             + HelpExampleCli("getnetworkhiveinfo", "")
@@ -667,9 +671,15 @@ UniValue getnetworkhiveinfo(const JSONRPCRequest& request)
     if (!IsHiveEnabled(pindexPrev, consensusParams))
         throw std::runtime_error("Error: The Hive is not yet enabled on the network");
 
+    bool includeGraph = false;
+    if (!request.params[0].isNull()) {
+        RPCTypeCheckArgument(request.params[0], UniValue::VBOOL);
+        includeGraph = request.params[0].get_bool();
+    }
+
     int globalImmatureBees, globalImmatureBCTs, globalMatureBees, globalMatureBCTs;
     CAmount potentialRewards;
-    if (!GetNetworkHiveInfo(globalImmatureBees, globalImmatureBCTs, globalMatureBees, globalMatureBCTs, potentialRewards, consensusParams))
+    if (!GetNetworkHiveInfo(globalImmatureBees, globalImmatureBCTs, globalMatureBees, globalMatureBCTs, potentialRewards, consensusParams, includeGraph))
         throw std::runtime_error("Error: A block required to calculate network bee population was not available (pruned data / not found on disk)");
 
     UniValue jsonResults(UniValue::VOBJ);
@@ -679,6 +689,18 @@ UniValue getnetworkhiveinfo(const JSONRPCRequest& request)
     jsonResults.push_back(Pair("mature_bct_count", globalMatureBCTs));
     jsonResults.push_back(Pair("honey_pot", potentialRewards));
 
+    if (includeGraph) {
+        int totalBeeLifespan = consensusParams.beeLifespanBlocks + consensusParams.beeGestationBlocks;
+        UniValue maturePopJSON(UniValue::VARR);
+        for (int i = 1; i < totalBeeLifespan; i++)
+            maturePopJSON.push_back(beePopGraph[i].maturePop);
+        jsonResults.push_back(Pair("mature_bee_pop_graph", maturePopJSON));
+
+        UniValue immaturePopJSON(UniValue::VARR);
+        for (int i = 1; i < consensusParams.beeGestationBlocks; i++)
+            immaturePopJSON.push_back(beePopGraph[i].immaturePop);
+        jsonResults.push_back(Pair("immature_bee_pop_graph", immaturePopJSON));
+    }
     return jsonResults;
 }
 
@@ -3904,7 +3926,7 @@ static const CRPCCommand commands[] =
     { "wallet",             "getbeecost",               &getbeecost,               {"height"} },                                            // LitecoinCash: Hive: Get bee cost for given height (defaults to tipheight)
     { "wallet",             "createbees",               &createbees,               {"bee_count","community_contrib","honey_address"} },     // LitecoinCash: Hive: Create bee(s)
     { "wallet",             "gethiveinfo",              &gethiveinfo,              {"include_dead","min_honey_confirms"} },                 // LitecoinCash: Hive: Get current hive info
-    { "wallet",             "getnetworkhiveinfo",       &getnetworkhiveinfo,       {} },                                                    // LitecoinCash: Hive: Get current bee populations across whole network
+    { "wallet",             "getnetworkhiveinfo",       &getnetworkhiveinfo,       {"include_graph"} },                                     // LitecoinCash: Hive: Get current bee populations across whole network
     { "rawtransactions",    "fundrawtransaction",       &fundrawtransaction,       {"hexstring","options","iswitness"} },
     { "hidden",             "resendwallettransactions", &resendwallettransactions, {} },
     { "wallet",             "abandontransaction",       &abandontransaction,       {"txid"} },

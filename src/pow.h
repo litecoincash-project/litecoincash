@@ -16,7 +16,6 @@ class uint256;
 class CBlock;
 
 struct BeePopGraphPoint {
-    int block;
     int immaturePop;
     int maturePop;
 };

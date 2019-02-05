@@ -30,7 +30,7 @@ QT_BEGIN_NAMESPACE
 class QModelIndex;
 QT_END_NAMESPACE
 
-extern BeePopGraphPoint beePopGraph[12000];
+extern BeePopGraphPoint beePopGraph[1024*40];
 
 class QCPAxisTickerGI : public QCPAxisTicker 
 {
