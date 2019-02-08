@@ -704,6 +704,56 @@ UniValue getnetworkhiveinfo(const JSONRPCRequest& request)
     return jsonResults;
 }
 
+// LitecoinCash: Hive: Return BCT tx id for a honey transaction in this wallet
+UniValue getbeecreationtxid(const JSONRPCRequest& request)
+{
+    CWallet * const pwallet = GetWalletForJSONRPCRequest(request);
+    if (!EnsureWalletIsAvailable(pwallet, request.fHelp))
+        return NullUniValue;
+
+    if (request.fHelp || request.params.size() != 1)
+        throw std::runtime_error(
+            "getbeecreationtxid \"honey_txid\"\n"
+            "\nGives the BCT transaction id for a given honey transaction received by this wallet.\n"
+            "\nArguments:\n"
+            "1. honey_txid          (string) Transaction ID of a honey transaction received by this wallet\n"
+            "\nResult:\n"
+            "\"hex\"                  (string) Transaction ID of the BCT responsible for this honey\n"
+            "\nExamples:\n"
+            + HelpExampleCli("getbeecreationtxid", "bd76be6d12dfd072a605fd85a2aa956f6f5e0dee5dbbb0b4b5da5e72966b9dfd")
+        );
+        
+    ObserveSafeMode();
+    pwallet->BlockUntilSyncedToCurrentChain();
+
+    LOCK2(cs_main, pwallet->cs_wallet);
+
+    uint256 honeyTxHash;
+    honeyTxHash.SetHex(request.params[0].get_str());
+
+    // Grab the tx    
+    auto it = pwallet->mapWallet.find(honeyTxHash);
+    if (it == pwallet->mapWallet.end())
+        throw JSONRPCError(RPC_INVALID_PARAMETER, "Invalid or non-wallet transaction id");
+    const CWalletTx& wtx = it->second;
+
+    // Make sure it's really a honey tx
+    if (!wtx.IsHiveCoinBase())
+        throw JSONRPCError(RPC_INVALID_PARAMETER, "Not a honey transaction");
+
+    // Grab the scriptPubKey
+    const CTxOut& txout = wtx.tx->vout[0];
+    CScript honeyTxProof = txout.scriptPubKey;
+
+    // Grab the txid (bytes 14-78; byte 13 has val 64 as size marker)
+    if (wtx.tx->vout[0].scriptPubKey.size() < 144)
+        throw JSONRPCError(RPC_INVALID_PARAMETER, "Malformed honey transaction!");  // Should never hit; could probably be an assert.
+    std::vector<unsigned char> bctTxId(&wtx.tx->vout[0].scriptPubKey[14], &wtx.tx->vout[0].scriptPubKey[14 + 64]);
+    std::string bctTxIdStr = std::string(bctTxId.begin(), bctTxId.end());
+    
+    return bctTxIdStr;
+}
+
 // LitecoinCash: Hive: Get wallet's own hive info
 UniValue gethiveinfo(const JSONRPCRequest& request)
 {
@@ -749,7 +799,7 @@ UniValue gethiveinfo(const JSONRPCRequest& request)
             "\nExamples:\n"
             + HelpExampleCli("gethiveinfo", "")
             + HelpExampleCli("gethiveinfo", "true")
-            + HelpExampleRpc("gethiveinfo", "")
+            + HelpExampleRpc("gethiveinfo", "false, 10")
         );
 
     const Consensus::Params& consensusParams = Params().GetConsensus();
@@ -3927,6 +3977,7 @@ static const CRPCCommand commands[] =
     { "wallet",             "createbees",               &createbees,               {"bee_count","community_contrib","honey_address"} },     // LitecoinCash: Hive: Create bee(s)
     { "wallet",             "gethiveinfo",              &gethiveinfo,              {"include_dead","min_honey_confirms"} },                 // LitecoinCash: Hive: Get current hive info
     { "wallet",             "getnetworkhiveinfo",       &getnetworkhiveinfo,       {"include_graph"} },                                     // LitecoinCash: Hive: Get current bee populations across whole network
+    { "wallet",             "getbeecreationtxid",       &getbeecreationtxid,       {"honey_txid"} },                                        // LitecoinCash: Hive: Return BCT tx id for a honey transaction in this wallet
     { "rawtransactions",    "fundrawtransaction",       &fundrawtransaction,       {"hexstring","options","iswitness"} },
     { "hidden",             "resendwallettransactions", &resendwallettransactions, {} },
     { "wallet",             "abandontransaction",       &abandontransaction,       {"txid"} },
