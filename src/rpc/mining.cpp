@@ -64,11 +64,17 @@ UniValue GetNetworkHashPS(int lookup, int height) {
     CBlockIndex *pb0 = pb;
     int64_t minTime = pb0->GetBlockTime();
     int64_t maxTime = minTime;
+	
+	const Consensus::Params& consensusParams = Params().GetConsensus();					// Litecoin Cash: Hive: Take into account hive blocks
+	int nHiveBlocks = pb0->GetBlockHeader().IsHiveMined(consensusParams) ? 1 : 0;		// Litecoin Cash: Hive: Take into account hive blocks
+	
     for (int i = 0; i < lookup; i++) {
         pb0 = pb0->pprev;
         int64_t time = pb0->GetBlockTime();
         minTime = std::min(time, minTime);
         maxTime = std::max(time, maxTime);
+		if (pb0->GetBlockHeader().IsHiveMined(consensusParams))							// Litecoin Cash: Hive: Take into account hive blocks
+			nHiveBlocks++;																// Litecoin Cash: Hive: Take into account hive blocks
     }
 
     // In case there's a situation where minTime == maxTime, we don't want a divide by zero exception.
@@ -78,7 +84,12 @@ UniValue GetNetworkHashPS(int lookup, int height) {
     arith_uint256 workDiff = pb->nChainWork - pb0->nChainWork;
     int64_t timeDiff = maxTime - minTime;
 
-    return workDiff.getdouble() / timeDiff;
+	// The below calculation makes the (currently true) assumption that 
+	// hive blocks have the same chainwork as pow blocks.
+	// If this changes in future, this code should be revisited.
+	
+	// return workDiff.getdouble() / timeDiff;										// Litecoin Cash: Hive
+    return workDiff.getdouble() * (1 - nHiveBlocks / (double)lookup) / timeDiff;	// Litecoin Cash: Hive: Take into account hive blocks
 }
 
 UniValue getnetworkhashps(const JSONRPCRequest& request)
