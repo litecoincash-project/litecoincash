@@ -2699,6 +2699,109 @@ OutputType CWallet::TransactionChangeType(OutputType change_type, const std::vec
 
 bool fWalletUnlockHiveMiningOnly = false;  // LitecoinCash: Hive: Unlock for hive mining purposes only.
 
+// LitecoinCash: Hive: Return info for a single BCT known by this wallet, optionally scanning for blocks minted by bees from this BCT
+CBeeCreationTransactionInfo CWallet::GetBCT(const CWalletTx& wtx, bool includeDead, bool scanRewards, const Consensus::Params& consensusParams, int minHoneyConfirmations) {
+    CBeeCreationTransactionInfo bct;
+
+    if (chainActive.Height() == 0)  // Don't continue if chainActive is invalid; we may be reindexing
+        return bct;
+
+    int maxDepth = consensusParams.beeGestationBlocks + consensusParams.beeLifespanBlocks;
+
+    CScript scriptPubKeyBCF = GetScriptForDestination(DecodeDestination(consensusParams.beeCreationAddress));
+    CScript scriptPubKeyCF = GetScriptForDestination(DecodeDestination(consensusParams.hiveCommunityAddress));
+
+    // Make sure it's really a BCT
+    CAmount beeFeePaid;
+    CScript scriptPubKeyHoney;
+    if (!wtx.tx->IsBCT(consensusParams, scriptPubKeyBCF, &beeFeePaid, &scriptPubKeyHoney))
+        return bct;
+
+    // Grab honey address
+    CTxDestination honeyDestination;
+    if (!ExtractDestination(scriptPubKeyHoney, honeyDestination)) {
+        LogPrintf ("** Couldn't extract destination from BCT %s (dest=%s)\n", wtx.GetHash().GetHex(), HexStr(scriptPubKeyHoney));
+        return bct;
+    }
+    std::string honeyAddress = EncodeDestination(honeyDestination);
+
+    // Check lifespan & maturity
+    int depth = wtx.GetDepthInMainChain();
+    int blocksLeft = maxDepth - depth;
+    blocksLeft++;   // Bee life starts at zero immediately AFTER the BCT appears in a block.
+    bool isMature = false;
+    std::string status = "immature";
+    if (blocksLeft < 1) {
+        if (!includeDead)   // Skip dead bees unless explicitly including them
+            return bct;
+        blocksLeft = 0;
+        status = "expired";
+        isMature = true;    // We still want to calc rewards
+    } else {
+        if (depth > consensusParams.beeGestationBlocks) {
+            status = "mature";
+            isMature = true;
+        }
+    }
+
+    // Find bee count & community donation status
+    int height = chainActive.Height() - depth;
+    CAmount beeCost = GetBeeCost(height, consensusParams);
+    bool communityContrib = false;
+    if (wtx.tx->vout.size() > 1 && wtx.tx->vout[1].scriptPubKey == scriptPubKeyCF) {
+        beeFeePaid += wtx.tx->vout[1].nValue;            // Add any community fund contribution back to the total paid
+        communityContrib = true;
+    }
+    int beeCount = beeFeePaid / beeCost;
+
+    // If mature, check for coinbase transactions from blocks minted by a bee from this BCT
+    std::string bctTxid = wtx.GetHash().GetHex();
+    int blocksFound = 0;
+    CAmount rewardsPaid = 0;
+    if (isMature && scanRewards) {
+        for (const std::pair<uint256, CWalletTx>& pairWtx2 : mapWallet) {
+            const CWalletTx& wtx2 = pairWtx2.second;
+
+            // Skip non-CBTs
+            if (!wtx2.IsHiveCoinBase())
+                continue;
+
+            // Skip unconfirmed transactions and orphans
+            if (wtx2.GetDepthInMainChain() < minHoneyConfirmations)
+                continue;
+
+            // Grab the txid (bytes 14-78)
+            std::vector<unsigned char> blockTxid(&wtx2.tx->vout[0].scriptPubKey[14], &wtx2.tx->vout[0].scriptPubKey[14 + 64]);
+            std::string blockTxidStr = std::string(blockTxid.begin(), blockTxid.end());
+
+            // Check it
+            if (bctTxid!=blockTxidStr)
+                continue;
+
+            blocksFound++;
+            rewardsPaid += wtx2.tx->vout[1].nValue;
+        }
+    }
+
+    int64_t time = 0;
+    if (mapBlockIndex[wtx.hashBlock])
+        time = mapBlockIndex[wtx.hashBlock]->GetBlockTime();
+
+    bct.txid = bctTxid;
+    bct.time = time;
+    bct.beeCount = beeCount;
+    bct.beeFeePaid = beeFeePaid;
+    bct.communityContrib = communityContrib;
+    bct.beeStatus = status;
+    bct.honeyAddress = honeyAddress;
+    bct.rewardsPaid = rewardsPaid;
+    bct.blocksFound = blocksFound;
+    bct.blocksLeft = blocksLeft;
+    bct.profit = rewardsPaid - beeFeePaid;
+
+    return bct;
+}
+
 // LitecoinCash: Hive: Return all BCTs known by this wallet, optionally including dead bees and optionally scanning for blocks minted by bees from each BCT
 std::vector<CBeeCreationTransactionInfo> CWallet::GetBCTs(bool includeDead, bool scanRewards, const Consensus::Params& consensusParams, int minHoneyConfirmations) {
     std::vector<CBeeCreationTransactionInfo> bcts;
@@ -2726,96 +2829,10 @@ std::vector<CBeeCreationTransactionInfo> CWallet::GetBCTs(bool includeDead, bool
         if (!IsAllFromMe(*wtx.tx, ISMINE_SPENDABLE))
             continue;
 
-        // Skip non-BCT txs
-        CAmount beeFeePaid;
-        CScript scriptPubKeyHoney;
-        if (!wtx.tx->IsBCT(consensusParams, scriptPubKeyBCF, &beeFeePaid, &scriptPubKeyHoney))
-            continue;
-
-        // Grab honey address
-        CTxDestination honeyDestination;
-        if (!ExtractDestination(scriptPubKeyHoney, honeyDestination)) {
-            LogPrintf ("** Couldn't extract destination from BCT %s (dest=%s)\n", wtx.GetHash().GetHex(), HexStr(scriptPubKeyHoney));
-            continue;
-        }
-        std::string honeyAddress = EncodeDestination(honeyDestination);
-
-        // Check lifespan & maturity
-        int depth = wtx.GetDepthInMainChain();
-        int blocksLeft = maxDepth - depth;
-        blocksLeft++;   // Bee life starts at zero immediately AFTER the BCT appears in a block.
-        bool isMature = false;
-        std::string status = "immature";
-        if (blocksLeft < 1) {
-            if (!includeDead)   // Skip dead bees unless explicitly including them
-                continue;
-            blocksLeft = 0;
-            status = "expired";
-            isMature = true;    // We still want to calc rewards
-        } else {
-            if (depth > consensusParams.beeGestationBlocks) {
-                status = "mature";
-                isMature = true;
-            }
-        }
-
-        // Find bee count & community donation status
-        int height = chainActive.Height() - depth;
-        CAmount beeCost = GetBeeCost(height, consensusParams);
-        bool communityContrib = false;
-        if (wtx.tx->vout.size() > 1 && wtx.tx->vout[1].scriptPubKey == scriptPubKeyCF) {
-            beeFeePaid += wtx.tx->vout[1].nValue;            // Add any community fund contribution back to the total paid
-            communityContrib = true;
-        }
-        int beeCount = beeFeePaid / beeCost;
-
-        // If mature, check for coinbase transactions from blocks minted by a bee from this BCT
-        std::string bctTxid = wtx.GetHash().GetHex();
-        int blocksFound = 0;
-        CAmount rewardsPaid = 0;
-        if (isMature && scanRewards) {
-            for (const std::pair<uint256, CWalletTx>& pairWtx2 : mapWallet) {
-                const CWalletTx& wtx2 = pairWtx2.second;
-
-                // Skip non-CBTs
-                if (!wtx2.IsHiveCoinBase())
-                    continue;
-
-                // Skip unconfirmed transactions and orphans
-                if (wtx2.GetDepthInMainChain() < minHoneyConfirmations)
-                    continue;
-
-                // Grab the txid (bytes 14-78)
-                std::vector<unsigned char> blockTxid(&wtx2.tx->vout[0].scriptPubKey[14], &wtx2.tx->vout[0].scriptPubKey[14 + 64]);
-                std::string blockTxidStr = std::string(blockTxid.begin(), blockTxid.end());
-
-                // Check it
-                if (bctTxid!=blockTxidStr)
-                    continue;
-
-                blocksFound++;
-                rewardsPaid += wtx2.tx->vout[1].nValue;
-            }
-        }
-
-        int64_t time = 0;
-        if (mapBlockIndex[wtx.hashBlock])
-            time = mapBlockIndex[wtx.hashBlock]->GetBlockTime();
-
-        CBeeCreationTransactionInfo bct;
-        bct.txid = bctTxid;
-        bct.time = time;
-        bct.beeCount = beeCount;
-        bct.beeFeePaid = beeFeePaid;
-        bct.communityContrib = communityContrib;
-        bct.beeStatus = status;
-        bct.honeyAddress = honeyAddress;
-        bct.rewardsPaid = rewardsPaid;
-        bct.blocksFound = blocksFound;
-        bct.blocksLeft = blocksLeft;
-        bct.profit = rewardsPaid - beeFeePaid;
-
-        bcts.push_back(bct);
+        // Get its info if it's a BCT
+        CBeeCreationTransactionInfo bct = GetBCT(wtx, includeDead, scanRewards, consensusParams, minHoneyConfirmations);
+        if (bct.txid != "")
+            bcts.push_back(bct);
     }
 
     return bcts;

@@ -753,6 +753,79 @@ UniValue getbeecreationtxid(const JSONRPCRequest& request)
     
     return bctTxIdStr;
 }
+            
+// LitecoinCash: Hive: Return hive info for a single BCT
+UniValue getbctinfo(const JSONRPCRequest& request)
+{
+    CWallet * const pwallet = GetWalletForJSONRPCRequest(request);
+    if (!EnsureWalletIsAvailable(pwallet, request.fHelp))
+        return NullUniValue;
+
+    if (request.fHelp || request.params.size() < 1 || request.params.size() > 2)
+        throw std::runtime_error(
+            "getbctinfo ( \"bct_txid\", min_honey_confirms )\n"
+            "\nLists the status of a single bee creation transaction from your current hive.\n"
+            "\nArguments:\n"
+            "1. bct_txid               (string) Transaction ID of a bee creation transaction made by this wallet\n"
+            "2. min_honey_confirms     (numeric, optional, default=1) Only include honey rewards with at least this many confirmations\n"
+            "\nResult:\n"
+            "{\n"
+            "    \"txid\",               (string) Transaction ID of the bee creation transaction\n"
+            "    time,                 (numeric) Timestamp of block containing the bee creation transaction (only present once tx is in a block)\n"
+            "    bee_count,            (numeric) The number of bees created\n"
+            "    community_contrib,    (boolean) If true, indicates that a portion of the bee creation fee was paid to the community fund\n"
+            "    \"bee_status\",         (string) immature | mature | dead. Only mature bees are capable of mining\n"
+            "    \"honey_address\",      (string) The address which will receive block rewards for blocks minted by the bees\n"
+            "    bee_fee_paid,         (numeric) Total bee creation fee (in " + CURRENCY_UNIT + ")\n"
+            "    rewards_paid,         (numeric) The amount of block rewards earned by the bees (in " + CURRENCY_UNIT + ")\n"
+            "    profit,               (numeric) The profit earned by the bees (in " + CURRENCY_UNIT + ")\n"
+            "    blocks_found,         (numeric) The number of blocks minted by the bees\n"
+            "    blocks_left           (numeric) The number of blocks of bee lifespan remaining\n"
+            "}\n"
+            "\nExamples:\n"
+            + HelpExampleCli("getbctinfo", "1f14fc54cfce1ec53f5a8d36d8aef7ae8485e4cd693b6f404c5d2504017ecd59")
+            + HelpExampleCli("getbctinfo", "1f14fc54cfce1ec53f5a8d36d8aef7ae8485e4cd693b6f404c5d2504017ecd59, 10")
+        );
+
+    ObserveSafeMode();
+    pwallet->BlockUntilSyncedToCurrentChain();
+
+    LOCK2(cs_main, pwallet->cs_wallet);
+
+    uint256 bctHash;
+    bctHash.SetHex(request.params[0].get_str());
+
+    // Grab the tx
+    auto it = pwallet->mapWallet.find(bctHash);
+    if (it == pwallet->mapWallet.end())
+        throw JSONRPCError(RPC_INVALID_PARAMETER, "Invalid or non-wallet transaction id");
+    const CWalletTx& wtx = it->second;
+
+    int minHoneyConfirms = 1;
+    if (!request.params[1].isNull()) {
+        RPCTypeCheckArgument(request.params[1], UniValue::VNUM);
+        minHoneyConfirms = request.params[1].get_int();
+    }
+
+    // Get the BCT info
+    const Consensus::Params& consensusParams = Params().GetConsensus();
+    CBeeCreationTransactionInfo bct = pwallet->GetBCT(wtx, true, true, consensusParams, minHoneyConfirms);
+    UniValue jsonResults(UniValue::VOBJ);
+    if (bct.txid != "") {
+        jsonResults.push_back(Pair("txid", bct.txid));
+        jsonResults.push_back(Pair("time", bct.time));
+        jsonResults.push_back(Pair("bee_count", bct.beeCount));
+        jsonResults.push_back(Pair("community_contrib", bct.communityContrib));
+        jsonResults.push_back(Pair("bee_status", bct.beeStatus));
+        jsonResults.push_back(Pair("honey_address", bct.honeyAddress));
+        jsonResults.push_back(Pair("bee_fee_paid", ValueFromAmount(bct.beeFeePaid)));
+        jsonResults.push_back(Pair("rewards_paid", ValueFromAmount(bct.rewardsPaid)));
+        jsonResults.push_back(Pair("profit", ValueFromAmount(bct.profit)));
+        jsonResults.push_back(Pair("blocks_found", bct.blocksFound));
+        jsonResults.push_back(Pair("blocks_left", bct.blocksLeft));
+    }
+    return jsonResults;
+}
 
 // LitecoinCash: Hive: Get wallet's own hive info
 UniValue gethiveinfo(const JSONRPCRequest& request)
@@ -837,29 +910,31 @@ UniValue gethiveinfo(const JSONRPCRequest& request)
     for (std::vector<CBeeCreationTransactionInfo>::const_iterator it = bcts.begin(); it != bcts.end(); it++) {
         CBeeCreationTransactionInfo bct = *it;
 
-        UniValue entry(UniValue::VOBJ);
-        entry.push_back(Pair("txid", bct.txid));
-        entry.push_back(Pair("time", bct.time));
-        entry.push_back(Pair("bee_count", bct.beeCount));
-        entry.push_back(Pair("community_contrib", bct.communityContrib));
-        entry.push_back(Pair("bee_status", bct.beeStatus));
-        entry.push_back(Pair("honey_address", bct.honeyAddress));
-        entry.push_back(Pair("bee_fee_paid", ValueFromAmount(bct.beeFeePaid)));
-        entry.push_back(Pair("rewards_paid", ValueFromAmount(bct.rewardsPaid)));
-        entry.push_back(Pair("profit", ValueFromAmount(bct.profit)));
-        entry.push_back(Pair("blocks_found", bct.blocksFound));
-        entry.push_back(Pair("blocks_left", bct.blocksLeft));
+        if (bct.txid!="") {
+            UniValue entry(UniValue::VOBJ);
+            entry.push_back(Pair("txid", bct.txid));
+            entry.push_back(Pair("time", bct.time));
+            entry.push_back(Pair("bee_count", bct.beeCount));
+            entry.push_back(Pair("community_contrib", bct.communityContrib));
+            entry.push_back(Pair("bee_status", bct.beeStatus));
+            entry.push_back(Pair("honey_address", bct.honeyAddress));
+            entry.push_back(Pair("bee_fee_paid", ValueFromAmount(bct.beeFeePaid)));
+            entry.push_back(Pair("rewards_paid", ValueFromAmount(bct.rewardsPaid)));
+            entry.push_back(Pair("profit", ValueFromAmount(bct.profit)));
+            entry.push_back(Pair("blocks_found", bct.blocksFound));
+            entry.push_back(Pair("blocks_left", bct.blocksLeft));
 
-        totalBlocksFound += bct.blocksFound;
-        totalBeeFee += bct.beeFeePaid;
-        totalRewards += bct.rewardsPaid;
-        totalBees += bct.beeCount;
-        if (bct.beeStatus == "immature")
-            totalImmature += bct.beeCount;
-        else if (bct.beeStatus == "mature")
-            totalMature += bct.beeCount;
+            totalBlocksFound += bct.blocksFound;
+            totalBeeFee += bct.beeFeePaid;
+            totalRewards += bct.rewardsPaid;
+            totalBees += bct.beeCount;
+            if (bct.beeStatus == "immature")
+                totalImmature += bct.beeCount;
+            else if (bct.beeStatus == "mature")
+                totalMature += bct.beeCount;
 
-        bctList.push_back(entry);
+            bctList.push_back(entry);
+        }
     }
 
     UniValue summary(UniValue::VOBJ);
@@ -2088,7 +2163,7 @@ UniValue listtransactions(const JSONRPCRequest& request)
     // LitecoinCash: Hive: Include ishoney in documentation
     if (request.fHelp || request.params.size() > 4)
         throw std::runtime_error(
-            "listtransactions ( \"account\" count skip include_watchonly)\n"
+            "listtransactions ( \"account\" count skip include_watchonly )\n"
             "\nReturns up to 'count' most recent transactions skipping the first 'from' transactions for account 'account'.\n"
             "\nArguments:\n"
             "1. \"account\"    (string, optional) DEPRECATED. The account name. Should be \"*\".\n"
@@ -3978,6 +4053,7 @@ static const CRPCCommand commands[] =
     { "wallet",             "gethiveinfo",              &gethiveinfo,              {"include_dead","min_honey_confirms"} },                 // LitecoinCash: Hive: Get current hive info
     { "wallet",             "getnetworkhiveinfo",       &getnetworkhiveinfo,       {"include_graph"} },                                     // LitecoinCash: Hive: Get current bee populations across whole network
     { "wallet",             "getbeecreationtxid",       &getbeecreationtxid,       {"honey_txid"} },                                        // LitecoinCash: Hive: Return BCT tx id for a honey transaction in this wallet
+    { "wallet",             "getbctinfo",               &getbctinfo,               {"bct_txid","min_honey_confirms"} },                     // LitecoinCash: Hive: Return hive info for a single BCT
     { "rawtransactions",    "fundrawtransaction",       &fundrawtransaction,       {"hexstring","options","iswitness"} },
     { "hidden",             "resendwallettransactions", &resendwallettransactions, {} },
     { "wallet",             "abandontransaction",       &abandontransaction,       {"txid"} },
