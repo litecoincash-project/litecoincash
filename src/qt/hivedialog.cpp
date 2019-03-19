@@ -359,7 +359,7 @@ void HiveDialog::initGraph() {
 
     giTicker = QSharedPointer<QCPAxisTickerGI>(new QCPAxisTickerGI);
     ui->beePopGraph->yAxis2->setTicker(giTicker);
-    ui->beePopGraph->yAxis2->setLabel("Honey Index");
+    ui->beePopGraph->yAxis2->setLabel("Global Index");
     ui->beePopGraph->yAxis2->setVisible(true);
 
     ui->beePopGraph->xAxis->setTickLabelFont(QFont(QFont().family(), 8));
