@@ -86,6 +86,8 @@ private:
     CAmount potentialRewards;
     CAmount currentBalance;
     double beePopIndex;
+    double beePopFutureIndex;
+    double futureHoneyBees;
     int lastGlobalCheckHeight;
     virtual void resizeEvent(QResizeEvent *event);
     QCPItemText *graphMouseoverText;

@@ -628,6 +628,7 @@ still fully unlock it to send funds.</string>
            </property>
           </spacer>
          </item>
+
          <item>
           <widget class="QLabel" name="label_16">
            <property name="toolTip">
@@ -674,6 +675,7 @@ to make back their cost. At values below 100, it is expected at all bees will be
            </property>
           </spacer>
          </item>
+
          <item>
           <widget class="TinyPie" name="beePopIndexPie" native="true">
            <property name="sizePolicy">
@@ -695,6 +697,73 @@ to make back their cost. At values below 100, it is expected at all bees will be
            </property>
           </widget>
          </item>
+
+         <item>
+          <spacer name="immatureLabelSpacer_6b">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeType">
+            <enum>QSizePolicy::Fixed</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>10</width>
+             <height>0</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+
+         <item>
+          <widget class="QLabel" name="label_16b">
+           <property name="toolTip">
+            <string>The Future Honey Index is a measure of network bee population when the current immature bees are matured. At a value of 100,
+the network is saturated with the maximum number of bees that are expected
+to make back their cost. At values below 100, it is expected at all bees will be profitable.</string>
+           </property>
+           <property name="text">
+            <string>&lt;a href=&quot;https://hive.litecoinca.sh/gi/&quot;&gt;&lt;span style=&quot;text-decoration: underline;&quot;&gt;Future Honey Index&lt;/span&gt;&lt;/a&gt;: </string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+           </property>
+           <property name="openExternalLinks">
+            <bool>true</bool>
+           </property>
+          </widget>
+         </item>
+
+         <item>
+          <widget class="QLabel" name="beePopFutureIndexLabel">
+           <property name="toolTip">
+            <string>The Future Honey Index is a measure of network bee population when the current immature bees are matured. At a value of 100,
+the network is saturated with the maximum number of bees that are expected
+to make back their cost. At values below 100, it is expected at all bees will be profitable.</string>
+           </property>
+           <property name="text">
+            <string>0</string>
+           </property>
+          </widget>
+         </item>
+
+         <item>
+          <spacer name="immatureLabelSpacer_6a">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeType">
+            <enum>QSizePolicy::Fixed</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>10</width>
+             <height>0</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+
          <item>
           <spacer name="horizontalSpacer_12">
            <property name="orientation">
@@ -708,6 +777,7 @@ to make back their cost. At values below 100, it is expected at all bees will be
            </property>
           </spacer>
          </item>
+
          <item>
           <widget class="QLabel" name="label_13">
            <property name="toolTip">

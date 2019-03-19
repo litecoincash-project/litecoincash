@@ -50,6 +50,8 @@ HiveDialog::HiveDialog(const PlatformStyle *_platformStyle, QWidget *parent) :
     potentialRewards = 0;
     currentBalance = 0;
     beePopIndex = 0;
+    beePopFutureIndex = 0;
+    futureHoneyBees = 0;
 
     ui->globalHiveSummaryError->hide();
 
@@ -250,8 +252,12 @@ void HiveDialog::updateData(bool forceGlobalSummaryUpdate) {
         ui->hiveWeightPie->setValue(hiveWeight);
 
         beePopIndex = ((beeCost * globalMatureBees) / ((double)potentialRewards * 0.667)) * 100.0;
+        beePopFutureIndex = ((beeCost * futureHoneyBees) / ((double)potentialRewards * 0.667)) * 100.0;
+
         if (beePopIndex > 200) beePopIndex = 200;
+        //if (beePopFutureIndex > 200) beePopFutureIndex = 200;
         ui->beePopIndexLabel->setText(QString::number(floor(beePopIndex)));
+        ui->beePopFutureIndexLabel->setText(QString::number(floor(beePopFutureIndex)));
         ui->beePopIndexPie->setValue(beePopIndex / 100);
         
         lastGlobalCheckHeight = chainActive.Tip()->nHeight;
@@ -378,7 +384,6 @@ void HiveDialog::initGraph() {
 
 void HiveDialog::updateGraph() {
     const Consensus::Params& consensusParams = Params().GetConsensus();
-
     ui->beePopGraph->graph()->data()->clear();
     double now = QDateTime::currentDateTime().toTime_t();
     int totalLifespan = consensusParams.beeGestationBlocks + consensusParams.beeLifespanBlocks;
@@ -391,10 +396,13 @@ void HiveDialog::updateGraph() {
         dataMature[i].key = dataImmature[i].key;
         dataMature[i].value = (double)beePopGraph[i].maturePop;
     }
+
     ui->beePopGraph->graph(0)->data()->set(dataImmature);
     ui->beePopGraph->graph(1)->data()->set(dataMature);
 
     double global100 = (double)potentialRewards * 0.667 / beeCost;
+
+    futureHoneyBees = beePopGraph[consensusParams.beeGestationBlocks].maturePop;
 
     globalMarkerLine->start->setCoords(now, global100);
     globalMarkerLine->end->setCoords(now + consensusParams.nPowTargetSpacing / 2 * totalLifespan, global100);
