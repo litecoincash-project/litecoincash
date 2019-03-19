@@ -249,7 +249,7 @@ void HiveDialog::updateData(bool forceGlobalSummaryUpdate) {
         ui->localHiveWeightLabel->setText((mature == 0 || globalMatureBees == 0) ? "0" : QString::number(hiveWeight, 'f', 3));
         ui->hiveWeightPie->setValue(hiveWeight);
 
-        beePopIndex = ((beeCost * globalMatureBees) / (double)potentialRewards) * 100.0;
+        beePopIndex = ((beeCost * globalMatureBees) / ((double)potentialRewards * 0.667)) * 100.0;
         if (beePopIndex > 200) beePopIndex = 200;
         ui->beePopIndexLabel->setText(QString::number(floor(beePopIndex)));
         ui->beePopIndexPie->setValue(beePopIndex / 100);
@@ -353,7 +353,7 @@ void HiveDialog::initGraph() {
 
     giTicker = QSharedPointer<QCPAxisTickerGI>(new QCPAxisTickerGI);
     ui->beePopGraph->yAxis2->setTicker(giTicker);
-    ui->beePopGraph->yAxis2->setLabel("Global index");
+    ui->beePopGraph->yAxis2->setLabel("Honey Index");
     ui->beePopGraph->yAxis2->setVisible(true);
 
     ui->beePopGraph->xAxis->setTickLabelFont(QFont(QFont().family(), 8));
@@ -394,7 +394,8 @@ void HiveDialog::updateGraph() {
     ui->beePopGraph->graph(0)->data()->set(dataImmature);
     ui->beePopGraph->graph(1)->data()->set(dataMature);
 
-    double global100 = (double)potentialRewards / beeCost;
+    double global100 = (double)potentialRewards * 0.667 / beeCost;
+
     globalMarkerLine->start->setCoords(now, global100);
     globalMarkerLine->end->setCoords(now + consensusParams.nPowTargetSpacing / 2 * totalLifespan, global100);
     giTicker->global100 = global100;

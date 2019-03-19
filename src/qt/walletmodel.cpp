@@ -690,7 +690,7 @@ bool WalletModel::createBees(int beeCount, bool communityContrib, QWidget *paren
     QString questionString = tr("Are you sure you want to create bees?<br />");
 
     if (beePopIndex > 90)
-        questionString.append("<br /><span style='color:#aa0000;'><b>WARNING:</b> Global Index is high and bees may not be profitable. Please ensure you understand the consequences before proceeding.</span><br />");
+        questionString.append("<br /><span style='color:#aa0000;'><b>WARNING:</b> Honey Index is high and bees may not be profitable. Please ensure you understand the consequences before proceeding.</span><br />");
 
     questionString.append("<br />");
     questionString.append("<b>" + BitcoinUnits::formatHtmlWithUnit(optionsModel->getDisplayUnit(), amountWithoutFees) + "</b>");
