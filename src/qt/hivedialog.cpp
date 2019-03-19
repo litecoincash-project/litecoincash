@@ -243,7 +243,7 @@ void HiveDialog::updateData(bool forceGlobalSummaryUpdate) {
             updateGraph();
         }
 
-        setAmountField(ui->potentialRewardsLabel, potentialRewards);
+        setAmountField(ui->potentialRewardsLabel, potentialRewards * 0.677);
 
         double hiveWeight = mature / (double)globalMatureBees;
         ui->localHiveWeightLabel->setText((mature == 0 || globalMatureBees == 0) ? "0" : QString::number(hiveWeight, 'f', 3));
