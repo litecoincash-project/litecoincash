@@ -415,7 +415,7 @@ void HiveDialog::onMouseMove(QMouseEvent *event) {
     int beeCountMature = (int)graphTracerMature->position->value();      
 
     QDateTime xDateTime = QDateTime::fromTime_t(x);
-    int global100 = (int)((double)potentialRewards / beeCost);
+    int global100 = (int)((double)potentialRewards * 0.677 / beeCost);
     QColor traceColMature = beeCountMature >= global100 ? Qt::red : Qt::black;
     QColor traceColImmature = beeCountImmature >= global100 ? Qt::red : Qt::black;
 
