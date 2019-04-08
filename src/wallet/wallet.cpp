@@ -2809,8 +2809,6 @@ std::vector<CBeeCreationTransactionInfo> CWallet::GetBCTs(bool includeDead, bool
     if (chainActive.Height() == 0)  // Don't continue if chainActive is invalid; we may be reindexing
         return bcts;
 
-    int maxDepth = consensusParams.beeGestationBlocks + consensusParams.beeLifespanBlocks;
-
     CScript scriptPubKeyBCF = GetScriptForDestination(DecodeDestination(consensusParams.beeCreationAddress));
     CScript scriptPubKeyCF = GetScriptForDestination(DecodeDestination(consensusParams.hiveCommunityAddress));
 
@@ -2864,7 +2862,7 @@ bool CWallet::CreateBeeTransaction(int beeCount, CWalletTx& wtxNew, CReserveKey&
     }
 
     // Don't spend more than potential rewards in a single BCT
-    CAmount totalPotentialReward = (consensusParams.beeLifespanBlocks * GetBlockSubsidy(pindexPrev->nHeight, consensusParams)) / consensusParams.hiveBlockSpacingTarget;
+    CAmount totalPotentialReward = (consensusParams.beeLifespanBlocks * GetBlockSubsidy(pindexPrev->nHeight, consensusParams)) / consensusParams.hiveBlockSpacingTargetTypical;
     if (totalPotentialReward < beeCost) {
         strFailReason = "Error: Bee creation would cost more than possible rewards";
         return false;
