@@ -2837,7 +2837,7 @@ std::vector<CBeeCreationTransactionInfo> CWallet::GetBCTs(bool includeDead, bool
 }
 
 // LitecoinCash: Hive: Create a BCT to gestate given number of bees
-bool CWallet::CreateBeeTransaction(int beeCount, CWalletTx& wtxNew, CReserveKey& reservekeyChange, CReserveKey& reservekeyHoney, std::string honeyAddress, bool communityContrib, std::string& strFailReason, const Consensus::Params& consensusParams) {
+bool CWallet::CreateBeeTransaction(int beeCount, CWalletTx& wtxNew, CReserveKey& reservekeyChange, CReserveKey& reservekeyHoney, std::string honeyAddress, std::string changeAddress, bool communityContrib, std::string& strFailReason, const Consensus::Params& consensusParams) {
     CBlockIndex* pindexPrev = chainActive.Tip();
     assert(pindexPrev != nullptr);
 
@@ -2912,6 +2912,24 @@ bool CWallet::CreateBeeTransaction(int beeCount, CWalletTx& wtxNew, CReserveKey&
             return false;
         }
     }
+	
+		
+	// Check the custom change address is valid and on-wallet
+	CTxDestination destinationChange;
+	if (!changeAddress.empty()) {
+		destinationChange = DecodeDestination(changeAddress);
+        if (!IsValidDestination(destinationChange)) {
+            strFailReason = "Error: Invalid change address specified";
+            return false;
+        }
+		
+		// Make sure it's a wallet address (otherwise bees won't be able to receive change) 
+        CKeyID keyid = GetKeyForDestination(*this, destinationChange);
+        if (keyid.IsNull()) {
+            strFailReason = "Error: Wallet doesn't contain the private key for the change address specified";
+            return false;
+        }
+	}
 
     // Create the unspendable bee creation fee output (vout[0])
     std::vector<CRecipient> vecSend;
@@ -2935,11 +2953,13 @@ bool CWallet::CreateBeeTransaction(int beeCount, CWalletTx& wtxNew, CReserveKey&
         vecSend.push_back(recipientCF);
     }
 
-    // Create the BCT with our specified outputs
+    // Create the BCT with our specified outputs, adding change address to coin control if set
     CAmount feeRequired;
     int changePos = communityContrib ? 2 : 1;      // Always put any change in the last output
     std::string strError;
     CCoinControl coinControl;
+	if (!changeAddress.empty()) 
+		coinControl.destChange = destinationChange;
     if (!CreateTransaction(vecSend, wtxNew, reservekeyChange, feeRequired, changePos, strError, coinControl, true)) {
         if (totalBeeCost + feeRequired > curBalance)   // Now we know fee requirement, check balance fail again
             strFailReason = "Error: Insufficient balance to cover bee creation fee and transaction fee";

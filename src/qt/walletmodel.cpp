@@ -676,9 +676,10 @@ bool WalletModel::createBees(int beeCount, bool communityContrib, QWidget *paren
     CWalletTx wtxNew;
     std::string strError;
     std::string honeyAddress;
+	std::string changeAddress;
     CReserveKey reservekeyChange(wallet);
     CReserveKey reservekeyHoney(wallet);
-    if (!wallet->CreateBeeTransaction(beeCount, wtxNew, reservekeyChange, reservekeyHoney, honeyAddress, communityContrib, strError, Params().GetConsensus())) {
+    if (!wallet->CreateBeeTransaction(beeCount, wtxNew, reservekeyChange, reservekeyHoney, honeyAddress, changeAddress, communityContrib, strError, Params().GetConsensus())) {
         QMessageBox::critical(parent, tr("Error"), "Bee creation error: " + QString::fromStdString(strError));
         return false;
     }

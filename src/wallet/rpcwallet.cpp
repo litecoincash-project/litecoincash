@@ -585,15 +585,16 @@ UniValue createbees(const JSONRPCRequest& request)
     if (!EnsureWalletIsAvailable(pwallet, request.fHelp))
         return NullUniValue;
 
-    if (request.fHelp || request.params.size() < 1 || request.params.size() > 3)
+    if (request.fHelp || request.params.size() < 1 || request.params.size() > 4)
         throw std::runtime_error(
-            "createbees bee_count ( community_contrib, \"honey_address\" )\n"
+            "createbees bee_count ( community_contrib, \"honey_address\", \"change_address\" )\n"
             "\nCreate one or more bees in a single transaction, sign it, and broadcast it to the network.\n"
             + HelpRequiringPassphrase(pwallet) +
             "\nArguments:\n"
             "1. bee_count              (numeric, required) The number of bees to create.\n"
             "2. community_contrib      (boolean, optional, default=true) If true, a small percentage of bee creation cost will be paid to a community fund.\n"
             "3. \"honey_address\"        (string, optional) The LCC address to receive rewards for blocks mined by bee(s) created in this transaction.\n"
+			"4. \"change_address\"       (string, optional, default pool address) The LCC address to receive the change.\n"
             "\nResult:\n"
             "\"txid\"                    (string) The transaction id.\n"
             "\nExamples:\n"
@@ -619,6 +620,13 @@ UniValue createbees(const JSONRPCRequest& request)
             honeyAddress = request.params[2].get_str();
     }
 
+	std::string changeAddress;
+	if (!request.params[3].isNull()) {
+        RPCTypeCheckArgument(request.params[3], UniValue::VSTR);
+        if (!request.params[3].get_str().empty())
+            changeAddress = request.params[3].get_str();
+    }
+
     pwallet->BlockUntilSyncedToCurrentChain();
     LOCK2(cs_main, pwallet->cs_wallet);
 
@@ -629,7 +637,7 @@ UniValue createbees(const JSONRPCRequest& request)
 	
     CReserveKey reservekeyChange(pwallet);
     CReserveKey reservekeyHoney(pwallet);
-    if (pwallet->CreateBeeTransaction(beeCount, wtxNew, reservekeyChange, reservekeyHoney, honeyAddress, communityContrib, strError, Params().GetConsensus())) {
+    if (pwallet->CreateBeeTransaction(beeCount, wtxNew, reservekeyChange, reservekeyHoney, honeyAddress, changeAddress, communityContrib, strError, Params().GetConsensus())) {
         CValidationState state;
         if (honeyAddress.empty()) // If not using a custom honey address, keep the honey key
             reservekeyHoney.KeepKey();
@@ -639,6 +647,7 @@ UniValue createbees(const JSONRPCRequest& request)
     } else
         throw JSONRPCError(RPC_WALLET_BCT_FAIL, strError);
 }
+
 
 // LitecoinCash: Hive: Get network hive info
 UniValue getnetworkhiveinfo(const JSONRPCRequest& request)
