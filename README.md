@@ -4,7 +4,7 @@ Litecoin Cash Core integration/staging tree
 What is Litecoin Cash?
 ----------------------
 
-Litecoin Cash is a SHA256 fork of Litecoin. For full details, as well as prebuilt binaries for Windows, Mac and Linux, please visit our website at https://litecoinca.sh.
+Litecoin Cash is a fork of Litecoin supporting SHA256 PoW and Hive Mining. For full details, as well as prebuilt binaries for Windows, Mac and Linux, please visit our website at https://litecoinca.sh.
 
 Litecoin Cash Core is the full node software that makes up the backbone of the LCC network.
 
