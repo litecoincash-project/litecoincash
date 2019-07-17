@@ -3084,6 +3084,13 @@ bool IsHiveEnabled(const CBlockIndex* pindexPrev, const Consensus::Params& param
     return (VersionBitsState(pindexPrev, params, Consensus::DEPLOYMENT_HIVE, versionbitscache) == THRESHOLD_ACTIVE);
 }
 
+// LitecoinCash: Hive: Check if Hive 1.1 is activated at given point
+bool IsHive11Enabled(const CBlockIndex* pindexPrev, const Consensus::Params& params)
+{
+    LOCK(cs_main);
+    return (VersionBitsState(pindexPrev, params, Consensus::DEPLOYMENT_HIVE_1_1, versionbitscache) == THRESHOLD_ACTIVE);
+}
+
 // LitecoinCash: Hive: Get the well-rooted deterministic random string (see whitepaper section 4.1)
 std::string GetDeterministicRandString(const CBlockIndex* pindexPrev) {
     //LOCK(cs_main);  // Lock maybe not needed

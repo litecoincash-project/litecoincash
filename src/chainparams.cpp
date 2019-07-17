@@ -107,6 +107,11 @@ public:
         consensus.vDeployments[Consensus::DEPLOYMENT_HIVE].nStartTime = 1545782400; // Dec 26, 2018
         consensus.vDeployments[Consensus::DEPLOYMENT_HIVE].nTimeout = 1577318400; // Dec 26, 2019
 
+        // LitecoinCash: Hive 1.1: Deployment
+        consensus.vDeployments[Consensus::DEPLOYMENT_HIVE_1_1].bit = 9;
+        consensus.vDeployments[Consensus::DEPLOYMENT_HIVE_1_1].nStartTime = 2000000000;  // Far future
+        consensus.vDeployments[Consensus::DEPLOYMENT_HIVE_1_1].nTimeout = 2100000000;  // Far future
+
         // LitecoinCash fields
         consensus.powForkTime = 1518982404;                 // Time of PoW hash method change
         consensus.lastScryptBlock = 1371111;                // Height of last scrypt block
@@ -132,11 +137,19 @@ public:
         consensus.hiveBlockSpacingTargetTypical = 3;        // Observed Hive block frequency (1 out of this many blocks are observed to be Hive)
         consensus.hiveNonceMarker = 192;                    // Nonce marker for hivemined blocks
 
+        // LitecoinCash: Hive 1.1-related consensus fields
+        consensus.minK = 1;                                 // Minimum chainwork scale for Hive blocks (see Hive whitepaper section 5)
+        consensus.maxK = 8;                                 // Maximum chainwork scale for Hive blocks (see Hive whitepaper section 5)
+        consensus.maxHiveDiff = 0.006;                      // Hive difficulty at which max chainwork bonus is awarded
+        consensus.maxKPow = 5;                              // Maximum chainwork scale for PoW blocks
+        consensus.powSplit1 = 0.005;                        // Below this Hive difficulty threshold, PoW block chainwork bonus is halved
+        consensus.powSplit2 = 0.0025;                       // Below this Hive difficulty threshold, PoW block chainwork bonus is halved again
+
         // The best chain should have at least this much work.
-        consensus.nMinimumChainWork = uint256S("0x0000000000000000000000000000000000000000000000401b101e2e526d5821");  // LitecoinCash: At LAST_SCRYPT_BLOCK+1
+        consensus.nMinimumChainWork = uint256S("0x00000000000000000000000000000000000000000000ba12a25c1f2da751fc96");  // LitecoinCash: 1695238
 
         // By default assume that the signatures in ancestors of this block are valid.
-        consensus.defaultAssumeValid = uint256S("0x00000000de1e4e93317241177b5f1d72fc151c6e76815e9b0be4961dfd309d60"); // LitecoinCash: LAST_SCRYPT_BLOCK+1
+        consensus.defaultAssumeValid = uint256S("0x00000000000000238fc08340331e2735a64ac2baccdc3db0984ef65c08f658b2"); // LitecoinCash: 1695238
 
         /**
          * The message start string is designed to be unlikely to occur in normal data.
@@ -192,15 +205,16 @@ public:
                 {638902, uint256S("0x15238656e8ec63d28de29a8c75fcf3a5819afc953dcd9cc45cecc53baec74f38")},
                 {721000, uint256S("0x198a7b4de1df9478e2463bd99d75b714eab235a2e63e741641dc8a759a9840e5")},
                 {1371112, uint256S("0x00000000de1e4e93317241177b5f1d72fc151c6e76815e9b0be4961dfd309d60")},  // LitecoinCash: Premine block
+                {1695238, uint256S("0x00000000000000238fc08340331e2735a64ac2baccdc3db0984ef65c08f658b2")},
             }
         };
 
         chainTxData = ChainTxData{
-            // Data as of block db42d00d824950a125f9b08b6b6c282c484781562fa8b3bd29d6ce4a2627c348 (height 1259851).
-            1518985227, // * UNIX timestamp of last known number of transactions
-            21458357,   // * total number of transactions between genesis and that timestamp
+            // Data as of block 00000000000000238fc08340331e2735a64ac2baccdc3db0984ef65c08f658b2 (height 1695238).
+            1563371439, // * UNIX timestamp of last known number of transactions
+            22345100,   // * total number of transactions between genesis and that timestamp
                         //   (the tx=... number in the SetBestChain debug.log lines)
-            0.63        // * estimated number of transactions per second after that timestamp
+            0.0162      // * estimated number of transactions per second after that timestamp
         };
     }
 };
@@ -244,8 +258,14 @@ public:
         consensus.vDeployments[Consensus::DEPLOYMENT_HIVE].nStartTime = 1535587200; // August 30, 2018
         consensus.vDeployments[Consensus::DEPLOYMENT_HIVE].nTimeout = 1535587200 + 31536000; // Start + 1 year
 
+        // LitecoinCash: Hive 1.1: Deployment
+        consensus.vDeployments[Consensus::DEPLOYMENT_HIVE_1_1].bit = 9;
+        consensus.vDeployments[Consensus::DEPLOYMENT_HIVE_1_1].nStartTime = 1561939200;  // July 1, 2019
+        consensus.vDeployments[Consensus::DEPLOYMENT_HIVE_1_1].nTimeout = 1593561600;  // July 1, 2020
+
         // LitecoinCash fields
         consensus.powForkTime = 1543765622;                 // Time of PoW hash method change (block 100)
+
         consensus.lastScryptBlock = 100;                    // Height of last scrypt block
         consensus.powLimitSHA = uint256S("000000ffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");   // Initial hash target at fork
         consensus.slowStartBlocks = 40;                     // Scale post-fork block reward up over this many blocks
@@ -269,11 +289,19 @@ public:
         consensus.hiveBlockSpacingTargetTypical = 3;        // Observed Hive block frequency (1 out of this many blocks are observed to be Hive)
         consensus.hiveNonceMarker = 192;                    // Nonce marker for hivemined blocks
 
+        // LitecoinCash: Hive 1.1-related consensus fields
+        consensus.minK = 1;                                 // Minimum chainwork scale for Hive blocks (see Hive whitepaper section 5)
+        consensus.maxK = 8;                                 // Maximum chainwork scale for Hive blocks (see Hive whitepaper section 5)
+        consensus.maxHiveDiff = 0.002;                      // Hive difficulty at which max chainwork bonus is awarded
+        consensus.maxKPow = 5;                              // Maximum chainwork scale for PoW blocks
+        consensus.powSplit1 = 0.001;                        // Below this Hive difficulty threshold, PoW block chainwork bonus is halved
+        consensus.powSplit2 = 0.0005;                       // Below this Hive difficulty threshold, PoW block chainwork bonus is halved again
+
         // The best chain should have at least this much work.
-        consensus.nMinimumChainWork = uint256S("0x000000000000000000000000000000000000000000000000000000014e21bb45");  // LitecoinCash: 179
+        consensus.nMinimumChainWork = uint256S("0x00000000000000000000000000000000000000000000000008ff647196445448");  // LitecoinCash: 192849
 
         // By default assume that the signatures in ancestors of this block are valid.
-        consensus.defaultAssumeValid = uint256S("00000001e6d34f6879ef8abecf6f4eaf7413700e6f6b37cfb0647606736fa7f0"); // LitecoinCash: 157
+        consensus.defaultAssumeValid = uint256S("0000000155537358173629cb096e456aa88bb86460a709f49453b866b8936d0e"); // LitecoinCash: 192849
 
         pchMessageStart[0] = 0xb6;
         pchMessageStart[1] = 0xf5;
@@ -309,14 +337,15 @@ public:
             {
                 {100, uint256S("f05a7f0666f3062464d25d9c2a87d6c235d03158ea593595dacd2ed6a22010d1")},    // Last Scrypt block
                 {146, uint256S("000000042bcd56d6ea0509230b76fe850f0a40a9110f7dba979fd5d707e47c8a")},    // BIP34/BIP65/BIP66 activation
-                {157, uint256S("00000001e6d34f6879ef8abecf6f4eaf7413700e6f6b37cfb0647606736fa7f0")}
+                {157, uint256S("00000001e6d34f6879ef8abecf6f4eaf7413700e6f6b37cfb0647606736fa7f0")},
+                {192849, uint256S("0000000155537358173629cb096e456aa88bb86460a709f49453b866b8936d0e")}, // Pre Hive-1.1 activation
             }
         };
 
-        chainTxData = ChainTxData{  // As at 157
-            1543766363,
-            158,
-            0.01    // Assumed
+        chainTxData = ChainTxData{  // As at 192849
+            1563135330,
+            247682,
+            0.0105
         };
     }
 };

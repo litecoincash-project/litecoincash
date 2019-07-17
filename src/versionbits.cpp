@@ -22,6 +22,11 @@ const struct VBDeploymentInfo VersionBitsDeploymentInfo[Consensus::MAX_VERSION_B
     {
         /*.name =*/ "hive",
         /*.gbt_force =*/ true,
+    },
+    // LitecoinCash: Hive: Deployment of 1.1
+    {
+        /*.name =*/ "hive_1_1",
+        /*.gbt_force =*/ true,
     }
 };
 

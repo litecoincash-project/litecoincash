@@ -411,6 +411,9 @@ bool IsWitnessEnabled(const CBlockIndex* pindexPrev, const Consensus::Params& pa
 // LitecoinCash: Hive: Check if Hive is activated at given point
 bool IsHiveEnabled(const CBlockIndex* pindexPrev, const Consensus::Params& params);
 
+// LitecoinCash: Hive: Check if Hive 1.1 is activated at given point
+bool IsHive11Enabled(const CBlockIndex* pindexPrev, const Consensus::Params& params);
+
 // LitecoinCash: Hive: Get the well-rooted deterministic random string (see whitepaper section 4.1)
 std::string GetDeterministicRandString(const CBlockIndex* pindexPrev);
 

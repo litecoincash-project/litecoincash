@@ -91,6 +91,10 @@ static const CRPCConvertParam vRPCConvertParams[] =
     { "createrawtransaction", 1, "outputs" },
     { "createrawtransaction", 2, "locktime" },
     { "createrawtransaction", 3, "replaceable" },
+    { "createrawbct", 0, "inputs" },                // LitecoinCash: Hive: Create a Raw BCT
+    { "createrawbct", 1, "bee_count" },             // LitecoinCash: Hive: Create a Raw BCT
+    { "createrawbct", 3, "community_contrib" },     // LitecoinCash: Hive: Create a Raw BCT
+    { "createrawbct", 4, "locktime" },              // LitecoinCash: Hive: Create a Raw BCT
     { "createbees", 0, "beecount" },                // LitecoinCash: Hive: Create a BCT
     { "createbees", 1, "community_contrib" },       // LitecoinCash: Hive: Create a BCT
     { "getbeecost", 0, "height" },                  // LitecoinCash: Hive: Get cost of a single bee

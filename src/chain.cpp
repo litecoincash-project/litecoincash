@@ -4,8 +4,10 @@
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 #include <chain.h>
-#include <chainparams.h>    // LitecoinCash: Hive
-#include <util.h>    // LitecoinCash: Hive
+#include <chainparams.h>        // LitecoinCash: Hive
+#include <util.h>               // LitecoinCash: Hive
+#include <rpc/blockchain.h>     // LitecoinCash: Hive 1.1
+#include <validation.h>         // LitecoinCash: Hive 1.1
 
 /**
  * CChain implementation
@@ -124,6 +126,8 @@ void CBlockIndex::BuildSkip()
 // their own block plus that of the PoW block behind them
 arith_uint256 GetBlockProof(const CBlockIndex& block)
 {
+    const Consensus::Params& consensusParams = Params().GetConsensus();
+
     arith_uint256 bnTarget;
     bool fNegative;
     bool fOverflow;
@@ -138,7 +142,7 @@ arith_uint256 GetBlockProof(const CBlockIndex& block)
     // or ~bnTarget / (bnTarget+1) + 1.
     arith_uint256 bnTargetScaled = (~bnTarget / (bnTarget + 1)) + 1;
 
-    if (block.GetBlockHeader().IsHiveMined(Params().GetConsensus())) {
+    if (block.GetBlockHeader().IsHiveMined(consensusParams)) {
         assert(block.pprev);
 
         arith_uint256 bnPreviousTarget;
@@ -146,6 +150,57 @@ arith_uint256 GetBlockProof(const CBlockIndex& block)
         if (fNegative || fOverflow || bnPreviousTarget == 0)
             return 0;
         bnTargetScaled += (~bnPreviousTarget / (bnPreviousTarget + 1)) + 1;
+
+        // Hive 1.1: Enable bonus chainwork for Hive blocks
+        if (IsHive11Enabled(&block, consensusParams)) {
+            LogPrintf("**** HIVE-1.1: ENABLING BONUS CHAINWORK ON HIVE BLOCK %s\n", block.GetBlockHash().ToString());
+            LogPrintf("**** Initial block chainwork = %s\n", bnTargetScaled.ToString());
+            double hiveDiff = GetDifficulty(&block, true);                                  // Current hive diff
+            LogPrintf("**** Hive diff = %.12f\n", hiveDiff);
+            unsigned int k = floor(std::min(hiveDiff/consensusParams.maxHiveDiff, 1.0) * (consensusParams.maxK - consensusParams.minK) + consensusParams.minK);
+
+            bnTargetScaled *= k;
+
+            LogPrintf("**** k = %d\n", k);
+            LogPrintf("**** Final scaled chainwork =  %s\n", bnTargetScaled.ToString());
+        }
+    // Hive 1.1: Enable bonus chainwork for PoW blocks
+    } else if (IsHive11Enabled(&block, consensusParams)) {
+        LogPrintf("**** HIVE-1.1: CHECKING FOR BONUS CHAINWORK ON POW BLOCK %s\n", block.GetBlockHash().ToString());
+        LogPrintf("**** Initial block chainwork = %s\n", bnTargetScaled.ToString());
+
+        // Find last hive block
+        CBlockIndex *currBlock = block.pprev;
+        int blocksSinceHive;
+        double lastHiveDifficulty = 0;
+
+        for (blocksSinceHive = 0; blocksSinceHive < consensusParams.maxKPow; blocksSinceHive++) {
+            if (currBlock->GetBlockHeader().IsHiveMined(consensusParams)) {
+                lastHiveDifficulty = GetDifficulty(currBlock, true);
+                LogPrintf("**** Got last Hive diff = %.12f, at %s\n", lastHiveDifficulty, currBlock->GetBlockHash().ToString());
+                break;
+            }
+
+            assert(currBlock->pprev);
+            currBlock = currBlock->pprev;
+        }
+
+        LogPrintf("**** Pow blocks since last Hive block = %d\n", blocksSinceHive);
+
+        // Apply k scaling
+        unsigned int k = consensusParams.maxKPow - blocksSinceHive;
+        if (lastHiveDifficulty < consensusParams.powSplit1)
+            k = k >> 1;
+        if (lastHiveDifficulty < consensusParams.powSplit2)
+            k = k >> 1;
+
+        if (k < 1)
+            k = 1;
+
+        bnTargetScaled *= k;
+
+        LogPrintf("**** k = %d\n", k);
+        LogPrintf("**** Final scaled chainwork =  %s\n", bnTargetScaled.ToString());
     }
 
     return bnTargetScaled;

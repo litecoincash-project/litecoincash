@@ -444,6 +444,153 @@ UniValue createrawtransaction(const JSONRPCRequest& request)
     return EncodeHexTx(rawTx);
 }
 
+// LitecoinCash: Hive: Create a raw bee creation transaction allowing user to specify the inputs
+UniValue createrawbct(const JSONRPCRequest& request)
+{
+    if (request.fHelp || request.params.size() < 2 || request.params.size() > 4)
+        throw std::runtime_error(
+            "createrawbct [{\"txid\":\"id\",\"vout\":n},...] {\"address\":amount,\"data\":\"hex\",...} ( locktime ) ( replaceable )\n"
+            "\nCreate a raw bee creation transaction spending the given inputs and creating the given number of bees.\n"
+            "Does not add change address for unspent inputs, so be sure to add one as the final output using fundrawtransaction.\n"
+            "Returns hex-encoded raw transaction.\n"
+            "Note that the transaction's inputs are not signed, and\n"
+            "it is not stored in the wallet or transmitted to the network.\n"
+            "\nArguments:\n"
+            "1. \"inputs\"               (array, required) A json array of json objects\n"
+            "     [\n"
+            "       {\n"
+            "         \"txid\":\"id\",     (string, required) The transaction id\n"
+            "         \"vout\":n,        (numeric, required) The output number\n"
+            "         \"sequence\":n     (numeric, optional) The sequence number\n"
+            "       } \n"
+            "       ,...\n"
+            "     ]\n"
+            "2. bee_count              (numeric, required) The number of bees to create.\n"
+            "3. \"honey_address\"        (string, required) The LCC address to receive rewards for blocks mined by bee(s) created in this transaction.\n"
+            "4. community_contrib      (boolean, optional, default=true) If true, a small percentage of bee creation cost will be paid to a community fund.\n"
+            "5. locktime               (numeric, optional, default=0) Raw locktime. Non-0 value also locktime-activates inputs\n"
+            "\nResult:\n"
+            "\"transaction\"             (string) hex string of the transaction\n"
+
+            "\nExamples:\n"
+            + HelpExampleCli("createrawbct", "\"[{\\\"txid\\\":\\\"myid\\\",\\\"vout\\\":0}]\" 1 \"t8ppRjr96ew2Z4p5GTPKdT4V5PyNTp3Nw9\"")
+            + HelpExampleCli("createrawbct", "\"[{\\\"txid\\\":\\\"myid\\\",\\\"vout\\\":0}]\" 5 \"t8ppRjr96ew2Z4p5GTPKdT4V5PyNTp3Nw9\" false")
+            + HelpExampleRpc("createrawbct", "\"[{\\\"txid\\\":\\\"myid\\\",\\\"vout\\\":0}]\", 12 \"t8ppRjr96ew2Z4p5GTPKdT4V5PyNTp3Nw9\"")
+            + HelpExampleRpc("createrawbct", "\"[{\\\"txid\\\":\\\"myid\\\",\\\"vout\\\":0}]\", 34 \"t8ppRjr96ew2Z4p5GTPKdT4V5PyNTp3Nw9\" false")
+        );
+
+    RPCTypeCheck(request.params, {UniValue::VARR, UniValue::VNUM, UniValue::VSTR, UniValue::VBOOL, UniValue::VNUM}, true);
+    if (request.params[0].isNull() || request.params[1].isNull() || request.params[2].isNull() || request.params[2].get_str().empty())
+        throw JSONRPCError(RPC_INVALID_PARAMETER, "Invalid parameter, arguments 1, 2 and 3 must be non-null");
+
+    UniValue inputs = request.params[0].get_array();
+    int beeCount = request.params[1].get_int();
+
+    std::string honeyAddress;
+    RPCTypeCheckArgument(request.params[2], UniValue::VSTR);
+    honeyAddress = request.params[2].get_str();
+
+    bool communityContrib = true;
+    if (!request.params[3].isNull())
+        communityContrib = request.params[3].get_bool();
+
+    CMutableTransaction rawTx;
+
+    if (!request.params[4].isNull()) {
+        int64_t nLockTime = request.params[4].get_int64();
+        if (nLockTime < 0 || nLockTime > std::numeric_limits<uint32_t>::max())
+            throw JSONRPCError(RPC_INVALID_PARAMETER, "Invalid parameter, locktime out of range");
+        rawTx.nLockTime = nLockTime;
+    }
+
+    bool rbfOptIn = false;
+
+    // Add the inputs
+    for (unsigned int idx = 0; idx < inputs.size(); idx++) {
+        const UniValue& input = inputs[idx];
+        const UniValue& o = input.get_obj();
+
+        uint256 txid = ParseHashO(o, "txid");
+
+        const UniValue& vout_v = find_value(o, "vout");
+        if (!vout_v.isNum())
+            throw JSONRPCError(RPC_INVALID_PARAMETER, "Invalid parameter, missing vout key");
+        int nOutput = vout_v.get_int();
+        if (nOutput < 0)
+            throw JSONRPCError(RPC_INVALID_PARAMETER, "Invalid parameter, vout must be positive");
+
+        uint32_t nSequence;
+        if (rbfOptIn) {
+            nSequence = MAX_BIP125_RBF_SEQUENCE;
+        } else if (rawTx.nLockTime) {
+            nSequence = std::numeric_limits<uint32_t>::max() - 1;
+        } else {
+            nSequence = std::numeric_limits<uint32_t>::max();
+        }
+
+        // set the sequence number if passed in the parameters object
+        const UniValue& sequenceObj = find_value(o, "sequence");
+        if (sequenceObj.isNum()) {
+            int64_t seqNr64 = sequenceObj.get_int64();
+            if (seqNr64 < 0 || seqNr64 > std::numeric_limits<uint32_t>::max()) {
+                throw JSONRPCError(RPC_INVALID_PARAMETER, "Invalid parameter, sequence number is out of range");
+            } else {
+                nSequence = (uint32_t)seqNr64;
+            }
+        }
+
+        CTxIn in(COutPoint(txid, nOutput), CScript(), nSequence);
+
+        rawTx.vin.push_back(in);
+    }
+
+    // Start Bee Creation
+    Consensus::Params consensusParams = Params().GetConsensus();
+    CAmount beeCost = GetBeeCost(chainActive.Height(), consensusParams);
+    CAmount totalBeeCost = beeCost * beeCount;
+
+    // Check the honey address
+    CTxDestination destinationFCA;
+    destinationFCA = DecodeDestination(honeyAddress);
+    if (!IsValidDestination(destinationFCA)) {
+        throw JSONRPCError(RPC_INVALID_PARAMETER, "Invalid parameter, Invalid honey address specified");
+    }
+
+    // Make sure it's legacy format (TX_PUBKEYHASH)
+    std::vector<std::vector<unsigned char>> vSolutions;
+    txnouttype whichType;
+    if (!Solver(GetScriptForDestination(destinationFCA), whichType, vSolutions)) {
+        throw JSONRPCError(RPC_INVALID_PARAMETER, "Invalid parameter, Couldn't solve scriptPubKey for honey address");
+    }
+    if (whichType != TX_PUBKEYHASH) {
+        throw JSONRPCError(RPC_INVALID_PARAMETER, "Invalid parameter, Honey address must be legacy format (TX_PUBKEYHASH)");
+    }
+
+    CTxDestination destinationBCF = DecodeDestination(consensusParams.beeCreationAddress);
+    CScript scriptPubKeyBCF = GetScriptForDestination(destinationBCF);
+    CScript scriptPubKeyFCA = GetScriptForDestination(destinationFCA);
+    scriptPubKeyBCF << OP_RETURN << OP_BEE;
+    scriptPubKeyBCF += scriptPubKeyFCA;
+    CAmount beeCreationValue = totalBeeCost;
+    CAmount donationValue = (CAmount)(totalBeeCost / consensusParams.communityContribFactor);
+    if(communityContrib) {
+        beeCreationValue -= donationValue;
+    }
+
+    CTxOut outBeeCreation(beeCreationValue, scriptPubKeyBCF);
+    rawTx.vout.push_back(outBeeCreation);
+
+    // Add optional community fund output (vout[1] if present)
+    if (communityContrib) {
+        CTxDestination destinationCF = DecodeDestination(consensusParams.hiveCommunityAddress);
+        CScript scriptPubKeyCF = GetScriptForDestination(destinationCF);
+        CTxOut outCommunityContrib(donationValue,scriptPubKeyCF);
+        rawTx.vout.push_back(outCommunityContrib);
+    }
+
+    return EncodeHexTx(rawTx);
+}
+
 UniValue decoderawtransaction(const JSONRPCRequest& request)
 {
     if (request.fHelp || request.params.size() < 1 || request.params.size() > 2)
@@ -1035,6 +1182,7 @@ static const CRPCCommand commands[] =
   //  --------------------- ------------------------  -----------------------  ----------
     { "rawtransactions",    "getrawtransaction",      &getrawtransaction,      {"txid","verbose","blockhash"} },
     { "rawtransactions",    "createrawtransaction",   &createrawtransaction,   {"inputs","outputs","locktime","replaceable"} },
+    { "rawtransactions",    "createrawbct",           &createrawbct,           {"inputs","beecount","honey_address","community_contrib", "locktime"} }, // LitecoinCash: Hive
     { "rawtransactions",    "decoderawtransaction",   &decoderawtransaction,   {"hexstring","iswitness"} },
     { "rawtransactions",    "decodescript",           &decodescript,           {"hexstring"} },
     { "rawtransactions",    "sendrawtransaction",     &sendrawtransaction,     {"hexstring","allowhighfees"} },

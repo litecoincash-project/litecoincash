@@ -21,7 +21,8 @@ enum DeploymentPos
     DEPLOYMENT_TESTDUMMY,
     DEPLOYMENT_CSV, // Deployment of BIP68, BIP112, and BIP113.
     DEPLOYMENT_SEGWIT, // Deployment of BIP141, BIP143, and BIP147.
-    DEPLOYMENT_HIVE,    // LitecoinCash: Hive: Deployment
+    DEPLOYMENT_HIVE,        // LitecoinCash: Hive: Deployment
+    DEPLOYMENT_HIVE_1_1,    // LitecoinCash: Hive: 1.1 Deployment
     // NOTE: Also add new deployments to VersionBitsDeploymentInfo in versionbits.cpp
     MAX_VERSION_BITS_DEPLOYMENTS
 };
@@ -103,6 +104,14 @@ struct Params {
     int hiveTargetAdjustAggression;     // Snap speed for bee hash target adjustment EMA
     int hiveBlockSpacingTarget;         // Target Hive block frequency (1 out of this many blocks should be Hive)
     int hiveBlockSpacingTargetTypical;  // Observed Hive block frequency (1 out of this many blocks are observed to be Hive)
+
+    // LitecoinCash: Hive 1.1-related consensus fields
+    int minK;                           // Minimum chainwork scale for Hive blocks (see Hive whitepaper section 5)
+    int maxK;                           // Maximum chainwork scale for Hive blocks (see Hive whitepaper section 5)
+    double maxHiveDiff;                 // Hive difficulty at which max chainwork bonus is awarded
+    int maxKPow;                        // Maximum chainwork scale for PoW blocks
+    double powSplit1;                   // Below this Hive difficulty threshold, PoW block chainwork bonus is halved
+    double powSplit2;                   // Below this Hive difficulty threshold, PoW block chainwork bonus is halved again
 };
 } // namespace Consensus
 
