@@ -23,7 +23,7 @@ static void TestBlockSubsidyHalvings(const Consensus::Params& consensusParams)
     for (int nHalvings = 0; nHalvings < maxHalvings; nHalvings++) {
         int nHeight = nHalvings * consensusParams.nSubsidyHalvingInterval;
         CAmount nSubsidy = GetBlockSubsidy(nHeight, consensusParams);
-        if(nHeight >= 6164768) {	// Litecoin Cash: Money issue has finished by this point
+        if(nHeight >= 6164768) {	// LitecoinCash: Money issue has finished by this point
 			BOOST_CHECK(nSubsidy == 0);
 		} else {
 			BOOST_CHECK(nSubsidy <= nInitialSubsidy);

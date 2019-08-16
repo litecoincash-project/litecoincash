@@ -117,7 +117,7 @@ void WalletFrame::gotoOverviewPage()
         i.value()->gotoOverviewPage();
 }
 
-// Litecoin Cash: Hive page
+// LitecoinCash: Hive page
 void WalletFrame::gotoHivePage()
 {
     QMap<QString, WalletView*>::const_iterator i;

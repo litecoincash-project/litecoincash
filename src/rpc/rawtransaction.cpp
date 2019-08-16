@@ -473,10 +473,10 @@ UniValue createrawbct(const JSONRPCRequest& request)
             "\"transaction\"             (string) hex string of the transaction\n"
 
             "\nExamples:\n"
-            + HelpExampleCli("createrawbct", "\"[{\\\"txid\\\":\\\"myid\\\",\\\"vout\\\":0}]\" 1 \"t8ppRjr96ew2Z4p5GTPKdT4V5PyNTp3Nw9\"")
-            + HelpExampleCli("createrawbct", "\"[{\\\"txid\\\":\\\"myid\\\",\\\"vout\\\":0}]\" 5 \"t8ppRjr96ew2Z4p5GTPKdT4V5PyNTp3Nw9\" false")
-            + HelpExampleRpc("createrawbct", "\"[{\\\"txid\\\":\\\"myid\\\",\\\"vout\\\":0}]\", 12 \"t8ppRjr96ew2Z4p5GTPKdT4V5PyNTp3Nw9\"")
-            + HelpExampleRpc("createrawbct", "\"[{\\\"txid\\\":\\\"myid\\\",\\\"vout\\\":0}]\", 34 \"t8ppRjr96ew2Z4p5GTPKdT4V5PyNTp3Nw9\" false")
+            + HelpExampleCli("createrawbct", "\"[{\\\"txid\\\":\\\"myid\\\",\\\"vout\\\":0}]\" 1 \"Cfkv9pniUJ2UoWvaukgD5Ksqx5EsVLzsCk\"")
+            + HelpExampleCli("createrawbct", "\"[{\\\"txid\\\":\\\"myid\\\",\\\"vout\\\":0}]\" 5 \"Cfkv9pniUJ2UoWvaukgD5Ksqx5EsVLzsCk\" false")
+            + HelpExampleRpc("createrawbct", "\"[{\\\"txid\\\":\\\"myid\\\",\\\"vout\\\":0}]\", 12 \"Cfkv9pniUJ2UoWvaukgD5Ksqx5EsVLzsCk\"")
+            + HelpExampleRpc("createrawbct", "\"[{\\\"txid\\\":\\\"myid\\\",\\\"vout\\\":0}]\", 34 \"Cfkv9pniUJ2UoWvaukgD5Ksqx5EsVLzsCk\" false")
         );
 
     RPCTypeCheck(request.params, {UniValue::VARR, UniValue::VNUM, UniValue::VSTR, UniValue::VBOOL, UniValue::VNUM}, true);

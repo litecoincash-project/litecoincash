@@ -365,6 +365,7 @@ public:
 };
 
 arith_uint256 GetBlockProof(const CBlockIndex& block);
+arith_uint256 GetNumHashes(const CBlockIndex& block);       // LitecoinCash: Hive: Reimplement un-boosted GetBlockProof for getnetworkhashps estimation.
 /** Return the time it would take to redo the work difference between from and to, assuming the current hashrate corresponds to the difficulty at tip, in seconds. */
 int64_t GetBlockProofEquivalentTime(const CBlockIndex& to, const CBlockIndex& from, const CBlockIndex& tip, const Consensus::Params&);
 /** Find the forking point between two chain tips. */

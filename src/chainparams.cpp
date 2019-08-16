@@ -139,11 +139,13 @@ public:
 
         // LitecoinCash: Hive 1.1-related consensus fields
         consensus.minK = 1;                                 // Minimum chainwork scale for Hive blocks (see Hive whitepaper section 5)
-        consensus.maxK = 8;                                 // Maximum chainwork scale for Hive blocks (see Hive whitepaper section 5)
+        consensus.maxK = 7;                                 // Maximum chainwork scale for Hive blocks (see Hive whitepaper section 5)
         consensus.maxHiveDiff = 0.006;                      // Hive difficulty at which max chainwork bonus is awarded
         consensus.maxKPow = 5;                              // Maximum chainwork scale for PoW blocks
         consensus.powSplit1 = 0.005;                        // Below this Hive difficulty threshold, PoW block chainwork bonus is halved
         consensus.powSplit2 = 0.0025;                       // Below this Hive difficulty threshold, PoW block chainwork bonus is halved again
+        consensus.maxConsecutiveHiveBlocks = 2;             // Maximum hive blocks that can occur consecutively before a PoW block is required
+        consensus.hiveDifficultyWindow = 24;                // How many blocks the SMA averages over in hive difficulty adjust
 
         // The best chain should have at least this much work.
         consensus.nMinimumChainWork = uint256S("0x00000000000000000000000000000000000000000000ba12a25c1f2da751fc96");  // LitecoinCash: 1695238
@@ -206,15 +208,16 @@ public:
                 {721000, uint256S("0x198a7b4de1df9478e2463bd99d75b714eab235a2e63e741641dc8a759a9840e5")},
                 {1371112, uint256S("0x00000000de1e4e93317241177b5f1d72fc151c6e76815e9b0be4961dfd309d60")},  // LitecoinCash: Premine block
                 {1695238, uint256S("0x00000000000000238fc08340331e2735a64ac2baccdc3db0984ef65c08f658b2")},
+                {1718000, uint256S("0x0000000000000059b656b7601a20df80912e6ab8bf83c63e221cdf460adebe7b")},
             }
         };
 
         chainTxData = ChainTxData{
-            // Data as of block 00000000000000238fc08340331e2735a64ac2baccdc3db0984ef65c08f658b2 (height 1695238).
-            1563371439, // * UNIX timestamp of last known number of transactions
-            22345100,   // * total number of transactions between genesis and that timestamp
+            // Data as of block 00000000000000018614b73ad9d9b37c19473d9e05ba9e32c552e42b022b5de7 (height 1718119).
+            1565797958, // * UNIX timestamp of last known number of transactions
+            22392167,   // * total number of transactions between genesis and that timestamp
                         //   (the tx=... number in the SetBestChain debug.log lines)
-            0.0162      // * estimated number of transactions per second after that timestamp
+            0.0198      // * estimated number of transactions per second after that timestamp
         };
     }
 };
@@ -227,11 +230,11 @@ public:
     CTestNetParams() {
         strNetworkID = "test";
         consensus.nSubsidyHalvingInterval = 840000;
-        consensus.BIP16Height = 0; // always enforce P2SH BIP16 on regtest
-        consensus.BIP34Height = 146;
-        consensus.BIP34Hash = uint256S("000000042bcd56d6ea0509230b76fe850f0a40a9110f7dba979fd5d707e47c8a"); // Block hash at block 146
-        consensus.BIP65Height = 146;
-        consensus.BIP66Height = 146;
+        consensus.BIP16Height = 0; // always enforce BIP16
+        consensus.BIP34Height = 125;
+        consensus.BIP34Hash = uint256S("00000025a842c7a24366423a5a475a27e2d70148d238c68f657f8e8d5d28ea5f"); // Block hash at block 125
+        consensus.BIP65Height = 125;
+        consensus.BIP66Height = 125;
         consensus.powLimit = uint256S("00000fffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
         consensus.nPowTargetTimespan = 3.5 * 24 * 60 * 60; // 3.5 days
         consensus.nPowTargetSpacing = 2.5 * 60;
@@ -240,8 +243,8 @@ public:
         consensus.nRuleChangeActivationThreshold = 30; // Require 75% of last 40 blocks to activate rulechanges
         consensus.nMinerConfirmationWindow = 40;
         consensus.vDeployments[Consensus::DEPLOYMENT_TESTDUMMY].bit = 28;
-        consensus.vDeployments[Consensus::DEPLOYMENT_TESTDUMMY].nStartTime = 1535587200; // August 30, 2018
-        consensus.vDeployments[Consensus::DEPLOYMENT_TESTDUMMY].nTimeout = 1535587200 + 31536000; // Start + 1 year
+        consensus.vDeployments[Consensus::DEPLOYMENT_TESTDUMMY].nStartTime = 1199145601; // January 1, 2008
+        consensus.vDeployments[Consensus::DEPLOYMENT_TESTDUMMY].nTimeout = 1230767999; // December 31, 2008
 
         // Deployment of BIP68, BIP112, and BIP113.
         consensus.vDeployments[Consensus::DEPLOYMENT_CSV].bit = 0;
@@ -260,11 +263,11 @@ public:
 
         // LitecoinCash: Hive 1.1: Deployment
         consensus.vDeployments[Consensus::DEPLOYMENT_HIVE_1_1].bit = 9;
-        consensus.vDeployments[Consensus::DEPLOYMENT_HIVE_1_1].nStartTime = 1561939200;  // July 1, 2019
-        consensus.vDeployments[Consensus::DEPLOYMENT_HIVE_1_1].nTimeout = 1593561600;  // July 1, 2020
+        consensus.vDeployments[Consensus::DEPLOYMENT_HIVE_1_1].nStartTime = 1565801161;  // August 14, 2019
+        consensus.vDeployments[Consensus::DEPLOYMENT_HIVE_1_1].nTimeout = 1565801161 + 31536000;  // Start + 1 year
 
         // LitecoinCash fields
-        consensus.powForkTime = 1543765622;                 // Time of PoW hash method change (block 100)
+        consensus.powForkTime = 1565799588;                 // Time of PoW hash method change (block 100)
 
         consensus.lastScryptBlock = 100;                    // Height of last scrypt block
         consensus.powLimitSHA = uint256S("000000ffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");   // Initial hash target at fork
@@ -291,17 +294,19 @@ public:
 
         // LitecoinCash: Hive 1.1-related consensus fields
         consensus.minK = 1;                                 // Minimum chainwork scale for Hive blocks (see Hive whitepaper section 5)
-        consensus.maxK = 8;                                 // Maximum chainwork scale for Hive blocks (see Hive whitepaper section 5)
+        consensus.maxK = 7;                                 // Maximum chainwork scale for Hive blocks (see Hive whitepaper section 5)
         consensus.maxHiveDiff = 0.002;                      // Hive difficulty at which max chainwork bonus is awarded
         consensus.maxKPow = 5;                              // Maximum chainwork scale for PoW blocks
         consensus.powSplit1 = 0.001;                        // Below this Hive difficulty threshold, PoW block chainwork bonus is halved
         consensus.powSplit2 = 0.0005;                       // Below this Hive difficulty threshold, PoW block chainwork bonus is halved again
+        consensus.maxConsecutiveHiveBlocks = 2;             // Maximum hive blocks that can occur consecutively before a PoW block is required
+        consensus.hiveDifficultyWindow = 24;                // How many blocks the SMA averages over in hive difficulty adjust
 
         // The best chain should have at least this much work.
-        consensus.nMinimumChainWork = uint256S("0x00000000000000000000000000000000000000000000000008ff647196445448");  // LitecoinCash: 192849
+        consensus.nMinimumChainWork = uint256S("0x00000000000000000000000000000000000000000000000000000000664aa685");  // LitecoinCash: 141
 
         // By default assume that the signatures in ancestors of this block are valid.
-        consensus.defaultAssumeValid = uint256S("0000000155537358173629cb096e456aa88bb86460a709f49453b866b8936d0e"); // LitecoinCash: 192849
+        consensus.defaultAssumeValid = uint256S("0000000148fba811dcac0561d31910d231d1838304414e8520ab9084deb35aeb"); // LitecoinCash: 141
 
         pchMessageStart[0] = 0xb6;
         pchMessageStart[1] = 0xf5;
@@ -335,17 +340,16 @@ public:
 
         checkpointData = (CCheckpointData) {
             {
-                {100, uint256S("f05a7f0666f3062464d25d9c2a87d6c235d03158ea593595dacd2ed6a22010d1")},    // Last Scrypt block
-                {146, uint256S("000000042bcd56d6ea0509230b76fe850f0a40a9110f7dba979fd5d707e47c8a")},    // BIP34/BIP65/BIP66 activation
-                {157, uint256S("00000001e6d34f6879ef8abecf6f4eaf7413700e6f6b37cfb0647606736fa7f0")},
-                {192849, uint256S("0000000155537358173629cb096e456aa88bb86460a709f49453b866b8936d0e")}, // Pre Hive-1.1 activation
+                {100, uint256S("9407e44ea211c125715f7a1a52f875edaaaa5129ad300e47b3ae8c24b4368721")},    // Last Scrypt block
+                {125, uint256S("00000025a842c7a24366423a5a475a27e2d70148d238c68f657f8e8d5d28ea5f")},    // BIP34/BIP65/BIP66 activation
+                {141, uint256S("0000000148fba811dcac0561d31910d231d1838304414e8520ab9084deb35aeb")},    // Pre Hive-1.1 activation
             }
         };
 
-        chainTxData = ChainTxData{  // As at 192849
-            1563135330,
-            247682,
-            0.0105
+        chainTxData = ChainTxData{  // As at 141
+            1565801161,
+            142,
+            0.05
         };
     }
 };

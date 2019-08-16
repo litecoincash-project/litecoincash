@@ -44,6 +44,7 @@ unsigned int ParseConfirmTarget(const UniValue& value)
  * or from the last difficulty change if 'lookup' is nonpositive.
  * If 'height' is nonnegative, compute the estimate at the time when a given block was found.
  */
+// LitecoinCash: Hive: count hashes with dedicated function, dont use chainwork. GetNumHashes is Hive Aware.
 UniValue GetNetworkHashPS(int lookup, int height) {
     CBlockIndex *pb = chainActive.Tip();
 
@@ -55,41 +56,32 @@ UniValue GetNetworkHashPS(int lookup, int height) {
 
     // If lookup is -1, then use blocks since last difficulty change.
     if (lookup <= 0)
-        lookup = pb->nHeight % Params().GetConsensus().DifficultyAdjustmentInterval() + 1;
+        lookup = IsHive11Enabled(pb, Params().GetConsensus()) ? 1 : pb->nHeight % Params().GetConsensus().DifficultyAdjustmentInterval() + 1;   // LitecoinCash: Hive 1.1: Taking the opportunity to provide a more sensible default.
 
     // If lookup is larger than chain, then set it to chain length.
     if (lookup > pb->nHeight)
         lookup = pb->nHeight;
 
-    CBlockIndex *pb0 = pb;
-    int64_t minTime = pb0->GetBlockTime();
+    int64_t minTime = pb->GetBlockTime();
     int64_t maxTime = minTime;
 	
-	const Consensus::Params& consensusParams = Params().GetConsensus();					// Litecoin Cash: Hive: Take into account hive blocks
-	int nHiveBlocks = pb0->GetBlockHeader().IsHiveMined(consensusParams) ? 1 : 0;		// Litecoin Cash: Hive: Take into account hive blocks
+	arith_uint256 workDiff = GetNumHashes(*pb);
 	
     for (int i = 0; i < lookup; i++) {
-        pb0 = pb0->pprev;
-        int64_t time = pb0->GetBlockTime();
+        pb = pb->pprev;
+        int64_t time = pb->GetBlockTime();
         minTime = std::min(time, minTime);
         maxTime = std::max(time, maxTime);
-		if (pb0->GetBlockHeader().IsHiveMined(consensusParams))							// Litecoin Cash: Hive: Take into account hive blocks
-			nHiveBlocks++;																// Litecoin Cash: Hive: Take into account hive blocks
+        workDiff += GetNumHashes(*pb);
     }
 
     // In case there's a situation where minTime == maxTime, we don't want a divide by zero exception.
     if (minTime == maxTime)
         return 0;
 
-    arith_uint256 workDiff = pb->nChainWork - pb0->nChainWork;
     int64_t timeDiff = maxTime - minTime;
 
-	// The below calculation makes the (currently true) assumption that 
-	// hive blocks have the same chainwork as pow blocks.
-	// If this changes in future, this code should be revisited.
-	
-	// return workDiff.getdouble() / timeDiff;										// Litecoin Cash: Hive
-    return workDiff.getdouble() * (1 - nHiveBlocks / (double)lookup) / timeDiff;	// Litecoin Cash: Hive: Take into account hive blocks
+	return workDiff.getdouble() / timeDiff;
 }
 
 UniValue getnetworkhashps(const JSONRPCRequest& request)

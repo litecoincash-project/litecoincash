@@ -145,7 +145,7 @@ BOOST_AUTO_TEST_CASE(rpc_createraw_op_return)
 
 BOOST_AUTO_TEST_CASE(rpc_format_monetary_values)
 {
-    // Litecoin Cash: Fix tests for coinscale
+    // LitecoinCash: Fix tests for coinscale
     BOOST_CHECK(ValueFromAmount(0LL).write() == "0.0000000");
     BOOST_CHECK(ValueFromAmount(1LL).write() == "0.0000001");
     BOOST_CHECK(ValueFromAmount(17622195LL).write() == "1.7622195");

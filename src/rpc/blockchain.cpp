@@ -64,9 +64,12 @@ double GetDifficulty(const CChain& chain, const CBlockIndex* blockindex, bool ge
 
     // LitecoinCash: Hive: If tip is hivemined and we want PoW, step back one (Hive blocks always follow a PoW block)
     const Consensus::Params& consensusParams = Params().GetConsensus();
-    if (!getHiveDifficulty && blockindex->GetBlockHeader().IsHiveMined(consensusParams)) {
-        assert (blockindex->pprev);
-        blockindex = blockindex->pprev;
+    if (!getHiveDifficulty) {
+        // LitecoinCash: Hive 1.1: Allow there to be multiple hive blocks in the way
+        while (blockindex->GetBlockHeader().IsHiveMined(consensusParams)) {
+            assert (blockindex->pprev);
+            blockindex = blockindex->pprev;
+        }
     }
 
     // LitecoinCash: Hive: If tip is PoW and we want hivemined, step back until we find a Hive block

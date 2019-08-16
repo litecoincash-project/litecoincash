@@ -145,8 +145,15 @@ arith_uint256 GetBlockProof(const CBlockIndex& block)
     if (block.GetBlockHeader().IsHiveMined(consensusParams)) {
         assert(block.pprev);
 
+        // LitecoinCash: Hive 1.1: Set bnPreviousTarget from nBits in most recent pow block, not just assuming it's one back. Note this logic is still valid for Hive 1.0 so doesn't need to be gated.
+        CBlockIndex* pindexTemp = block.pprev;
+        while (pindexTemp->GetBlockHeader().IsHiveMined(consensusParams)) {
+            assert(pindexTemp->pprev);
+            pindexTemp = pindexTemp->pprev;
+        }
+
         arith_uint256 bnPreviousTarget;
-        bnPreviousTarget.SetCompact(block.pprev->nBits, &fNegative, &fOverflow);
+        bnPreviousTarget.SetCompact(pindexTemp->nBits, &fNegative, &fOverflow); // LitecoinCash: Hive 1.1: Set bnPreviousTarget from nBits in most recent pow block, not just assuming it's one back
         if (fNegative || fOverflow || bnPreviousTarget == 0)
             return 0;
         bnTargetScaled += (~bnPreviousTarget / (bnPreviousTarget + 1)) + 1;
@@ -204,6 +211,24 @@ arith_uint256 GetBlockProof(const CBlockIndex& block)
     }
 
     return bnTargetScaled;
+}
+
+// LitecoinCash: Hive: Use this to compute estimated hashes for GetNetworkHashPS()
+arith_uint256 GetNumHashes(const CBlockIndex& block)
+{
+    arith_uint256 bnTarget;
+    bool fNegative;
+    bool fOverflow;
+
+    bnTarget.SetCompact(block.nBits, &fNegative, &fOverflow);
+    if (fNegative || fOverflow || bnTarget == 0 || block.GetBlockHeader().IsHiveMined(Params().GetConsensus()))
+        return 0;
+
+    // We need to compute 2**256 / (bnTarget+1), but we can't represent 2**256
+    // as it's too large for an arith_uint256. However, as 2**256 is at least as large
+    // as bnTarget+1, it is equal to ((2**256 - bnTarget - 1) / (bnTarget+1)) + 1,
+    // or ~bnTarget / (bnTarget+1) + 1.
+    return (~bnTarget / (bnTarget + 1)) + 1;
 }
 
 int64_t GetBlockProofEquivalentTime(const CBlockIndex& to, const CBlockIndex& from, const CBlockIndex& tip, const Consensus::Params& params)

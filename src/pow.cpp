@@ -32,6 +32,15 @@ unsigned int DarkGravityWave(const CBlockIndex* pindexLast, const CBlockHeader *
     if (params.fPowAllowMinDifficultyBlocks && pblock->GetBlockTime() > pindexLast->GetBlockTime() + params.nPowTargetSpacing * 10)
         return bnPowLimit.GetCompact();
 
+    // LitecoinCash: Hive 1.1: Skip over Hivemined blocks at tip
+    if (IsHive11Enabled(pindexLast, params)) {
+        while (pindexLast->GetBlockHeader().IsHiveMined(params)) {
+            //LogPrintf("DarkGravityWave: Skipping hivemined block at %i\n", pindex->nHeight);
+            assert(pindexLast->pprev); // should never fail
+            pindexLast = pindexLast->pprev;
+        }
+    }
+
     // LitecoinCash: Make sure we have at least (nPastBlocks + 1) blocks since the fork, otherwise just return powLimitSHA
     if (!pindexLast || pindexLast->nHeight - params.lastScryptBlock < nPastBlocks)
         return bnPowLimit.GetCompact();
@@ -190,8 +199,50 @@ bool CheckProofOfWork(uint256 hash, unsigned int nBits, const Consensus::Params&
     return true;
 }
 
+// LitecoinCash: Hive 1.1: SMA Hive Difficulty Adjust
+unsigned int GetNextHive11WorkRequired(const CBlockIndex* pindexLast, const Consensus::Params& params) {
+    const arith_uint256 bnPowLimit = UintToArith256(params.powLimitHive);
+
+    arith_uint256 beeHashTarget = 0;
+    int hiveBlockCount = 0;
+    int targetBlockCount = params.hiveDifficultyWindow / params.hiveBlockSpacingTarget;
+
+    CBlockHeader block;
+    for(int i = 0; i < params.hiveDifficultyWindow; i++) {
+        if (!pindexLast->pprev || pindexLast->nHeight < params.minHiveCheckBlock) {   // Not enough sampling window
+            LogPrintf("GetNextHive11WorkRequired: Not enough blocks in sampling window.\n");
+            return bnPowLimit.GetCompact();
+        }
+
+        block = pindexLast->GetBlockHeader();
+        if (block.IsHiveMined(params)) {
+            beeHashTarget += arith_uint256().SetCompact(pindexLast->nBits);
+            hiveBlockCount++;
+        }
+        pindexLast = pindexLast->pprev;
+    }
+
+    if (hiveBlockCount == 0)
+        return bnPowLimit.GetCompact();
+
+    beeHashTarget /= hiveBlockCount;    // Average the bee hash targets in window
+
+    // Retarget
+    beeHashTarget *= targetBlockCount;
+    beeHashTarget /= hiveBlockCount;
+
+    if (beeHashTarget > bnPowLimit)
+        beeHashTarget = bnPowLimit;
+
+    return beeHashTarget.GetCompact();
+}
+
 // LitecoinCash: Hive: Get the current Bee Hash Target
 unsigned int GetNextHiveWorkRequired(const CBlockIndex* pindexLast, const Consensus::Params& params) {
+    // LitecoinCash: Hive 1.1: Use SMA diff adjust
+    if (IsHive11Enabled(pindexLast, params))
+        return GetNextHive11WorkRequired(pindexLast, params);
+
     const arith_uint256 bnPowLimit = UintToArith256(params.powLimitHive);
     const arith_uint256 bnImpossible = 0;
     arith_uint256 beeHashTarget;
@@ -365,10 +416,24 @@ bool CheckHiveProof(const CBlock* pblock, const Consensus::Params& consensusPara
         return false;
     }
 
-    // Check previous block wasn't hivemined
-    if (pindexPrev->GetBlockHeader().IsHiveMined(consensusParams)) {
-        LogPrintf("CheckHiveProof: Hive block must follow a POW block.\n");
-        return false;
+    // LitecoinCash: Hive 1.1: Check that there aren't too many consecutive Hive blocks
+    if (IsHive11Enabled(pindexPrev, consensusParams)) {
+        int hiveBlocksAtTip = 0;
+        CBlockIndex* pindexTemp = pindexPrev;
+        while (pindexTemp->GetBlockHeader().IsHiveMined(consensusParams)) {
+            assert(pindexTemp->pprev);
+            pindexTemp = pindexTemp->pprev;
+            hiveBlocksAtTip++;
+        }
+        if (hiveBlocksAtTip >= consensusParams.maxConsecutiveHiveBlocks) {
+            LogPrintf("CheckHiveProof: Too many Hive blocks without a POW block.\n");
+            return false;
+        }
+    } else {
+        if (pindexPrev->GetBlockHeader().IsHiveMined(consensusParams)) {
+            LogPrint(BCLog::HIVE, "CheckHiveProof: Hive block must follow a POW block.\n");
+            return false;
+        }
     }
 
     // Block mustn't include any BCTs

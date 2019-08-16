@@ -599,9 +599,9 @@ UniValue createbees(const JSONRPCRequest& request)
             "\"txid\"                    (string) The transaction id.\n"
             "\nExamples:\n"
             + HelpExampleCli("createbees", "1")
-            + HelpExampleCli("createbees", "5 true \"MBA3cASkMpjqjn8NmbcfYRPHdzkPm6AYdW\"")
+            + HelpExampleCli("createbees", "5 true \"Cfkv9pniUJ2UoWvaukgD5Ksqx5EsVLzsCk\"")
             + HelpExampleRpc("createbees", "12")
-            + HelpExampleRpc("createbees", "34 false \"MBA3cASkMpjqjn8NmbcfYRPHdzkPm6AYdW\"")
+            + HelpExampleRpc("createbees", "34 false \"Cfkv9pniUJ2UoWvaukgD5Ksqx5EsVLzsCk\"")
         );
 
     RPCTypeCheckArgument(request.params[0], UniValue::VNUM);

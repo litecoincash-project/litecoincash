@@ -672,8 +672,8 @@ public:
 
     // LitecoinCash: Hive: Check if script is a Bee Creation script and optionally get the honey scriptPubKey in scriptPubKeyHoney
     static bool IsBCTScript(CScript scriptPubKey, CScript scriptPubKeyBCF, CScript* scriptPubKeyHoney = nullptr) {
-        // Check it's big enough
-        if (scriptPubKey.size() < 52)
+        // Check for correct size
+        if (scriptPubKey.size() != 52)
             return false;
 
         // Check for the unspendable bee creation script

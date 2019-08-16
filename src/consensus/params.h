@@ -112,6 +112,8 @@ struct Params {
     int maxKPow;                        // Maximum chainwork scale for PoW blocks
     double powSplit1;                   // Below this Hive difficulty threshold, PoW block chainwork bonus is halved
     double powSplit2;                   // Below this Hive difficulty threshold, PoW block chainwork bonus is halved again
+    int maxConsecutiveHiveBlocks;       // Maximum hive blocks that can occur consecutively before a PoW block is required
+    int hiveDifficultyWindow;           // How many blocks the SMA averages over in hive difficulty adjust
 };
 } // namespace Consensus
 

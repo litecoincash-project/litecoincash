@@ -36,6 +36,8 @@
 #include <boost/algorithm/string/replace.hpp>
 #include <boost/thread.hpp>
 
+#include <script/ismine.h>  // LitecoinCash: Hive
+
 std::vector<CWalletRef> vpwallets;
 /** Transaction fee set by the user */
 CFeeRate payTxFee(DEFAULT_TRANSACTION_FEE);
@@ -2906,14 +2908,13 @@ bool CWallet::CreateBeeTransaction(int beeCount, CWalletTx& wtxNew, CReserveKey&
         }
 
         // Make sure it's a wallet address (otherwise bees won't be able to mint)
-        CKeyID keyid = GetKeyForDestination(*this, destinationFCA);
-        if (keyid.IsNull()) {
+        isminetype isMine = ::IsMine((const CKeyStore&)*this, (const CTxDestination&)destinationFCA, SIGVERSION_BASE);
+        if (isMine != ISMINE_SPENDABLE) {
             strFailReason = "Error: Wallet doesn't contain the private key for the honey address specified";
             return false;
         }
     }
 	
-		
 	// Check the custom change address is valid and on-wallet
 	CTxDestination destinationChange;
 	if (!changeAddress.empty()) {
@@ -2923,10 +2924,10 @@ bool CWallet::CreateBeeTransaction(int beeCount, CWalletTx& wtxNew, CReserveKey&
             return false;
         }
 		
-		// Make sure it's a wallet address (otherwise bees won't be able to receive change) 
-        CKeyID keyid = GetKeyForDestination(*this, destinationChange);
-        if (keyid.IsNull()) {
-            strFailReason = "Error: Wallet doesn't contain the private key for the change address specified";
+        // Make sure it's a wallet address (otherwise the change won't make it back to us)
+        isminetype isMine = ::IsMine((const CKeyStore&)*this, (const CTxDestination&)destinationChange, SIGVERSION_BASE);
+        if (isMine != ISMINE_SPENDABLE) {
+            strFailReason = "Error: Wallet doesn't contain the private key for the honey address specified";
             return false;
         }
 	}
