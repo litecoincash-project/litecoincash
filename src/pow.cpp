@@ -205,31 +205,29 @@ unsigned int GetNextHive11WorkRequired(const CBlockIndex* pindexLast, const Cons
 
     arith_uint256 beeHashTarget = 0;
     int hiveBlockCount = 0;
-    int targetBlockCount = params.hiveDifficultyWindow / params.hiveBlockSpacingTarget;
+    int totalBlockCount = 0;
 
-    CBlockHeader block;
-    for(int i = 0; i < params.hiveDifficultyWindow; i++) {
-        if (!pindexLast->pprev || pindexLast->nHeight < params.minHiveCheckBlock) {   // Not enough sampling window
-            LogPrintf("GetNextHive11WorkRequired: Not enough blocks in sampling window.\n");
-            return bnPowLimit.GetCompact();
-        }
-
-        block = pindexLast->GetBlockHeader();
-        if (block.IsHiveMined(params)) {
+    // Step back till we have found 24 hive blocks, or we ran out...
+    while (hiveBlockCount < params.hiveDifficultyWindow && pindexLast->pprev && pindexLast->nHeight >= params.minHiveCheckBlock) {
+        if (pindexLast->GetBlockHeader().IsHiveMined(params)) {
             beeHashTarget += arith_uint256().SetCompact(pindexLast->nBits);
             hiveBlockCount++;
         }
+        totalBlockCount++;
         pindexLast = pindexLast->pprev;
     }
 
-    if (hiveBlockCount == 0)
+    if (hiveBlockCount == 0) {          // Should only happen when chain is starting
+        LogPrintf("GetNextHive11WorkRequired: No previous hive blocks found.\n");
         return bnPowLimit.GetCompact();
+    }
 
     beeHashTarget /= hiveBlockCount;    // Average the bee hash targets in window
 
-    // Retarget
-    beeHashTarget *= targetBlockCount;
-    beeHashTarget /= hiveBlockCount;
+    // Retarget based on totalBlockCount
+    int targetTotalBlockCount = hiveBlockCount * params.hiveBlockSpacingTarget;
+    beeHashTarget *= totalBlockCount;
+    beeHashTarget /= targetTotalBlockCount;
 
     if (beeHashTarget > bnPowLimit)
         beeHashTarget = bnPowLimit;
@@ -680,6 +678,6 @@ bool CheckHiveProof(const CBlock* pblock, const Consensus::Params& consensusPara
         return false;
     }
 
-    LogPrintf("CheckHiveProof: Pass at %i%s\n", blockHeight, deepDrill ? " (used deepdrill)" : "");
+    //LogPrintf("CheckHiveProof: Pass at %i%s\n", blockHeight, deepDrill ? " (used deepdrill)" : "");
     return true;
 }

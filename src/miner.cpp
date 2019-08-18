@@ -531,7 +531,7 @@ void BeeKeeper(const CChainParams& chainparams) {
 
     try {
         while (true) {
-            MilliSleep(5000);
+            MilliSleep(1000);
             int newHeight;
             {
                 LOCK(cs_main);

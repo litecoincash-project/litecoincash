@@ -293,20 +293,20 @@ public:
         consensus.hiveNonceMarker = 192;                    // Nonce marker for hivemined blocks
 
         // LitecoinCash: Hive 1.1-related consensus fields
-        consensus.minK = 1;                                 // Minimum chainwork scale for Hive blocks (see Hive whitepaper section 5)
-        consensus.maxK = 7;                                 // Maximum chainwork scale for Hive blocks (see Hive whitepaper section 5)
+        consensus.minK = 2;                                 // Minimum chainwork scale for Hive blocks (see Hive whitepaper section 5)
+        consensus.maxK = 10;                                // Maximum chainwork scale for Hive blocks (see Hive whitepaper section 5)
         consensus.maxHiveDiff = 0.002;                      // Hive difficulty at which max chainwork bonus is awarded
         consensus.maxKPow = 5;                              // Maximum chainwork scale for PoW blocks
         consensus.powSplit1 = 0.001;                        // Below this Hive difficulty threshold, PoW block chainwork bonus is halved
         consensus.powSplit2 = 0.0005;                       // Below this Hive difficulty threshold, PoW block chainwork bonus is halved again
         consensus.maxConsecutiveHiveBlocks = 2;             // Maximum hive blocks that can occur consecutively before a PoW block is required
-        consensus.hiveDifficultyWindow = 24;                // How many blocks the SMA averages over in hive difficulty adjust
+        consensus.hiveDifficultyWindow = 36;                // How many blocks the SMA averages over in hive difficulty adjust
 
         // The best chain should have at least this much work.
-        consensus.nMinimumChainWork = uint256S("0x00000000000000000000000000000000000000000000000000000000664aa685");  // LitecoinCash: 141
+        consensus.nMinimumChainWork = uint256S("0x00000000000000000000000000000000000000000000000000000000814ac185");  // LitecoinCash: 166
 
         // By default assume that the signatures in ancestors of this block are valid.
-        consensus.defaultAssumeValid = uint256S("0000000148fba811dcac0561d31910d231d1838304414e8520ab9084deb35aeb"); // LitecoinCash: 141
+        consensus.defaultAssumeValid = uint256S("000000317630e88ba7eb1a03579c4102adb9d23dc8261ca4db27fa3ed1cad044"); // LitecoinCash: 166
 
         pchMessageStart[0] = 0xb6;
         pchMessageStart[1] = 0xf5;
@@ -343,6 +343,7 @@ public:
                 {100, uint256S("9407e44ea211c125715f7a1a52f875edaaaa5129ad300e47b3ae8c24b4368721")},    // Last Scrypt block
                 {125, uint256S("00000025a842c7a24366423a5a475a27e2d70148d238c68f657f8e8d5d28ea5f")},    // BIP34/BIP65/BIP66 activation
                 {141, uint256S("0000000148fba811dcac0561d31910d231d1838304414e8520ab9084deb35aeb")},    // Pre Hive-1.1 activation
+                {166, uint256S("000000317630e88ba7eb1a03579c4102adb9d23dc8261ca4db27fa3ed1cad044")},
             }
         };
 
