@@ -2864,7 +2864,13 @@ bool CWallet::CreateBeeTransaction(int beeCount, CWalletTx& wtxNew, CReserveKey&
     }
 
     // Don't spend more than potential rewards in a single BCT
-    CAmount totalPotentialReward = (consensusParams.beeLifespanBlocks * GetBlockSubsidy(pindexPrev->nHeight, consensusParams)) / consensusParams.hiveBlockSpacingTargetTypical;
+    // LitecoinCash: Hive 1.1: Use correct typical spacing
+    CAmount totalPotentialReward;
+    if (IsHive11Enabled(pindexPrev, consensusParams))
+        totalPotentialReward = (consensusParams.beeLifespanBlocks * GetBlockSubsidy(pindexPrev->nHeight, consensusParams)) / consensusParams.hiveBlockSpacingTargetTypical_1_1;
+    else
+        totalPotentialReward = (consensusParams.beeLifespanBlocks * GetBlockSubsidy(pindexPrev->nHeight, consensusParams)) / consensusParams.hiveBlockSpacingTargetTypical;
+
     if (totalPotentialReward < beeCost) {
         strFailReason = "Error: Bee creation would cost more than possible rewards";
         return false;

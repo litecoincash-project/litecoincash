@@ -104,6 +104,7 @@ struct Params {
     int hiveTargetAdjustAggression;     // Snap speed for bee hash target adjustment EMA
     int hiveBlockSpacingTarget;         // Target Hive block frequency (1 out of this many blocks should be Hive)
     int hiveBlockSpacingTargetTypical;  // Observed Hive block frequency (1 out of this many blocks are observed to be Hive)
+    int hiveBlockSpacingTargetTypical_1_1; // Observed Hive block frequency in Hive 1.1 (1 out of this many blocks are observed to be Hive)
 
     // LitecoinCash: Hive 1.1-related consensus fields
     int minK;                           // Minimum chainwork scale for Hive blocks (see Hive whitepaper section 5)

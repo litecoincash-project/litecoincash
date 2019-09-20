@@ -134,7 +134,8 @@ public:
         consensus.minHiveCheckBlock = 1537566;              // Don't bother checking below this height for Hive blocks (not used for consensus/validation checks, just efficiency when looking for potential BCTs)
         consensus.hiveTargetAdjustAggression = 30;          // Snap speed for bee hash target adjustment EMA
         consensus.hiveBlockSpacingTarget = 2;               // Target Hive block frequency (1 out of this many blocks should be Hivemined)
-        consensus.hiveBlockSpacingTargetTypical = 2;        // Observed Hive block frequency (1 out of this many blocks are observed to be Hive)
+        consensus.hiveBlockSpacingTargetTypical = 3;        // Observed Hive block frequency (1 out of this many blocks are observed to be Hive)
+        consensus.hiveBlockSpacingTargetTypical_1_1 = 2;    // Observed Hive block frequency in Hive 1.1 (1 out of this many blocks are observed to be Hive)
         consensus.hiveNonceMarker = 192;                    // Nonce marker for hivemined blocks
 
         // LitecoinCash: Hive 1.1-related consensus fields
@@ -288,7 +289,8 @@ public:
         consensus.minHiveCheckBlock = 100;                  // Don't bother checking below this height for Hive blocks (not used for consensus/validation checks, just efficiency when looking for potential BCTs)
         consensus.hiveTargetAdjustAggression = 30;          // Snap speed for bee hash target adjustment EMA
         consensus.hiveBlockSpacingTarget = 2;               // Target Hive block frequency (1 out of this many blocks should be Hivemined)
-        consensus.hiveBlockSpacingTargetTypical = 2;        // Observed Hive block frequency (1 out of this many blocks are observed to be Hive)
+        consensus.hiveBlockSpacingTargetTypical = 3;        // Observed Hive block frequency (1 out of this many blocks are observed to be Hive)
+        consensus.hiveBlockSpacingTargetTypical_1_1 = 2;    // Observed Hive block frequency in Hive 1.1 (1 out of this many blocks are observed to be Hive)
         consensus.hiveNonceMarker = 192;                    // Nonce marker for hivemined blocks
 
         // LitecoinCash: Hive 1.1-related consensus fields
