@@ -87,6 +87,7 @@ void EnsureWalletIsUnlocked(CWallet * const pwallet)
     if (pwallet->IsLocked()) {
         throw JSONRPCError(RPC_WALLET_UNLOCK_NEEDED, "Error: Please enter the wallet passphrase with walletpassphrase first.");
     }
+    // LitecoinCash: Hive
     if (fWalletUnlockHiveMiningOnly) {
         throw JSONRPCError(RPC_WALLET_UNLOCK_NEEDED, "Error: Wallet is unlocked for hive mining only, please enter the wallet passphrase with walletpassphrase first.");
     }

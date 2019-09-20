@@ -2,6 +2,8 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
+// LitecoinCash: Hive
+
 #include <wallet/wallet.h>
 #include <wallet/fees.h>
 

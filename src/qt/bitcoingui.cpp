@@ -716,7 +716,7 @@ void BitcoinGUI::gotoOverviewPage()
     if (walletFrame) walletFrame->gotoOverviewPage();
 }
 
-// LitecoinCash: Switch to hive page
+// LitecoinCash: Hive: Switch to hive page
 void BitcoinGUI::gotoHivePage()
 {
     hiveAction->setChecked(true);

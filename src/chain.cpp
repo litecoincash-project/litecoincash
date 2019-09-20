@@ -127,6 +127,7 @@ void CBlockIndex::BuildSkip()
 arith_uint256 GetBlockProof(const CBlockIndex& block)
 {
     const Consensus::Params& consensusParams = Params().GetConsensus();
+    bool verbose = LogAcceptCategory(BCLog::HIVE);
 
     arith_uint256 bnTarget;
     bool fNegative;
@@ -160,21 +161,27 @@ arith_uint256 GetBlockProof(const CBlockIndex& block)
 
         // Hive 1.1: Enable bonus chainwork for Hive blocks
         if (IsHive11Enabled(&block, consensusParams)) {
-            LogPrintf("**** HIVE-1.1: ENABLING BONUS CHAINWORK ON HIVE BLOCK %s\n", block.GetBlockHash().ToString());
-            LogPrintf("**** Initial block chainwork = %s\n", bnTargetScaled.ToString());
+            if (verbose) {
+                LogPrintf("**** HIVE-1.1: ENABLING BONUS CHAINWORK ON HIVE BLOCK %s\n", block.GetBlockHash().ToString());
+                LogPrintf("**** Initial block chainwork = %s\n", bnTargetScaled.ToString());
+            }
             double hiveDiff = GetDifficulty(&block, true);                                  // Current hive diff
-            LogPrintf("**** Hive diff = %.12f\n", hiveDiff);
+            if (verbose) LogPrintf("**** Hive diff = %.12f\n", hiveDiff);
             unsigned int k = floor(std::min(hiveDiff/consensusParams.maxHiveDiff, 1.0) * (consensusParams.maxK - consensusParams.minK) + consensusParams.minK);
 
             bnTargetScaled *= k;
 
-            LogPrintf("**** k = %d\n", k);
-            LogPrintf("**** Final scaled chainwork =  %s\n", bnTargetScaled.ToString());
+            if (verbose) {
+                LogPrintf("**** k = %d\n", k);
+                LogPrintf("**** Final scaled chainwork =  %s\n", bnTargetScaled.ToString());
+            }
         }
     // Hive 1.1: Enable bonus chainwork for PoW blocks
     } else if (IsHive11Enabled(&block, consensusParams)) {
-        LogPrintf("**** HIVE-1.1: CHECKING FOR BONUS CHAINWORK ON POW BLOCK %s\n", block.GetBlockHash().ToString());
-        LogPrintf("**** Initial block chainwork = %s\n", bnTargetScaled.ToString());
+        if (verbose) {
+            LogPrintf("**** HIVE-1.1: CHECKING FOR BONUS CHAINWORK ON POW BLOCK %s\n", block.GetBlockHash().ToString());
+            LogPrintf("**** Initial block chainwork = %s\n", bnTargetScaled.ToString());
+        }
 
         // Find last hive block
         CBlockIndex *currBlock = block.pprev;
@@ -184,7 +191,7 @@ arith_uint256 GetBlockProof(const CBlockIndex& block)
         for (blocksSinceHive = 0; blocksSinceHive < consensusParams.maxKPow; blocksSinceHive++) {
             if (currBlock->GetBlockHeader().IsHiveMined(consensusParams)) {
                 lastHiveDifficulty = GetDifficulty(currBlock, true);
-                LogPrintf("**** Got last Hive diff = %.12f, at %s\n", lastHiveDifficulty, currBlock->GetBlockHash().ToString());
+                if (verbose) LogPrintf("**** Got last Hive diff = %.12f, at %s\n", lastHiveDifficulty, currBlock->GetBlockHash().ToString());
                 break;
             }
 
@@ -192,7 +199,7 @@ arith_uint256 GetBlockProof(const CBlockIndex& block)
             currBlock = currBlock->pprev;
         }
 
-        LogPrintf("**** Pow blocks since last Hive block = %d\n", blocksSinceHive);
+        if (verbose) LogPrintf("**** Pow blocks since last Hive block = %d\n", blocksSinceHive);
 
         // Apply k scaling
         unsigned int k = consensusParams.maxKPow - blocksSinceHive;
@@ -206,8 +213,10 @@ arith_uint256 GetBlockProof(const CBlockIndex& block)
 
         bnTargetScaled *= k;
 
-        LogPrintf("**** k = %d\n", k);
-        LogPrintf("**** Final scaled chainwork =  %s\n", bnTargetScaled.ToString());
+        if (verbose) {
+            LogPrintf("**** k = %d\n", k);
+            LogPrintf("**** Final scaled chainwork =  %s\n", bnTargetScaled.ToString());
+        }
     }
 
     return bnTargetScaled;

@@ -11,8 +11,7 @@ class CRPCTable;
 class CWallet;
 class JSONRPCRequest;
 
-struct BeePopGraphPoint;
-
+struct BeePopGraphPoint;                            // LitecoinCash: Hive
 extern BeePopGraphPoint beePopGraph[1024*40];       // LitecoinCash: Hive
 
 void RegisterWalletRPCCommands(CRPCTable &t);

@@ -99,7 +99,7 @@ void WalletView::setBitcoinGUI(BitcoinGUI *gui)
         // Clicking on a transaction on the overview page simply sends you to transaction history page
         connect(overviewPage, SIGNAL(transactionClicked(QModelIndex)), gui, SLOT(gotoHistoryPage()));
 
-        // LitecoinCash: Go to hive page if bee button on overview clicked
+        // LitecoinCash: Hive: Go to hive page if bee button on overview clicked
         connect(overviewPage, SIGNAL(beeButtonClicked()), gui, SLOT(gotoHivePage()));
 
         // Receive and report messages

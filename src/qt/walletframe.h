@@ -71,7 +71,7 @@ public Q_SLOTS:
     /** Switch to send coins page */
     void gotoSendCoinsPage(QString addr = "");
 
-    // LitecoinCash: Switch to hive page
+    // LitecoinCash: Hive: Switch to hive page
     void gotoHivePage();
 
     // LitecoinCash: Key import helper

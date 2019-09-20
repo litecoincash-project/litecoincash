@@ -40,7 +40,7 @@ private:
     Mode mode;
     WalletModel *model;
     bool fCapsLock;
-	bool fHiveOnly;
+	bool fHiveOnly;     // LitecoinCash: Hive: Locked wallet support
 
 private Q_SLOTS:
     void textChanged();

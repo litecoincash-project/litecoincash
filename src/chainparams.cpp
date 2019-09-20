@@ -109,8 +109,8 @@ public:
 
         // LitecoinCash: Hive 1.1: Deployment
         consensus.vDeployments[Consensus::DEPLOYMENT_HIVE_1_1].bit = 9;
-        consensus.vDeployments[Consensus::DEPLOYMENT_HIVE_1_1].nStartTime = 2000000000;  // Far future
-        consensus.vDeployments[Consensus::DEPLOYMENT_HIVE_1_1].nTimeout = 2100000000;  // Far future
+        consensus.vDeployments[Consensus::DEPLOYMENT_HIVE_1_1].nStartTime = 1568937600;  // Sept 20, 2019
+        consensus.vDeployments[Consensus::DEPLOYMENT_HIVE_1_1].nTimeout = 1600560000;    // Sept 20, 2020
 
         // LitecoinCash fields
         consensus.powForkTime = 1518982404;                 // Time of PoW hash method change
@@ -134,18 +134,18 @@ public:
         consensus.minHiveCheckBlock = 1537566;              // Don't bother checking below this height for Hive blocks (not used for consensus/validation checks, just efficiency when looking for potential BCTs)
         consensus.hiveTargetAdjustAggression = 30;          // Snap speed for bee hash target adjustment EMA
         consensus.hiveBlockSpacingTarget = 2;               // Target Hive block frequency (1 out of this many blocks should be Hivemined)
-        consensus.hiveBlockSpacingTargetTypical = 3;        // Observed Hive block frequency (1 out of this many blocks are observed to be Hive)
+        consensus.hiveBlockSpacingTargetTypical = 2;        // Observed Hive block frequency (1 out of this many blocks are observed to be Hive)
         consensus.hiveNonceMarker = 192;                    // Nonce marker for hivemined blocks
 
         // LitecoinCash: Hive 1.1-related consensus fields
-        consensus.minK = 1;                                 // Minimum chainwork scale for Hive blocks (see Hive whitepaper section 5)
-        consensus.maxK = 7;                                 // Maximum chainwork scale for Hive blocks (see Hive whitepaper section 5)
+        consensus.minK = 2;                                 // Minimum chainwork scale for Hive blocks (see Hive whitepaper section 5)
+        consensus.maxK = 16;                                // Maximum chainwork scale for Hive blocks (see Hive whitepaper section 5)
         consensus.maxHiveDiff = 0.006;                      // Hive difficulty at which max chainwork bonus is awarded
         consensus.maxKPow = 5;                              // Maximum chainwork scale for PoW blocks
         consensus.powSplit1 = 0.005;                        // Below this Hive difficulty threshold, PoW block chainwork bonus is halved
         consensus.powSplit2 = 0.0025;                       // Below this Hive difficulty threshold, PoW block chainwork bonus is halved again
         consensus.maxConsecutiveHiveBlocks = 2;             // Maximum hive blocks that can occur consecutively before a PoW block is required
-        consensus.hiveDifficultyWindow = 24;                // How many blocks the SMA averages over in hive difficulty adjust
+        consensus.hiveDifficultyWindow = 36;                // How many blocks the SMA averages over in hive difficulty adjust
 
         // The best chain should have at least this much work.
         consensus.nMinimumChainWork = uint256S("0x00000000000000000000000000000000000000000000ba12a25c1f2da751fc96");  // LitecoinCash: 1695238
@@ -268,7 +268,6 @@ public:
 
         // LitecoinCash fields
         consensus.powForkTime = 1565799588;                 // Time of PoW hash method change (block 100)
-
         consensus.lastScryptBlock = 100;                    // Height of last scrypt block
         consensus.powLimitSHA = uint256S("000000ffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");   // Initial hash target at fork
         consensus.slowStartBlocks = 40;                     // Scale post-fork block reward up over this many blocks
@@ -289,7 +288,7 @@ public:
         consensus.minHiveCheckBlock = 100;                  // Don't bother checking below this height for Hive blocks (not used for consensus/validation checks, just efficiency when looking for potential BCTs)
         consensus.hiveTargetAdjustAggression = 30;          // Snap speed for bee hash target adjustment EMA
         consensus.hiveBlockSpacingTarget = 2;               // Target Hive block frequency (1 out of this many blocks should be Hivemined)
-        consensus.hiveBlockSpacingTargetTypical = 3;        // Observed Hive block frequency (1 out of this many blocks are observed to be Hive)
+        consensus.hiveBlockSpacingTargetTypical = 2;        // Observed Hive block frequency (1 out of this many blocks are observed to be Hive)
         consensus.hiveNonceMarker = 192;                    // Nonce marker for hivemined blocks
 
         // LitecoinCash: Hive 1.1-related consensus fields

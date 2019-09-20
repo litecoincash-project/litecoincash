@@ -11,7 +11,7 @@
 #include <qt/optionsmodel.h>
 #include <qt/paymentserver.h>
 #include <qt/recentrequeststablemodel.h>
-#include <qt/hivetablemodel.h>
+#include <qt/hivetablemodel.h>  // LitecoinCash: Hive
 #include <qt/sendcoinsdialog.h>
 #include <qt/transactiontablemodel.h>
 

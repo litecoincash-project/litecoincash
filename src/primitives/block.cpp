@@ -10,7 +10,7 @@
 #include <utilstrencodings.h>
 #include <crypto/common.h>
 #include <crypto/scrypt.h>
-#include <chainparams.h>
+#include <chainparams.h>    // LitecoinCash: Hive
 
 uint256 CBlockHeader::GetHash() const
 {

@@ -278,7 +278,7 @@ bool BlockAssembler::TestPackageTransactions(const CTxMemPool::setEntries& packa
             return false;
         if (!fIncludeWitness && it->GetTx().HasWitness())
             return false;
-        // LitecoinCash: Inhibit BCTs if required
+        // LitecoinCash: Hive: Inhibit BCTs if required
         if (!fIncludeBCTs && it->GetTx().IsBCT(consensusParams, GetScriptForDestination(DecodeDestination(consensusParams.beeCreationAddress))))
             return false;
     }

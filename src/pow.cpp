@@ -678,6 +678,8 @@ bool CheckHiveProof(const CBlock* pblock, const Consensus::Params& consensusPara
         return false;
     }
 
-    //LogPrintf("CheckHiveProof: Pass at %i%s\n", blockHeight, deepDrill ? " (used deepdrill)" : "");
+    if (verbose)
+        LogPrintf("CheckHiveProof: Pass at %i%s\n", blockHeight, deepDrill ? " (used deepdrill)" : "");
+
     return true;
 }

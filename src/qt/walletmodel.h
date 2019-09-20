@@ -193,6 +193,7 @@ public:
         void CopyFrom(const UnlockContext& rhs);
     };
 
+    // LitecoinCash: Hive: Locked wallet support
     UnlockContext requestUnlock(bool hiveOnly=false);
 
     bool getPubKey(const CKeyID &address, CPubKey& vchPubKeyOut) const;

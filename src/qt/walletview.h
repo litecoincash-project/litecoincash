@@ -85,7 +85,7 @@ public Q_SLOTS:
     /** Switch to send coins page */
     void gotoSendCoinsPage(QString addr = "");
 
-    // LitecoinCash: Switch to hive page
+    // LitecoinCash: Hive: Switch to hive page
     void gotoHivePage();
 
     /** Show Sign/Verify Message dialog and switch to sign message tab */
@@ -107,7 +107,7 @@ public Q_SLOTS:
     /** Ask for passphrase to unlock wallet temporarily */
     void unlockWallet();
 	
-	// LitecoinCash: Unlock wallet just for hive
+	// LitecoinCash: Hive: Unlock wallet just for hive
 	void unlockWalletHive();
 
     // LitecoinCash: Key import helper

@@ -15,6 +15,7 @@ class CBlockIndex;
 class uint256;
 class CBlock;
 
+// LitecoinCash: Hive
 struct BeePopGraphPoint {
     int immaturePop;
     int maturePop;

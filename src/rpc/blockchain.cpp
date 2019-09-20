@@ -117,6 +117,7 @@ UniValue blockheaderToJSON(const CBlockIndex* blockindex)
     // Only report confirmations if the block is on the main chain
     if (chainActive.Contains(blockindex))
         confirmations = chainActive.Height() - blockindex->nHeight + 1;
+    result.push_back(Pair("type", blockindex->GetBlockHeader().IsHiveMined(Params().GetConsensus()) ? "hive" : "pow")); // LitecoinCash: Hive 1.1: Show block type in JSON
     result.push_back(Pair("confirmations", confirmations));
     result.push_back(Pair("height", blockindex->nHeight));
     result.push_back(Pair("version", blockindex->nVersion));
@@ -127,6 +128,7 @@ UniValue blockheaderToJSON(const CBlockIndex* blockindex)
     result.push_back(Pair("nonce", (uint64_t)blockindex->nNonce));
     result.push_back(Pair("bits", strprintf("%08x", blockindex->nBits)));
     result.push_back(Pair("difficulty", GetDifficulty(blockindex)));
+    result.push_back(Pair("hivedifficulty", GetDifficulty(blockindex, true)));  // LitecoinCash: Hive
     result.push_back(Pair("chainwork", blockindex->nChainWork.GetHex()));
 
     if (blockindex->pprev)
@@ -146,6 +148,7 @@ UniValue blockToJSON(const CBlock& block, const CBlockIndex* blockindex, bool tx
     // Only report confirmations if the block is on the main chain
     if (chainActive.Contains(blockindex))
         confirmations = chainActive.Height() - blockindex->nHeight + 1;
+    result.push_back(Pair("type", block.GetBlockHeader().IsHiveMined(Params().GetConsensus()) ? "hive" : "pow")); // LitecoinCash: Hive 1.1: Show block type in JSON
     result.push_back(Pair("confirmations", confirmations));
     result.push_back(Pair("strippedsize", (int)::GetSerializeSize(block, SER_NETWORK, PROTOCOL_VERSION | SERIALIZE_TRANSACTION_NO_WITNESS)));
     result.push_back(Pair("size", (int)::GetSerializeSize(block, SER_NETWORK, PROTOCOL_VERSION)));
@@ -172,6 +175,7 @@ UniValue blockToJSON(const CBlock& block, const CBlockIndex* blockindex, bool tx
     result.push_back(Pair("nonce", (uint64_t)block.nNonce));
     result.push_back(Pair("bits", strprintf("%08x", block.nBits)));
     result.push_back(Pair("difficulty", GetDifficulty(blockindex)));
+    result.push_back(Pair("hivedifficulty", GetDifficulty(blockindex, true)));  // LitecoinCash: Hive
     result.push_back(Pair("chainwork", blockindex->nChainWork.GetHex()));
 
     if (blockindex->pprev)
@@ -717,6 +721,7 @@ UniValue getblockheader(const JSONRPCRequest& request)
             "\nResult (for verbose = true):\n"
             "{\n"
             "  \"hash\" : \"hash\",     (string) the block hash (same as provided)\n"
+            "  \"type\" : \"hive\"|\"pow\", (string) Indicates whether this block is hive or pow mined\n"   // LitecoinCash: Hive 1.1: Include block type            
             "  \"confirmations\" : n,   (numeric) The number of confirmations, or -1 if the block is not on the main chain\n"
             "  \"height\" : n,          (numeric) The block height or index\n"
             "  \"version\" : n,         (numeric) The block version\n"
@@ -726,7 +731,8 @@ UniValue getblockheader(const JSONRPCRequest& request)
             "  \"mediantime\" : ttt,    (numeric) The median block time in seconds since epoch (Jan 1 1970 GMT)\n"
             "  \"nonce\" : n,           (numeric) The nonce\n"
             "  \"bits\" : \"1d00ffff\", (string) The bits\n"
-            "  \"difficulty\" : x.xxx,  (numeric) The difficulty\n"
+            "  \"difficulty\" : x.xxx,  (numeric) The pow difficulty\n"
+            "  \"hivedifficulty\" : x.xxx,  (numeric) The hive difficulty\n"    // LitecoinCash: Hive 1.1: Include hive diff
             "  \"chainwork\" : \"0000...1f3\"     (string) Expected number of hashes required to produce the current chain (in hex)\n"
             "  \"previousblockhash\" : \"hash\",  (string) The hash of the previous block\n"
             "  \"nextblockhash\" : \"hash\",      (string) The hash of the next block\n"
@@ -779,6 +785,7 @@ UniValue getblock(const JSONRPCRequest& request)
             "\nResult (for verbosity = 1):\n"
             "{\n"
             "  \"hash\" : \"hash\",     (string) the block hash (same as provided)\n"
+            "  \"type\" : \"hive\"|\"pow\", (string) Indicates whether this block is hive or pow mined\n"   // LitecoinCash: Hive 1.1: Include block type
             "  \"confirmations\" : n,   (numeric) The number of confirmations, or -1 if the block is not on the main chain\n"
             "  \"size\" : n,            (numeric) The block size\n"
             "  \"strippedsize\" : n,    (numeric) The block size excluding witness data\n"
@@ -795,7 +802,8 @@ UniValue getblock(const JSONRPCRequest& request)
             "  \"mediantime\" : ttt,    (numeric) The median block time in seconds since epoch (Jan 1 1970 GMT)\n"
             "  \"nonce\" : n,           (numeric) The nonce\n"
             "  \"bits\" : \"1d00ffff\", (string) The bits\n"
-            "  \"difficulty\" : x.xxx,  (numeric) The difficulty\n"
+            "  \"difficulty\" : x.xxx,  (numeric) The pow difficulty\n"
+            "  \"hivedifficulty\" : x.xxx,  (numeric) The hive difficulty\n"    // LitecoinCash: Hive 1.1: Include hive diff
             "  \"chainwork\" : \"xxxx\",  (string) Expected number of hashes required to produce the chain up to this block (in hex)\n"
             "  \"previousblockhash\" : \"hash\",  (string) The hash of the previous block\n"
             "  \"nextblockhash\" : \"hash\"       (string) The hash of the next block\n"
