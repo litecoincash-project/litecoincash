@@ -3,11 +3,6 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#if ! defined __MINGW32__
- #include <sys/resource.h> // here
-#endif
-
-
 #include <miner.h>
 
 #include <amount.h>
@@ -32,7 +27,6 @@
 #include <utilmoneystr.h>
 #include <validationinterface.h>
 
-#include <boost/thread.hpp> // HIVE MULTI-THREAD: an addition here
 #include <algorithm>
 #include <queue>
 #include <utility>
@@ -41,17 +35,6 @@
 #include <rpc/server.h>     // LitecoinCash: Hive
 #include <base58.h>         // LitecoinCash: Hive
 #include <sync.h>           // LitecoinCash: Hive
-
-int beesChecked; // HIVE MULTI-THREAD: those 9 declarations are a change.
-arith_uint256 bestHash;
-CBeeCreationTransactionInfo bestBct;
-uint32_t bestHashBee;
-bool solutionFound;
-
-std::string deterministicRandString;
-arith_uint256 beeHashTarget;
-std::vector<CBeeCreationTransactionInfo> bcts;
-CBeeCreationTransactionInfo bct;
 
 //////////////////////////////////////////////////////////////////////////////
 //
@@ -548,7 +531,7 @@ void BeeKeeper(const CChainParams& chainparams) {
 
     try {
         while (true) {
-            MilliSleep(50); // HIVE MULTI-THREAD: checks more often so that BusyBees() starts faster
+            MilliSleep(1000);
             int newHeight;
             {
                 LOCK(cs_main);
@@ -579,19 +562,19 @@ bool BusyBees(const Consensus::Params& consensusParams) {
 
     // Sanity checks
     if (!IsHiveEnabled(pindexPrev, consensusParams)) {
-        //LogPrint(BCLog::HIVE, "BusyBees: Skipping hive check: The Hive is not enabled on the network\n");
+        LogPrint(BCLog::HIVE, "BusyBees: Skipping hive check: The Hive is not enabled on the network\n");
         return false;
     }
     if(!g_connman) {
-        //LogPrint(BCLog::HIVE, "BusyBees: Skipping hive check: Peer-to-peer functionality missing or disabled\n");
+        LogPrint(BCLog::HIVE, "BusyBees: Skipping hive check: Peer-to-peer functionality missing or disabled\n");
         return false;
     }
     if (g_connman->GetNodeCount(CConnman::CONNECTIONS_ALL) == 0) {
-        //LogPrint(BCLog::HIVE, "BusyBees: Skipping hive check (not connected)\n");
+        LogPrint(BCLog::HIVE, "BusyBees: Skipping hive check (not connected)\n");
         return false;
     }
     if (IsInitialBlockDownload()) {
-        //LogPrint(BCLog::HIVE, "BusyBees: Skipping hive check (in initial block download)\n");
+        LogPrint(BCLog::HIVE, "BusyBees: Skipping hive check (in initial block download)\n");
         return false;
     }
 
@@ -605,13 +588,13 @@ bool BusyBees(const Consensus::Params& consensusParams) {
             hiveBlocksAtTip++;
         }
         if (hiveBlocksAtTip >= consensusParams.maxConsecutiveHiveBlocks) {
-            //LogPrintf("BusyBees: Skipping hive check (max Hive blocks without a POW block reached)\n");
+            LogPrintf("BusyBees: Skipping hive check (max Hive blocks without a POW block reached)\n");
             return false;
         }
     } else {
         // Check previous block wasn't hivemined
         if (pindexPrev->GetBlockHeader().IsHiveMined(consensusParams)) {
-            //LogPrintf("BusyBees: Skipping hive check (Hive block must follow a POW block)\n");
+            LogPrintf("BusyBees: Skipping hive check (Hive block must follow a POW block)\n");
             return false;
         }
     }
@@ -631,210 +614,46 @@ bool BusyBees(const Consensus::Params& consensusParams) {
     LogPrintf("********************* Hive: Bees at work *********************\n");
 
     // Find deterministicRandString
-    /*std::string*/ deterministicRandString = GetDeterministicRandString(pindexPrev); // HIVE MULTI-THREAD: another change here
+    std::string deterministicRandString = GetDeterministicRandString(pindexPrev);
     if (verbose) LogPrintf("BusyBees: deterministicRandString   = %s\n", deterministicRandString);
 
     // Find beeHashTarget
-    //arith_uint256 beeHashTarget;
+    arith_uint256 beeHashTarget;
     beeHashTarget.SetCompact(GetNextHiveWorkRequired(pindexPrev, consensusParams));
     if (verbose) LogPrintf("BusyBees: beeHashTarget             = %s\n", beeHashTarget.ToString());
 
     // Iterate all our active BCTs, letting their bees try and solve
     LogPrint(BCLog::HIVE, "BusyBees: Checking bee hashes....\n");
-    bcts = pwallet->GetBCTs(false, false, consensusParams); // HIVE MULTI-THREAD: another change here
-    bestHash = arith_uint256("ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"); // HIVE MULTI-THREAD: another change here
-
-    beesChecked = 0; // HIVE MULTI-THREAD: another change here
-
-    solutionFound = false; // HIVE MULTI-THREAD: another change here
-    int64_t nTheTime = GetTimeMicros(); // HIVE MULTI-THREAD: we add this to check how much time it takes to check the bee's hashes
-
+    std::vector<CBeeCreationTransactionInfo> bcts = pwallet->GetBCTs(false, false, consensusParams);
+    arith_uint256 bestHash = arith_uint256("ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
+    CBeeCreationTransactionInfo bestBct;
+    int beesChecked = 0;
+    uint32_t bestHashBee;
+    bool solutionFound = false;
     for (std::vector<CBeeCreationTransactionInfo>::const_iterator it = bcts.begin(); it != bcts.end(); it++) {
-        bct = *it; // and here
+        CBeeCreationTransactionInfo bct = *it;
         // Skip immature and dead bees
         if (bct.beeStatus != "mature")
             continue;
 
         // Iterate all bees in this BCT, keeping only the best hash found so far across all bees
-	// HIVE MULTI-THREAD: We declare lambdas ( functions inside functions ) so we can asigh them later to different parrallel threads
+        for (uint32_t bee = 0; bee < (uint32_t)bct.beeCount; bee++) {
+            std::string hashHex = (CHashWriter(SER_GETHASH, 0) << deterministicRandString << bct.txid << bee).GetHash().GetHex();
+            //LogPrintf("Bee %i gives hash %s\n", bee, hashHex);
+            beesChecked++;
+            arith_uint256 beeHash = arith_uint256(hashHex);
+            if (beeHash < beeHashTarget) {
+                bestHash = beeHash;
+                bestHashBee = bee;
+                bestBct = bct;
+                solutionFound = true;
+                break;
+            }
+        }
 
-	auto f1 = []() { 
-		int nHiveThreads = 12; // this depends on the number of threads
-		const uint32_t nBeesMultiplier = (uint32_t)bct.beeCount / nHiveThreads;
-
-		for (uint32_t bee = 0; bee < nBeesMultiplier * 1; bee++) {
-			std::string hashHex = (CHashWriter(SER_GETHASH, 0) << deterministicRandString << bct.txid << bee).GetHash().GetHex();
-			beesChecked++;
-
-			arith_uint256 beeHash = arith_uint256(hashHex);
-
-			if (beeHash < beeHashTarget) {
-			    bestHash = beeHash;
-			    bestHashBee = bee;
-			    bestBct = bct;
-			    solutionFound = true;
-			    break;
-			}            
-		}
-	};
-
-
-	auto f2 = []() { 
-		int nHiveThreads = 12;
-		const uint32_t nBeesMultiplier = (uint32_t)bct.beeCount / nHiveThreads;
-
-		for (uint32_t bee = nBeesMultiplier * 1; bee < nBeesMultiplier * 2; bee++) {
-			std::string hashHex = (CHashWriter(SER_GETHASH, 0) << deterministicRandString << bct.txid << bee).GetHash().GetHex();
-			beesChecked++;
-
-			arith_uint256 beeHash = arith_uint256(hashHex);
-
-			if (beeHash < beeHashTarget) {
-			    bestHash = beeHash;
-			    bestHashBee = bee;
-			    bestBct = bct;
-			    solutionFound = true;
-			    break;
-			}            
-		}
-	};
-
-
-	auto f3 = []() { 
-		int nHiveThreads = 12;
-		const uint32_t nBeesMultiplier = (uint32_t)bct.beeCount / nHiveThreads;
-
-		for (uint32_t bee = nBeesMultiplier * 2; bee < nBeesMultiplier * 3; bee++) {
-			std::string hashHex = (CHashWriter(SER_GETHASH, 0) << deterministicRandString << bct.txid << bee).GetHash().GetHex();
-			beesChecked++;
-
-			arith_uint256 beeHash = arith_uint256(hashHex);
-
-			if (beeHash < beeHashTarget) {
-			    bestHash = beeHash;
-			    bestHashBee = bee;
-			    bestBct = bct;
-			    solutionFound = true;
-			    break;
-			}            
-		}
-	};
-
-	auto f4 = []() { 
-		int nHiveThreads = 12;
-		const uint32_t nBeesMultiplier = (uint32_t)bct.beeCount / nHiveThreads;
-
-		for (uint32_t bee = nBeesMultiplier * 3; bee < nBeesMultiplier * 4; bee++) {
-			std::string hashHex = (CHashWriter(SER_GETHASH, 0) << deterministicRandString << bct.txid << bee).GetHash().GetHex();
-			beesChecked++;
-
-			arith_uint256 beeHash = arith_uint256(hashHex);
-
-			if (beeHash < beeHashTarget) {
-			    bestHash = beeHash;
-			    bestHashBee = bee;
-			    bestBct = bct;
-			    solutionFound = true;
-			    break;
-			}            
-		}
-	};
-
-	auto f5 = []() { 
-		int nHiveThreads = 12;
-		const uint32_t nBeesMultiplier = (uint32_t)bct.beeCount / nHiveThreads;
-
-		for (uint32_t bee = nBeesMultiplier * 4; bee < nBeesMultiplier * 5; bee++) {
-			std::string hashHex = (CHashWriter(SER_GETHASH, 0) << deterministicRandString << bct.txid << bee).GetHash().GetHex();
-			beesChecked++;
-
-			arith_uint256 beeHash = arith_uint256(hashHex);
-
-			if (beeHash < beeHashTarget) {
-			    bestHash = beeHash;
-			    bestHashBee = bee;
-			    bestBct = bct;
-			    solutionFound = true;
-			    break;
-			}            
-		}
-	};
-
-	auto f6 = []() { 
-		int nHiveThreads = 12;
-		const uint32_t nBeesMultiplier = (uint32_t)bct.beeCount / nHiveThreads;
-
-		for (uint32_t bee = nBeesMultiplier * 5; bee < nBeesMultiplier * 6; bee++) {
-			std::string hashHex = (CHashWriter(SER_GETHASH, 0) << deterministicRandString << bct.txid << bee).GetHash().GetHex();
-			beesChecked++;
-
-			arith_uint256 beeHash = arith_uint256(hashHex);
-
-			if (beeHash < beeHashTarget) {
-			    bestHash = beeHash;
-			    bestHashBee = bee;
-			    bestBct = bct;
-			    solutionFound = true;
-			    break;
-			}            
-		}
-	};
-
-	auto f7 = []() { 
-		int nHiveThreads = 12;
-		const uint32_t nBeesMultiplier = (uint32_t)bct.beeCount / nHiveThreads;
-
-		for (uint32_t bee = nBeesMultiplier * 6; bee < nBeesMultiplier * 7; bee++) {
-			std::string hashHex = (CHashWriter(SER_GETHASH, 0) << deterministicRandString << bct.txid << bee).GetHash().GetHex();
-			beesChecked++;
-
-			arith_uint256 beeHash = arith_uint256(hashHex);
-
-			if (beeHash < beeHashTarget) {
-			    bestHash = beeHash;
-			    bestHashBee = bee;
-			    bestBct = bct;
-			    solutionFound = true;
-			    break;
-			}            
-		}
-	};
-
-	auto f8 = []() { 
-		int nHiveThreads = 12;
-		const uint32_t nBeesMultiplier = (uint32_t)bct.beeCount / nHiveThreads;
-
-		for (uint32_t bee = nBeesMultiplier * 7; bee < nBeesMultiplier * 8; bee++) {
-			std::string hashHex = (CHashWriter(SER_GETHASH, 0) << deterministicRandString << bct.txid << bee).GetHash().GetHex();
-			beesChecked++;
-
-			arith_uint256 beeHash = arith_uint256(hashHex);
-
-			if (beeHash < beeHashTarget) {
-			    bestHash = beeHash;
-			    bestHashBee = bee;
-			    bestBct = bct;
-			    solutionFound = true;
-			    break;
-			}            
-		}
-	};
-
-	boost::thread t(f1), t2(f2), t3(f3), t4(f4), t5(f5), t6(f6), t7(f7), t8(f8); 
-    
-	t.join();
-	t2.join();
-	t3.join();
-	t4.join();
-	t5.join();
-	t6.join();
-	t7.join();
-	t8.join();
-
-   } // end of the for loop
-
-	int64_t nTimeEnd = GetTimeMicros();
-	int64_t nTimeTotal = nTimeEnd - nTheTime;
+        if(solutionFound)
+            break;
+    }
 
     if (beesChecked == 0) {
         LogPrintf("BusyBees: No bees currently mature.\n");
@@ -843,11 +662,11 @@ bool BusyBees(const Consensus::Params& consensusParams) {
 
     // Check if our best bee hash meets the target
     if (bestHash >= beeHashTarget) {
-        LogPrintf("BusyBees: Checked the bees in %.8f millionth of second. None were strong enough to mint. \n", nTimeTotal);
+        LogPrintf("BusyBees: Checked %i bees; none strong enough to mint.\n", beesChecked);
         return false;
     }
 
-    LogPrintf("BusyBees: BEE MEETS HASH TARGET. Checked %i bees; solution with bee #%i from BCT %s with hash %s. Honey address is %s.\n", beesChecked, bestHashBee, bestBct.txid, bestHash.ToString(), bestBct.honeyAddress);
+    if (verbose) LogPrintf("BusyBees: BEE MEETS HASH TARGET. Checked %i bees; solution with bee #%i from BCT %s with hash %s. Honey address is %s.\n", beesChecked, bestHashBee, bestBct.txid, bestHash.ToString(), bestBct.honeyAddress);
 
     // Assemble the Hive proof script
     std::vector<unsigned char> messageProofVec;
@@ -937,6 +756,6 @@ bool BusyBees(const Consensus::Params& consensusParams) {
         return false;
     }
 
-    LogPrintf("BusyBees: ** Block mined with Bees\n");
+    LogPrintf("BusyBees: ** Block mined\n");
     return true;
 }
