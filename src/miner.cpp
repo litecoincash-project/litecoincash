@@ -4,7 +4,7 @@
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 #if ! defined __MINGW32__
- #include <sys/resource.h> // HIVE MULTI-THREAD: a change here
+ #include <sys/resource.h> // LitecoinCash: Hive multi-thread miner
 #endif
 
 
@@ -32,7 +32,7 @@
 #include <utilmoneystr.h>
 #include <validationinterface.h>
 
-#include <boost/thread.hpp> // HIVE MULTI-THREAD: an addition here
+#include <boost/thread.hpp> // and here
 #include <algorithm>
 #include <queue>
 #include <utility>
@@ -42,7 +42,17 @@
 #include <base58.h>         // LitecoinCash: Hive
 #include <sync.h>           // LitecoinCash: Hive
 
-int beesChecked; // HIVE MULTI-THREAD: those 9 declarations are a change.
+
+// LitecoinCash: Hive multi-thread miner   begin
+int beesChecked; 
+int beesChecked1;
+int beesChecked2;
+int beesChecked3;
+int beesChecked4;
+int beesChecked5;
+int beesChecked6;
+int beesChecked7;
+int beesChecked8;
 arith_uint256 bestHash;
 CBeeCreationTransactionInfo bestBct;
 uint32_t bestHashBee;
@@ -52,6 +62,7 @@ std::string deterministicRandString;
 arith_uint256 beeHashTarget;
 std::vector<CBeeCreationTransactionInfo> bcts;
 CBeeCreationTransactionInfo bct;
+// LitecoinCash: Hive multi-thread miner   end
 
 //////////////////////////////////////////////////////////////////////////////
 //
@@ -548,7 +559,7 @@ void BeeKeeper(const CChainParams& chainparams) {
 
     try {
         while (true) {
-            MilliSleep(50); // HIVE MULTI-THREAD: checks more often so that BusyBees() starts faster
+            MilliSleep(50); // LitecoinCash: Hive multi-thread miner
             int newHeight;
             {
                 LOCK(cs_main);
@@ -579,7 +590,7 @@ bool BusyBees(const Consensus::Params& consensusParams) {
 
     // Sanity checks
     if (!IsHiveEnabled(pindexPrev, consensusParams)) {
-        //LogPrint(BCLog::HIVE, "BusyBees: Skipping hive check: The Hive is not enabled on the network\n");
+        //LogPrint(BCLog::HIVE, "BusyBees: Skipping hive check: The Hive is not enabled on the network\n"); 
         return false;
     }
     if(!g_connman) {
@@ -631,40 +642,48 @@ bool BusyBees(const Consensus::Params& consensusParams) {
     LogPrintf("********************* Hive: Bees at work *********************\n");
 
     // Find deterministicRandString
-    /*std::string*/ deterministicRandString = GetDeterministicRandString(pindexPrev); // HIVE MULTI-THREAD: another change here
+    deterministicRandString = GetDeterministicRandString(pindexPrev); // LitecoinCash: Hive multi-thread miner
     if (verbose) LogPrintf("BusyBees: deterministicRandString   = %s\n", deterministicRandString);
 
     // Find beeHashTarget
-    //arith_uint256 beeHashTarget; // HIVE MULTI-THREAD: another change here
-    beeHashTarget.SetCompact(GetNextHiveWorkRequired(pindexPrev, consensusParams)); // HIVE MULTI-THREAD: another change here
+    beeHashTarget.SetCompact(GetNextHiveWorkRequired(pindexPrev, consensusParams)); // LitecoinCash: Hive multi-thread miner
     if (verbose) LogPrintf("BusyBees: beeHashTarget             = %s\n", beeHashTarget.ToString());
 
     // Iterate all our active BCTs, letting their bees try and solve
     LogPrint(BCLog::HIVE, "BusyBees: Checking bee hashes....\n");
-    bcts = pwallet->GetBCTs(false, false, consensusParams); // HIVE MULTI-THREAD: another change here
-    bestHash = arith_uint256("ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"); // HIVE MULTI-THREAD: another change here
+    bcts = pwallet->GetBCTs(false, false, consensusParams); // LitecoinCash: Hive multi-thread miner
+    bestHash = arith_uint256("ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"); // LitecoinCash: Hive multi-thread miner
 
-    beesChecked = 0; // HIVE MULTI-THREAD: another change here
+    // LitecoinCash: Hive multi-thread miner   begin
+    beesChecked = 0;
+    beesChecked1 = 0;
+    beesChecked2 = 0;
+    beesChecked3 = 0;
+    beesChecked4 = 0;
+    beesChecked5 = 0;
+    beesChecked6 = 0;
+    beesChecked7 = 0;
+    beesChecked8 = 0;
+    // LitecoinCash: Hive multi-thread miner   end
 
-    solutionFound = false; // HIVE MULTI-THREAD: another change here
-    int64_t nTheTime = GetTimeMicros(); // HIVE MULTI-THREAD: we add this to check how much time it takes to check the bee's hashes
+    solutionFound = false; // LitecoinCash: Hive multi-thread miner
+    int64_t nTheTime = GetTimeMicros(); // LitecoinCash: Hive multi-thread miner
 
     for (std::vector<CBeeCreationTransactionInfo>::const_iterator it = bcts.begin(); it != bcts.end(); it++) {
-        bct = *it; // // HIVE MULTI-THREAD: another change here
+        bct = *it; // LitecoinCash: Hive multi-thread miner
         // Skip immature and dead bees
         if (bct.beeStatus != "mature")
             continue;
 
-        // Iterate all bees in this BCT, keeping only the best hash found so far across all bees
-	// HIVE MULTI-THREAD: We declare lambdas ( functions inside functions ) so we can asigh them later to different parrallel threads
+	// LitecoinCash: Hive multi-thread miner   begin
 
 	auto f1 = []() { 
-		int nHiveThreads = 8; // this depends on the number of threads
+		int nHiveThreads = 8;
 		const uint32_t nBeesMultiplier = (uint32_t)bct.beeCount / nHiveThreads;
 
 		for (uint32_t bee = 0; bee < nBeesMultiplier * 1; bee++) {
 			std::string hashHex = (CHashWriter(SER_GETHASH, 0) << deterministicRandString << bct.txid << bee).GetHash().GetHex();
-			beesChecked++;
+			beesChecked1++;
 
 			arith_uint256 beeHash = arith_uint256(hashHex);
 
@@ -685,7 +704,7 @@ bool BusyBees(const Consensus::Params& consensusParams) {
 
 		for (uint32_t bee = nBeesMultiplier * 1; bee < nBeesMultiplier * 2; bee++) {
 			std::string hashHex = (CHashWriter(SER_GETHASH, 0) << deterministicRandString << bct.txid << bee).GetHash().GetHex();
-			beesChecked++;
+			beesChecked2++;
 
 			arith_uint256 beeHash = arith_uint256(hashHex);
 
@@ -706,7 +725,7 @@ bool BusyBees(const Consensus::Params& consensusParams) {
 
 		for (uint32_t bee = nBeesMultiplier * 2; bee < nBeesMultiplier * 3; bee++) {
 			std::string hashHex = (CHashWriter(SER_GETHASH, 0) << deterministicRandString << bct.txid << bee).GetHash().GetHex();
-			beesChecked++;
+			beesChecked3++;
 
 			arith_uint256 beeHash = arith_uint256(hashHex);
 
@@ -726,7 +745,7 @@ bool BusyBees(const Consensus::Params& consensusParams) {
 
 		for (uint32_t bee = nBeesMultiplier * 3; bee < nBeesMultiplier * 4; bee++) {
 			std::string hashHex = (CHashWriter(SER_GETHASH, 0) << deterministicRandString << bct.txid << bee).GetHash().GetHex();
-			beesChecked++;
+			beesChecked4++;
 
 			arith_uint256 beeHash = arith_uint256(hashHex);
 
@@ -746,7 +765,7 @@ bool BusyBees(const Consensus::Params& consensusParams) {
 
 		for (uint32_t bee = nBeesMultiplier * 4; bee < nBeesMultiplier * 5; bee++) {
 			std::string hashHex = (CHashWriter(SER_GETHASH, 0) << deterministicRandString << bct.txid << bee).GetHash().GetHex();
-			beesChecked++;
+			beesChecked5++;
 
 			arith_uint256 beeHash = arith_uint256(hashHex);
 
@@ -766,7 +785,7 @@ bool BusyBees(const Consensus::Params& consensusParams) {
 
 		for (uint32_t bee = nBeesMultiplier * 5; bee < nBeesMultiplier * 6; bee++) {
 			std::string hashHex = (CHashWriter(SER_GETHASH, 0) << deterministicRandString << bct.txid << bee).GetHash().GetHex();
-			beesChecked++;
+			beesChecked6++;
 
 			arith_uint256 beeHash = arith_uint256(hashHex);
 
@@ -786,7 +805,7 @@ bool BusyBees(const Consensus::Params& consensusParams) {
 
 		for (uint32_t bee = nBeesMultiplier * 6; bee < nBeesMultiplier * 7; bee++) {
 			std::string hashHex = (CHashWriter(SER_GETHASH, 0) << deterministicRandString << bct.txid << bee).GetHash().GetHex();
-			beesChecked++;
+			beesChecked7++;
 
 			arith_uint256 beeHash = arith_uint256(hashHex);
 
@@ -804,9 +823,9 @@ bool BusyBees(const Consensus::Params& consensusParams) {
 		int nHiveThreads = 8;
 		const uint32_t nBeesMultiplier = (uint32_t)bct.beeCount / nHiveThreads;
 
-		for (uint32_t bee = nBeesMultiplier * 7; bee < nBeesMultiplier * 8; bee++) {
+		for (uint32_t bee = nBeesMultiplier * 7; bee < ((nBeesMultiplier * 8) + 1); bee++) {
 			std::string hashHex = (CHashWriter(SER_GETHASH, 0) << deterministicRandString << bct.txid << bee).GetHash().GetHex();
-			beesChecked++;
+			beesChecked8++;
 
 			arith_uint256 beeHash = arith_uint256(hashHex);
 
@@ -831,10 +850,12 @@ bool BusyBees(const Consensus::Params& consensusParams) {
 	t7.join();
 	t8.join();
 
-   } // // HIVE MULTI-THREAD: end of the replaced old "for loop"
+   } // LitecoinCash: Hive multi-thread miner   end
 
-	int64_t nTimeEnd = GetTimeMicros(); // HIVE MULTI-THREAD: another change here
-	int64_t nTimeTotal = nTimeEnd - nTheTime; // HIVE MULTI-THREAD: another change here
+	int64_t nTimeEnd = GetTimeMicros(); // LitecoinCash: Hive multi-thread miner
+	int64_t nTimeTotal = nTimeEnd - nTheTime; // LitecoinCash: Hive multi-thread miner
+
+	beesChecked = beesChecked1 + beesChecked2 + beesChecked3 + beesChecked4 + beesChecked5 + beesChecked6 + beesChecked7 + beesChecked8;
 
     if (beesChecked == 0) {
         LogPrintf("BusyBees: No bees currently mature.\n");
@@ -843,7 +864,7 @@ bool BusyBees(const Consensus::Params& consensusParams) {
 
     // Check if our best bee hash meets the target
     if (bestHash >= beeHashTarget) {
-        LogPrintf("BusyBees: Checked the bees in %.8f millionth of second. None were strong enough to mint. \n", nTimeTotal); // HIVE MULTI-THREAD: another change here
+        LogPrintf("BusyBees: Checked %i bees in %.8f millionth of second. None were strong enough to mint. \n", beesChecked, nTimeTotal); // LitecoinCash: Hive multi-thread
         return false;
     }
 
