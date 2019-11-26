@@ -35,6 +35,13 @@
 #include <rpc/server.h>     // LitecoinCash: Hive
 #include <base58.h>         // LitecoinCash: Hive
 #include <sync.h>           // LitecoinCash: Hive
+#include <boost/thread.hpp> // LitecoinCash: Hive: Mining optimisations
+
+static CCriticalSection cs_solution_vars;
+std::atomic<bool> solutionFound;            // LitecoinCash: Hive: Mining optimisations: Thread-safe atomic flag to signal solution found (saves a slow mutex)
+std::atomic<bool> earlyAbort;               // LitecoinCash: Hive: Mining optimisations: Thread-safe atomic flag to signal early abort needed
+CBeeRange solvingRange;                     // LitecoinCash: Hive: Mining optimisations: The solving range (protected by mutex)
+uint32_t solvingBee;                        // LitecoinCash: Hive: Mining optimisations: The solving bee (protected by mutex)
 
 //////////////////////////////////////////////////////////////////////////////
 //
@@ -531,7 +538,10 @@ void BeeKeeper(const CChainParams& chainparams) {
 
     try {
         while (true) {
-            MilliSleep(1000);
+            // LitecoinCash: Hive: Mining optimisations: Parameterised sleep time
+            int sleepTime = std::max((int64_t) 1, gArgs.GetArg("-hivecheckdelay", DEFAULT_HIVE_CHECK_DELAY));
+            MilliSleep(sleepTime);
+
             int newHeight;
             {
                 LOCK(cs_main);
@@ -541,7 +551,7 @@ void BeeKeeper(const CChainParams& chainparams) {
                 // Height changed; release the bees!
                 height = newHeight;
                 try {
-                    BusyBees(consensusParams);
+                    BusyBees(consensusParams, height);
                 } catch (const std::runtime_error &e) {
                     LogPrintf("! BeeKeeper: Error: %s\n", e.what());
                 }
@@ -553,8 +563,68 @@ void BeeKeeper(const CChainParams& chainparams) {
     }
 }
 
+// LitecoinCash: Hive: Mining optimisations: Thread to signal abort on new block
+void AbortWatchThread(int height) {
+    // Loop until any exit condition
+    while (true) {
+        // Yield to OS
+        MilliSleep(1);
+
+        // Check pre-existing abort conditions
+        if (solutionFound.load() || earlyAbort.load())
+            return;
+
+        // Get tip height, keeping lock scope as short as possible
+        int newHeight;
+        {
+            LOCK(cs_main);
+            newHeight = chainActive.Tip()->nHeight;
+        }
+
+        // Check for abort from tip height change
+        if (newHeight != height) {
+            //LogPrintf("*** ABORT FIRE\n");
+            earlyAbort.store(true);
+            return;
+        }
+    }
+}
+
+// LitecoinCash: Hive: Mining optimisations: Thread to check a single bin
+void CheckBin(int threadID, std::vector<CBeeRange> bin, std::string deterministicRandString, arith_uint256 beeHashTarget) {
+    // Iterate over ranges in this bin
+    int checkCount = 0;
+    for (std::vector<CBeeRange>::const_iterator it = bin.begin(); it != bin.end(); it++) {
+        CBeeRange beeRange = *it;
+        //LogPrintf("THREAD #%i: Checking %i-%i in %s\n", threadID, beeRange.offset, beeRange.offset + beeRange.count - 1, beeRange.txid);
+        // Iterate over bees in this range
+        for (int i = beeRange.offset; i < beeRange.offset + beeRange.count; i++) {
+            // Check abort conditions (Only every N bees. The atomic load is expensive, but much cheaper than a mutex - esp on Windows, see https://www.arangodb.com/2015/02/comparing-atomic-mutex-rwlocks/)
+            if(checkCount++ % 1000 == 0) {
+                if (solutionFound.load() || earlyAbort.load()) {
+                    //LogPrintf("THREAD #%i: Solution found elsewhere or early abort requested, ending early\n", threadID);
+                    return;
+                }
+            }
+            // Hash the bee
+            std::string hashHex = (CHashWriter(SER_GETHASH, 0) << deterministicRandString << beeRange.txid << i).GetHash().GetHex();
+            arith_uint256 beeHash = arith_uint256(hashHex);
+            // Compare to target and write out result if successful
+            if (beeHash < beeHashTarget) {
+                //LogPrintf("THREAD #%i: Solution found, returning\n", threadID);
+                LOCK(cs_solution_vars);                                 // Expensive mutex only happens at write-out
+                solutionFound.store(true);
+                solvingRange = beeRange;
+                solvingBee = i;
+                return;
+            }
+        }
+    }
+    //LogPrintf("THREAD #%i: Out of tasks\n", threadID);
+}
+
 // LitecoinCash: Hive: Attempt to mint the next block
-bool BusyBees(const Consensus::Params& consensusParams) {
+bool BusyBees(const Consensus::Params& consensusParams, int height) {
     bool verbose = LogAcceptCategory(BCLog::HIVE);
 
     CBlockIndex* pindexPrev = chainActive.Tip();
@@ -622,61 +692,134 @@ bool BusyBees(const Consensus::Params& consensusParams) {
     beeHashTarget.SetCompact(GetNextHiveWorkRequired(pindexPrev, consensusParams));
     if (verbose) LogPrintf("BusyBees: beeHashTarget             = %s\n", beeHashTarget.ToString());
 
-    // Iterate all our active BCTs, letting their bees try and solve
-    LogPrint(BCLog::HIVE, "BusyBees: Checking bee hashes....\n");
+    // Find bin size
     std::vector<CBeeCreationTransactionInfo> bcts = pwallet->GetBCTs(false, false, consensusParams);
-    arith_uint256 bestHash = arith_uint256("ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
-    CBeeCreationTransactionInfo bestBct;
-    int beesChecked = 0;
-    uint32_t bestHashBee;
-    bool solutionFound = false;
+    int totalBees = 0;
     for (std::vector<CBeeCreationTransactionInfo>::const_iterator it = bcts.begin(); it != bcts.end(); it++) {
         CBeeCreationTransactionInfo bct = *it;
-        // Skip immature and dead bees
         if (bct.beeStatus != "mature")
             continue;
+        totalBees += bct.beeCount;
+    }
 
-        // Iterate all bees in this BCT, keeping only the best hash found so far across all bees
-        for (uint32_t bee = 0; bee < (uint32_t)bct.beeCount; bee++) {
-            std::string hashHex = (CHashWriter(SER_GETHASH, 0) << deterministicRandString << bct.txid << bee).GetHash().GetHex();
-            //LogPrintf("Bee %i gives hash %s\n", bee, hashHex);
-            beesChecked++;
-            arith_uint256 beeHash = arith_uint256(hashHex);
-            if (beeHash < beeHashTarget) {
-                bestHash = beeHash;
-                bestHashBee = bee;
-                bestBct = bct;
-                solutionFound = true;
+    if (totalBees == 0) {
+        LogPrint(BCLog::HIVE, "BusyBees: No mature bees found\n");
+        return false;
+    }
+
+    int coreCount = GetNumVirtualCores();
+    int threadCount = gArgs.GetArg("-hivecheckthreads", DEFAULT_HIVE_THREADS);
+    if (threadCount == -2)
+        threadCount = std::max(1, coreCount - 1);
+    else if (threadCount < 0 || threadCount > coreCount)
+        threadCount = coreCount;
+    else if (threadCount == 0)
+        threadCount = 1;
+
+    int beesPerBin = ceil(totalBees / (float)threadCount);  // We want to check this many bees per thread
+
+    // Bin the bees according to desired thead count
+    if (verbose) LogPrint(BCLog::HIVE, "BusyBees: Binning %i bees in %i bins (%i bees per bin)\n", totalBees, threadCount, beesPerBin);
+    std::vector<CBeeCreationTransactionInfo>::const_iterator bctIterator = bcts.begin();
+    CBeeCreationTransactionInfo bct = *bctIterator;
+    std::vector<std::vector<CBeeRange>> beeBins;
+    int beeOffset = 0;                                      // Track offset in current BCT
+    while(bctIterator != bcts.end()) {                      // Until we're out of BCTs
+        std::vector<CBeeRange> currentBin;                  // Create a new bin
+        int beesInBin = 0;
+        while (bctIterator != bcts.end()) {                 // Keep filling it until full
+            int spaceLeft = beesPerBin - beesInBin;
+            if (bct.beeCount - beeOffset <= spaceLeft) {    // If there's soom, add all the bees from this BCT...
+                CBeeRange range = {bct.txid, bct.honeyAddress, bct.communityContrib, beeOffset, bct.beeCount - beeOffset};
+                currentBin.push_back(range);
+
+                beesInBin += bct.beeCount - beeOffset;
+                beeOffset = 0;
+
+                do {                                        // ... and iterate to next BCT
+                    bctIterator++;
+                    if (bctIterator == bcts.end())
+                        break;
+                    bct = *bctIterator;
+                } while (bct.beeStatus != "mature");
+            } else {                                        // Can't fit the whole thing to current bin; add what we can fit and let the rest go in next bin
+                CBeeRange range = {bct.txid, bct.honeyAddress, bct.communityContrib, beeOffset, spaceLeft};
+                currentBin.push_back(range);
+                beeOffset += spaceLeft;
                 break;
             }
         }
-
-        if(solutionFound)
-            break;
+        beeBins.push_back(currentBin);
     }
 
-    if (beesChecked == 0) {
-        LogPrintf("BusyBees: No bees currently mature.\n");
+    // Create a worker thread for each bin
+    if (verbose) LogPrintf("BusyBees: Running bins\n");
+    solutionFound.store(false);
+    earlyAbort.store(false);
+    std::vector<std::vector<CBeeRange>>::const_iterator beeBinIterator = beeBins.begin();
+    std::vector<boost::thread> binThreads;
+    int64_t checkTime = GetTimeMillis();
+    int binID = 0;
+    while (beeBinIterator != beeBins.end()) {
+        std::vector<CBeeRange> beeBin = *beeBinIterator;
+
+        if (verbose) {
+            LogPrintf("BusyBees: Bin #%i\n", binID);
+            std::vector<CBeeRange>::const_iterator beeRangeIterator = beeBin.begin();
+            while (beeRangeIterator != beeBin.end()) {
+                CBeeRange beeRange = *beeRangeIterator;
+                LogPrintf("offset = %i, count = %i, txid = %s\n", beeRange.offset, beeRange.count, beeRange.txid);
+                beeRangeIterator++;
+            }
+        }
+        binThreads.push_back(boost::thread(CheckBin, binID++, beeBin, deterministicRandString, beeHashTarget));   // Spawn the thread
+
+        beeBinIterator++;
+    }
+
+    // Add an extra thread to watch external abort conditions (eg new incoming block)
+    bool useEarlyAbortThread = gArgs.GetBoolArg("-hiveearlyout", DEFAULT_HIVE_EARLY_OUT);
+    if (verbose && useEarlyAbortThread)
+        LogPrintf("BusyBees: Will use early-abort thread\n");
+
+    boost::thread* earlyAbortThread;
+    if (useEarlyAbortThread)
+        earlyAbortThread = new boost::thread(AbortWatchThread, height);
+
+    // Wait for bin worker threads to find a solution or abort (in which case the others will all stop), or to run out of bees
+    for(auto& t:binThreads)
+        t.join();
+
+    checkTime = GetTimeMillis() - checkTime;
+
+    // Handle early aborts
+    if (useEarlyAbortThread) {
+        if (earlyAbort.load()) {
+            LogPrintf("BusyBees: Chain state changed (check aborted after %ims)\n", checkTime);
+            return false;
+        } else {
+            // We didn't abort; stop abort thread now
+            earlyAbort.store(true);
+            earlyAbortThread->join();
+        }
+    }
+
+    // Check if a solution was found
+    if (!solutionFound.load()) {
+        LogPrintf("BusyBees: No bee meets hash target (%i bees checked with %i threads in %ims)\n", totalBees, threadCount, checkTime);
         return false;
     }
-
-    // Check if our best bee hash meets the target
-    if (bestHash >= beeHashTarget) {
-        LogPrintf("BusyBees: Checked %i bees; none strong enough to mint.\n", beesChecked);
-        return false;
-    }
-
-    if (verbose) LogPrintf("BusyBees: BEE MEETS HASH TARGET. Checked %i bees; solution with bee #%i from BCT %s with hash %s. Honey address is %s.\n", beesChecked, bestHashBee, bestBct.txid, bestHash.ToString(), bestBct.honeyAddress);
+    LogPrintf("BusyBees: Bee meets hash target (check aborted after %ims). Solution with bee #%i from BCT %s. Honey address is %s.\n", checkTime, solvingBee, solvingRange.txid, solvingRange.honeyAddress);
 
     // Assemble the Hive proof script
     std::vector<unsigned char> messageProofVec;
-    std::vector<unsigned char> txidVec(bestBct.txid.begin(), bestBct.txid.end());
+    std::vector<unsigned char> txidVec(solvingRange.txid.begin(), solvingRange.txid.end());
     CScript hiveProofScript;
     uint32_t bctHeight;
     {   // Don't lock longer than needed
         LOCK2(cs_main, pwallet->cs_wallet);
 
-        CTxDestination dest = DecodeDestination(bestBct.honeyAddress);
+        CTxDestination dest = DecodeDestination(solvingRange.honeyAddress);
         if (!IsValidDestination(dest)) {
             LogPrintf("BusyBees: Honey destination invalid\n");
             return false;
@@ -703,7 +846,7 @@ bool BusyBees(const Consensus::Params& consensusParams) {
         }
         if (verbose) LogPrintf("BusyBees: messageSig                = %s\n", HexStr(&messageProofVec[0], &messageProofVec[messageProofVec.size()]));
 
-        COutPoint out(uint256S(bestBct.txid), 0);
+        COutPoint out(uint256S(solvingRange.txid), 0);
         Coin coin;
         if (!pcoinsTip || !pcoinsTip->GetCoin(out, coin)) {
             LogPrintf("BusyBees: Couldn't get the bct utxo!\n");
@@ -713,18 +856,18 @@ bool BusyBees(const Consensus::Params& consensusParams) {
     }
 
     unsigned char beeNonceEncoded[4];
-    WriteLE32(beeNonceEncoded, bestHashBee);
+    WriteLE32(beeNonceEncoded, solvingBee);
     std::vector<unsigned char> beeNonceVec(beeNonceEncoded, beeNonceEncoded + 4);
 
     unsigned char bctHeightEncoded[4];
     WriteLE32(bctHeightEncoded, bctHeight);
     std::vector<unsigned char> bctHeightVec(bctHeightEncoded, bctHeightEncoded + 4);
 
-    opcodetype communityContribFlag = bestBct.communityContrib ? OP_TRUE : OP_FALSE;
+    opcodetype communityContribFlag = solvingRange.communityContrib ? OP_TRUE : OP_FALSE;
     hiveProofScript << OP_RETURN << OP_BEE << beeNonceVec << bctHeightVec << communityContribFlag << txidVec << messageProofVec;
 
     // Create honey script from honey address
-    CScript honeyScript = GetScriptForDestination(DecodeDestination(bestBct.honeyAddress));
+    CScript honeyScript = GetScriptForDestination(DecodeDestination(solvingRange.honeyAddress));
 
     // Create a Hive block
     std::unique_ptr<CBlockTemplate> pblocktemplate(BlockAssembler(Params()).CreateNewBlock(honeyScript, true, &hiveProofScript));

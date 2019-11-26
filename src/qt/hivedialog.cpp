@@ -23,6 +23,8 @@
 #include <qt/tinypie.h>
 #include <qt/qcustomplot.h>
 
+#include <qt/optionsdialog.h> // LitecoinCash: Hive: Mining optimisations
+
 #include <QAction>
 #include <QCursor>
 #include <QMessageBox>
@@ -328,6 +330,16 @@ void HiveDialog::on_createBeesButton_clicked() {
 			return;     // Unlock wallet was cancelled
         model->createBees(ui->beeCountSpinner->value(), ui->donateCommunityFundCheckbox->isChecked(), this, beePopIndex);
     }
+}
+
+// LitecoinCash: Hive: Mining optimisations: Shortcut to Hive mining options
+void HiveDialog::on_showHiveOptionsButton_clicked() {
+    if(!clientModel || !clientModel->getOptionsModel())
+        return;
+
+    OptionsDialog dlg(this, model->isWalletEnabled());
+    dlg.setModel(clientModel->getOptionsModel());
+    dlg.exec();
 }
 
 void HiveDialog::initGraph() {

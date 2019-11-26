@@ -49,6 +49,9 @@ public:
         DatabaseCache,          // int
         SpendZeroConfChange,    // bool
         Listen,                 // bool
+        HiveCheckDelay,         // LitecoinCash: Hive: Mining optimisations (int)
+        HiveCheckThreads,       // LitecoinCash: Hive: Mining optimisations (int)
+        HiveCheckEarlyOut,      // LitecoinCash: Hive: Mining optimisations (bool)
         OptionIDRowCount,
     };
 

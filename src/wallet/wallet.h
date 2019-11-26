@@ -682,6 +682,16 @@ struct CBeeCreationTransactionInfo
     int blocksLeft;
 };
 
+// LitecoinCash: Hive: Mining optimisations: Bee range structure
+struct CBeeRange
+{
+    std::string txid;
+    std::string honeyAddress;
+    bool communityContrib;
+    int offset;
+    int count;
+};
+
 class WalletRescanReserver; //forward declarations for ScanForWalletTransactions/RescanFromTime
 /**
  * A CWallet is an extension of a keystore, which also maintains a set of transactions and balances,

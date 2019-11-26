@@ -84,6 +84,55 @@ UniValue GetNetworkHashPS(int lookup, int height) {
 	return workDiff.getdouble() / timeDiff;
 }
 
+// LitecoinCash: Hive: Mining optimisations: Set hive mining params
+UniValue sethiveparams(const JSONRPCRequest& request)
+{
+    if (request.fHelp || request.params.size() != 3)
+        throw std::runtime_error(
+            "sethiveparams ( hivecheckdelay, hivecheckthreads )\n"
+            "\nSet hivemining optimisation parameters.\n"
+            "\nArguments:\n"
+            "1. hivecheckdelay     (numeric, required, default=1) Time between Hive checks in ms. This should be left at default unless performance degradation is observed.\n"
+            "2. hivecheckthreads   (numeric, required, default=-2) Number of threads to use when checking bees, -1 for all available cores, or -2 for one less than all available cores.\n"
+            "3. hiveearlyout       (boolean, required, default=true) Abort Hive checking as quickly as possible when a new block comes in. This should be left enabled unless performance degradation is observed.\n"
+            "\nExamples:\n"
+            + HelpExampleCli("sethiveparams", "500 -1 false")
+            + HelpExampleRpc("sethiveparams", "2000 8 true")
+       );
+
+    gArgs.ForceSetArg("-hivecheckdelay", std::to_string(request.params[0].get_int()));
+    gArgs.ForceSetArg("-hivecheckthreads", std::to_string(request.params[1].get_int()));
+    gArgs.ForceSetArg("-hiveearlyout", std::to_string(request.params[2].get_bool()));
+
+    return NullUniValue;
+}
+
+// LitecoinCash: Hive: Mining optimisations: Get hive mining params
+UniValue gethiveparams(const JSONRPCRequest& request)
+{
+    if (request.fHelp || request.params.size() != 0)
+        throw std::runtime_error(
+            "gethiveparams\n"
+            "\nGet hivemining optimisation parameters.\n"
+            "\nResult:\n"
+            "{\n"
+            "  \"hivecheckdelay\" : n,             (numeric) Time between Hive checks in ms. This should be left at default unless performance degradation is observed.\n"
+            "  \"hivecheckthreads\" : n,           (numeric) Number of threads to use when checking bees, -1 for all available cores, or -2 for one less than all available cores.\n"
+            "  \"hiveearlyout\" : true|false,      (boolean) Abort Hive checking as quickly as possible when a new block comes in. This should be left enabled unless performance degradation is observed.\n"
+            "}\n"
+            "\nExamples:\n"
+            + HelpExampleCli("gethiveparams", "")
+            + HelpExampleRpc("gethiveparams", "")
+       );
+
+    UniValue obj(UniValue::VOBJ);
+    obj.push_back(Pair("hivecheckdelay", gArgs.GetArg("-hivecheckdelay", DEFAULT_HIVE_CHECK_DELAY)));
+    obj.push_back(Pair("hivecheckthreads", gArgs.GetArg("-hivecheckthreads", DEFAULT_HIVE_THREADS)));
+    obj.push_back(Pair("hiveearlyout", gArgs.GetBoolArg("-hiveearlyout", DEFAULT_HIVE_EARLY_OUT) ? "true" : "false"));
+
+    return obj;
+}
+
 UniValue getnetworkhashps(const JSONRPCRequest& request)
 {
     if (request.fHelp || request.params.size() > 2)
@@ -993,6 +1042,9 @@ static const CRPCCommand commands[] =
     { "util",               "estimatesmartfee",       &estimatesmartfee,       {"conf_target", "estimate_mode"} },
 
     { "hidden",             "estimaterawfee",         &estimaterawfee,         {"conf_target", "threshold"} },
+
+    { "mining",             "sethiveparams",          &sethiveparams,          {"hivecheckdelay", "hivecheckthreads", "hiveearlyout"} },  // LitecoinCash: Hive: Mining optimisations: Set hive mining params
+    { "mining",             "gethiveparams",          &gethiveparams,          {} },  // LitecoinCash: Hive: Mining optimisations: Get hive mining params
 };
 
 void RegisterMiningRPCCommands(CRPCTable &t)

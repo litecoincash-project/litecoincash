@@ -516,6 +516,11 @@ std::string HelpMessage(HelpMessageMode mode)
         strUsage += HelpMessageOpt("-rpcservertimeout=<n>", strprintf("Timeout during HTTP requests (default: %d)", DEFAULT_HTTP_SERVER_TIMEOUT));
     }
 
+    // LitecoinCash: Hive: Mining optimisations
+    strUsage += HelpMessageOpt("-hivecheckdelay", strprintf(_("Time between Hive checks in ms. This should be left at default unless performance degradation is observed (default: %u)"), DEFAULT_HIVE_CHECK_DELAY));
+    strUsage += HelpMessageOpt("-hivecheckthreads=<threads>", strprintf(_("Number of threads to use when checking bees, -1 for all available cores, or -2 for one less than all available cores (default: %u)"), DEFAULT_HIVE_THREADS));
+    strUsage += HelpMessageOpt("-hiveearlyabort", strprintf(_("Abort Hive checking as quickly as possible when a new block comes in. This should be left enabled unless performance degradation is observed. (default: %u)"), DEFAULT_HIVE_EARLY_OUT));
+
     return strUsage;
 }
 

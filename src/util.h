@@ -308,6 +308,7 @@ std::string HelpMessageOpt(const std::string& option, const std::string& message
  * when boost is newer than 1.56.
  */
 int GetNumCores();
+int GetNumVirtualCores();   // LitecoinCash: Hive: Mining Optimisations: Return number of virt cores
 
 void RenameThread(const char* name);
 

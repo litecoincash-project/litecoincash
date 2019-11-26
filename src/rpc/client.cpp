@@ -102,6 +102,9 @@ static const CRPCConvertParam vRPCConvertParams[] =
     { "gethiveinfo", 1, "min_honey_confirms" },     // LitecoinCash: Hive: Get hive info
     { "getbctinfo", 1, "min_honey_confirms" },      // LitecoinCash: Hive: Get single BCT info
     { "getnetworkhiveinfo", 0, "include_graph" },   // LitecoinCash: Hive: Get network hive info
+    { "sethiveparams", 0, "hivecheckdelay"},        // LitecoinCash: Hive: Mining optimisations: Set hive mining params
+    { "sethiveparams", 1, "hivecheckthreads"},      // LitecoinCash: Hive: Mining optimisations: Set hive mining params
+    { "sethiveparams", 2, "hiveearlyabort"},        // LitecoinCash: Hive: Mining optimisations: Set hive mining params
     { "decoderawtransaction", 1, "iswitness" },
     { "signrawtransaction", 1, "prevtxs" },
     { "signrawtransaction", 2, "privkeys" },

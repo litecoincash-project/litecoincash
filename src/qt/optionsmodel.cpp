@@ -16,6 +16,7 @@
 #include <net.h>
 #include <netbase.h>
 #include <txdb.h> // for -dbcache defaults
+#include <miner.h> // LitecoinCash: Hive: Mining optimisations: For -hivecheckthreads, -hivecheckdelay, -hiveearlyout defaults
 #include <qt/intro.h>
 
 #ifdef ENABLE_WALLET
@@ -110,6 +111,22 @@ void OptionsModel::Init(bool resetSettings)
         settings.setValue("bSpendZeroConfChange", true);
     if (!gArgs.SoftSetBoolArg("-spendzeroconfchange", settings.value("bSpendZeroConfChange").toBool()))
         addOverriddenOption("-spendzeroconfchange");
+
+    // LitecoinCash: Hive: Mining optimisations
+    if (!settings.contains("nHiveCheckThreads"))
+        settings.setValue("nHiveCheckThreads", (qint64)DEFAULT_HIVE_THREADS);
+    if (!gArgs.SoftSetArg("-hivecheckthreads", settings.value("nHiveCheckThreads").toString().toStdString()))
+        addOverriddenOption("-hivecheckthreads");
+
+    if (!settings.contains("nHiveCheckDelay"))
+        settings.setValue("nHiveCheckDelay", (qint64)DEFAULT_HIVE_CHECK_DELAY);
+    if (!gArgs.SoftSetArg("-hivecheckdelay", settings.value("nHiveCheckDelay").toString().toStdString()))
+        addOverriddenOption("-hivecheckdelay");
+
+    if (!settings.contains("fHiveCheckEarlyOut"))
+        settings.setValue("fHiveCheckEarlyOut", DEFAULT_HIVE_EARLY_OUT);
+    if (!gArgs.SoftSetBoolArg("-hiveearlyout", settings.value("fHiveCheckEarlyOut").toBool()))
+        addOverriddenOption("-hiveearlyout");
 #endif
 
     // Network
@@ -270,6 +287,14 @@ QVariant OptionsModel::data(const QModelIndex & index, int role) const
 #ifdef ENABLE_WALLET
         case SpendZeroConfChange:
             return settings.value("bSpendZeroConfChange");
+
+        // LitecoinCash: Hive: Mining optimisations
+        case HiveCheckThreads:
+            return settings.value("nHiveCheckThreads");
+        case HiveCheckDelay:
+            return settings.value("nHiveCheckDelay");
+        case HiveCheckEarlyOut:
+            return settings.value("fHiveCheckEarlyOut");
 #endif
         case DisplayUnit:
             return nDisplayUnit;
@@ -379,6 +404,29 @@ bool OptionsModel::setData(const QModelIndex & index, const QVariant & value, in
             if (settings.value("bSpendZeroConfChange") != value) {
                 settings.setValue("bSpendZeroConfChange", value);
                 setRestartRequired(true);
+            }
+            break;
+
+        // LitecoinCash: Hive: Mining optimisations
+        case HiveCheckDelay:
+            if (settings.value("nHiveCheckDelay") != value) {
+                settings.setValue("nHiveCheckDelay", value);
+                gArgs.ForceSetArg("-hivecheckdelay", settings.value("nHiveCheckDelay").toString().toStdString());
+            }
+
+            break;
+
+        case HiveCheckThreads:
+            if (settings.value("nHiveCheckThreads") != value) {
+                settings.setValue("nHiveCheckThreads", value);
+                gArgs.ForceSetArg("-hivecheckthreads", settings.value("nHiveCheckThreads").toString().toStdString());
+            }
+            break;
+
+        case HiveCheckEarlyOut:
+            if (settings.value("fHiveCheckEarlyOut") != value) {
+                settings.setValue("fHiveCheckEarlyOut", value.toBool());
+                gArgs.ForceSetArg("-hiveearlyout", settings.value("fHiveCheckEarlyOut").toBool() ? "1" : "0");
             }
             break;
 #endif
