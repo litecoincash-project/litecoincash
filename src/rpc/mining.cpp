@@ -89,7 +89,7 @@ UniValue sethiveparams(const JSONRPCRequest& request)
 {
     if (request.fHelp || request.params.size() != 3)
         throw std::runtime_error(
-            "sethiveparams ( hivecheckdelay, hivecheckthreads )\n"
+            "sethiveparams ( hivecheckdelay, hivecheckthreads, hiveearlyout )\n"
             "\nSet hivemining optimisation parameters.\n"
             "\nArguments:\n"
             "1. hivecheckdelay     (numeric, required, default=1) Time between Hive checks in ms. This should be left at default unless performance degradation is observed.\n"
