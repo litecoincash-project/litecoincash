@@ -750,29 +750,9 @@
         </layout>
        </item>
        <item>
-        <spacer name="verticalSpacer_3">
-         <property name="orientation">
-          <enum>Qt::Vertical</enum>
-         </property>
-         <property name="sizeType">
-          <enum>QSizePolicy::Fixed</enum>
-         </property>
-         <property name="sizeHint" stdset="0">
-          <size>
-           <width>20</width>
-           <height>8</height>
-          </size>
-         </property>
-        </spacer>
-       </item>
-       <item>
         <widget class="QLabel" name="label_5">
          <property name="text">
-          <string>By default, hive checking uses the number of virtual threads available on your machine, minus 1. For example, if you have a quad-core machine with 8 virtual threads, the default will use 7 threads for hive checking.
-
-To instead use all available cores, set Hive Check Threads to -1.
-
-We recommend leaving the default settings for Hive Check Interval and Hive Early Abort, unless you observe performance degradation on your machine.</string>
+          <string>We recommend leaving the default settings for Hive Check Interval and Hive Early Abort, unless you observe performance degradation on your machine.</string>
          </property>
          <property name="wordWrap">
           <bool>true</bool>

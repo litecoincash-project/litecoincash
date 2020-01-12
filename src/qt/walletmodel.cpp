@@ -663,8 +663,10 @@ void WalletModel::loadReceiveRequests(std::vector<std::string>& vReceiveRequests
 
 // LitecoinCash: Hive
 void WalletModel::getBCTs(std::vector<CBeeCreationTransactionInfo>& vBeeCreationTransactions, bool includeDeadBees) {
-    if (wallet)
+    if (wallet) {
+        LOCK(wallet->cs_wallet);
         vBeeCreationTransactions = wallet->GetBCTs(includeDeadBees, true, Params().GetConsensus());
+    }
 }
 
 // LitecoinCash: Hive

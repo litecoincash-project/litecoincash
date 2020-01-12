@@ -300,10 +300,13 @@ void HiveDialog::on_includeDeadBeesCheckbox_stateChanged() {
 }
 
 void HiveDialog::on_showAdvancedStatsCheckbox_stateChanged() {
-    if(ui->showAdvancedStatsCheckbox->isChecked())
+    if(ui->showAdvancedStatsCheckbox->isChecked()) {
         ui->beePopGraph->show();
-    else
+        ui->walletHiveStatsFrame->hide();
+    } else {
         ui->beePopGraph->hide();
+        ui->walletHiveStatsFrame->show();
+    }
 }
 
 void HiveDialog::on_retryGlobalSummaryButton_clicked() {

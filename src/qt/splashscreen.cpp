@@ -119,10 +119,6 @@ SplashScreen::SplashScreen(Qt::WindowFlags f, const NetworkStyle *networkStyle) 
         int titleAddTextWidth  = fm.width(titleAddText);
         pixPaint.drawText(pixmap.width()/devicePixelRatio-titleAddTextWidth-10,15,titleAddText);
     }
-
-    // LitecoinCash: Hive: May the hive bee with you
-    pixPaint.setFont(QFont(font, 15*fontFactor));
-    pixPaint.drawText(302, 150, "May the Hive bee with you");
     
     pixPaint.end();
 
