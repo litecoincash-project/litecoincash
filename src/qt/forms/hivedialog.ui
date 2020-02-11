@@ -356,7 +356,7 @@ still fully unlock it to send funds.</string>
            </size>
           </property>
           <property name="toolTip">
-           <string>Create bees now. You will be shown a confirmation dialogue including final transaction fees.</string>
+           <string>Open the Options dialogue to edit Hive mining settings.</string>
           </property>
           <property name="text">
            <string>Hive mining options</string>

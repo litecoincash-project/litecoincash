@@ -693,12 +693,14 @@ bool BusyBees(const Consensus::Params& consensusParams, int height) {
     if (verbose) LogPrintf("BusyBees: beeHashTarget             = %s\n", beeHashTarget.ToString());
 
     // Find bin size
-    std::vector<CBeeCreationTransactionInfo> bcts = pwallet->GetBCTs(false, false, consensusParams);
+    std::vector<CBeeCreationTransactionInfo> potentialBcts = pwallet->GetBCTs(false, false, consensusParams);
+    std::vector<CBeeCreationTransactionInfo> bcts;
     int totalBees = 0;
-    for (std::vector<CBeeCreationTransactionInfo>::const_iterator it = bcts.begin(); it != bcts.end(); it++) {
+    for (std::vector<CBeeCreationTransactionInfo>::const_iterator it = potentialBcts.begin(); it != potentialBcts.end(); it++) {
         CBeeCreationTransactionInfo bct = *it;
         if (bct.beeStatus != "mature")
             continue;
+        bcts.push_back(bct);
         totalBees += bct.beeCount;
     }
 
