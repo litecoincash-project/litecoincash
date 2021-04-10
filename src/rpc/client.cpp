@@ -91,20 +91,20 @@ static const CRPCConvertParam vRPCConvertParams[] =
     { "createrawtransaction", 1, "outputs" },
     { "createrawtransaction", 2, "locktime" },
     { "createrawtransaction", 3, "replaceable" },
-    { "createrawbct", 0, "inputs" },                // LitecoinCash: Hive: Create a Raw BCT
-    { "createrawbct", 1, "bee_count" },             // LitecoinCash: Hive: Create a Raw BCT
-    { "createrawbct", 3, "community_contrib" },     // LitecoinCash: Hive: Create a Raw BCT
-    { "createrawbct", 4, "locktime" },              // LitecoinCash: Hive: Create a Raw BCT
-    { "createbees", 0, "beecount" },                // LitecoinCash: Hive: Create a BCT
-    { "createbees", 1, "community_contrib" },       // LitecoinCash: Hive: Create a BCT
-    { "getbeecost", 0, "height" },                  // LitecoinCash: Hive: Get cost of a single bee
-    { "gethiveinfo", 0, "include_dead" },           // LitecoinCash: Hive: Get hive info
-    { "gethiveinfo", 1, "min_honey_confirms" },     // LitecoinCash: Hive: Get hive info
-    { "getbctinfo", 1, "min_honey_confirms" },      // LitecoinCash: Hive: Get single BCT info
-    { "getnetworkhiveinfo", 0, "include_graph" },   // LitecoinCash: Hive: Get network hive info
-    { "sethiveparams", 0, "hivecheckdelay"},        // LitecoinCash: Hive: Mining optimisations: Set hive mining params
-    { "sethiveparams", 1, "hivecheckthreads"},      // LitecoinCash: Hive: Mining optimisations: Set hive mining params
-    { "sethiveparams", 2, "hiveearlyabort"},        // LitecoinCash: Hive: Mining optimisations: Set hive mining params
+    { "createrawbct", 0, "inputs" },                // Neon: Hive: Create a Raw BCT
+    { "createrawbct", 1, "bee_count" },             // Neon: Hive: Create a Raw BCT
+    { "createrawbct", 3, "community_contrib" },     // Neon: Hive: Create a Raw BCT
+    { "createrawbct", 4, "locktime" },              // Neon: Hive: Create a Raw BCT
+    { "createbees", 0, "beecount" },                // Neon: Hive: Create a BCT
+    { "createbees", 1, "community_contrib" },       // Neon: Hive: Create a BCT
+    { "getbeecost", 0, "height" },                  // Neon: Hive: Get cost of a single bee
+    { "gethiveinfo", 0, "include_dead" },           // Neon: Hive: Get hive info
+    { "gethiveinfo", 1, "min_honey_confirms" },     // Neon: Hive: Get hive info
+    { "getbctinfo", 1, "min_honey_confirms" },      // Neon: Hive: Get single BCT info
+    { "getnetworkhiveinfo", 0, "include_graph" },   // Neon: Hive: Get network hive info
+    { "sethiveparams", 0, "hivecheckdelay"},        // Neon: Hive: Mining optimisations: Set hive mining params
+    { "sethiveparams", 1, "hivecheckthreads"},      // Neon: Hive: Mining optimisations: Set hive mining params
+    { "sethiveparams", 2, "hiveearlyabort"},        // Neon: Hive: Mining optimisations: Set hive mining params
     { "decoderawtransaction", 1, "iswitness" },
     { "signrawtransaction", 1, "prevtxs" },
     { "signrawtransaction", 2, "privkeys" },

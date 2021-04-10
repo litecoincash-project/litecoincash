@@ -82,8 +82,8 @@
 // Application startup time (used for uptime calculation)
 const int64_t nStartupTime = GetTime();
 
-const char * const BITCOIN_CONF_FILENAME = "litecoincash.conf";
-const char * const BITCOIN_PID_FILENAME = "litecoincashd.pid";
+const char * const BITCOIN_CONF_FILENAME = "neon.conf";
+const char * const BITCOIN_PID_FILENAME = "neond.pid";
 const char * const DEFAULT_DEBUGLOGFILE = "debug.log";
 
 ArgsManager gArgs;
@@ -252,7 +252,7 @@ const CLogCategoryDesc LogCategories[] =
     {BCLog::COINDB, "coindb"},
     {BCLog::QT, "qt"},
     {BCLog::LEVELDB, "leveldb"},
-    {BCLog::HIVE, "hive"},  // LitecoinCash: Hive
+    {BCLog::HIVE, "hive"},  // Neon: Hive
     {BCLog::ALL, "1"},
     {BCLog::ALL, "all"},
 };
@@ -559,7 +559,7 @@ static std::string FormatException(const std::exception* pex, const char* pszThr
     char pszModule[MAX_PATH] = "";
     GetModuleFileNameA(nullptr, pszModule, sizeof(pszModule));
 #else
-    const char* pszModule = "litecoincash";
+    const char* pszModule = "neon";
 #endif
     if (pex)
         return strprintf(
@@ -584,7 +584,7 @@ fs::path GetDefaultDataDir()
     // Unix: ~/.bitcoin
 #ifdef WIN32
     // Windows
-    return GetSpecialFolderPath(CSIDL_APPDATA) / "LitecoinCash";
+    return GetSpecialFolderPath(CSIDL_APPDATA) / "Neon";
 #else
     fs::path pathRet;
     char* pszHome = getenv("HOME");
@@ -594,10 +594,10 @@ fs::path GetDefaultDataDir()
         pathRet = fs::path(pszHome);
 #ifdef MAC_OSX
     // Mac
-    return pathRet / "Library/Application Support/LitecoinCash";
+    return pathRet / "Library/Application Support/Neon";
 #else
     // Unix
-    return pathRet / ".litecoincash";
+    return pathRet / ".neon";
 #endif
 #endif
 }
@@ -935,7 +935,7 @@ bool SetupNetworking()
     return true;
 }
 
-// LitecoinCash: Hive: Mining Optimisations: Return number of virt cores
+// Neon: Hive: Mining Optimisations: Return number of virt cores
 int GetNumVirtualCores() {
     return boost::thread::hardware_concurrency();
 }
@@ -951,12 +951,12 @@ int GetNumCores()
 
 std::string CopyrightHolders(const std::string& strPrefix)
 {
-    // LitecoinCash: Add a row
+    // Neon: Add a row
     std::string strFirstPrefix = strPrefix;    
     strFirstPrefix.replace(strFirstPrefix.find("2011-"), sizeof("2011-")-1, "2018-");        
     std::string strCopyrightHolders = strFirstPrefix + strprintf(_(COPYRIGHT_HOLDERS), _(COPYRIGHT_HOLDERS_SUBSTITUTION));
     
-    // LitecoinCash: Check for untranslated substitution to make sure Litecion Core copyright is not removed by accident
+    // Neon: Check for untranslated substitution to make sure Litecion Core copyright is not removed by accident
     if (strprintf(COPYRIGHT_HOLDERS, COPYRIGHT_HOLDERS_SUBSTITUTION).find("Litecoin Core") == std::string::npos)
         strCopyrightHolders += "\n" + strPrefix + "The Litecoin Core developers";
 

@@ -29,16 +29,16 @@
   <string>????</string>
 
   <key>CFBundleExecutable</key>
-  <string>LitecoinCash-Qt</string>
+  <string>Neon-Qt</string>
   
   <key>CFBundleName</key>
-  <string>LitecoinCash-Qt</string>
+  <string>Neon-Qt</string>
 
   <key>LSHasLocalizedDisplayName</key>
   <true/>
 
   <key>CFBundleIdentifier</key>
-  <string>org.litecoincash.LitecoinCash-Qt</string>
+  <string>org.neon.Neon-Qt</string>
 
   <key>CFBundleURLTypes</key>
   <array>
@@ -46,10 +46,10 @@
       <key>CFBundleTypeRole</key>
       <string>Editor</string>
       <key>CFBundleURLName</key>
-      <string>org.litecoincash.LitecoinCashPayment</string>
+      <string>org.neon.NeonPayment</string>
       <key>CFBundleURLSchemes</key>
       <array>
-        <string>litecoincash</string>
+        <string>neon</string>
       </array>
     </dict>
   </array>
@@ -58,9 +58,9 @@
   <array>
     <dict>
       <key>UTTypeIdentifier</key>
-      <string>org.litecoincash.paymentrequest</string>
+      <string>org.neon.paymentrequest</string>
       <key>UTTypeDescription</key>
-      <string>LitecoinCash payment request</string>
+      <string>Neon payment request</string>
       <key>UTTypeConformsTo</key>
       <array>
         <string>public.data</string>
@@ -68,10 +68,10 @@
       <key>UTTypeTagSpecification</key>
       <dict>
         <key>public.mime-type</key>
-        <string>application/x-litecoincash-payment-request</string>
+        <string>application/x-neon-payment-request</string>
         <key>public.filename-extension</key>
         <array>
-          <string>litecoincashpaymentrequest</string>
+          <string>neonpaymentrequest</string>
         </array>
       </dict>
     </dict>
@@ -84,7 +84,7 @@
       <string>Editor</string>
       <key>LSItemContentTypes</key>
       <array>
-        <string>org.litecoincash.paymentrequest</string>
+        <string>org.neon.paymentrequest</string>
       </array>
       <key>LSHandlerRank</key>
       <string>Owner</string>

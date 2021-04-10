@@ -44,7 +44,7 @@ unsigned int ParseConfirmTarget(const UniValue& value)
  * or from the last difficulty change if 'lookup' is nonpositive.
  * If 'height' is nonnegative, compute the estimate at the time when a given block was found.
  */
-// LitecoinCash: Hive: count hashes with dedicated function, dont use chainwork. GetNumHashes is Hive Aware.
+// Neon: Hive: count hashes with dedicated function, dont use chainwork. GetNumHashes is Hive Aware.
 UniValue GetNetworkHashPS(int lookup, int height) {
     CBlockIndex *pb = chainActive.Tip();
 
@@ -56,7 +56,7 @@ UniValue GetNetworkHashPS(int lookup, int height) {
 
     // If lookup is -1, then use blocks since last difficulty change.
     if (lookup <= 0)
-        lookup = IsHive11Enabled(pb, Params().GetConsensus()) ? 1 : pb->nHeight % Params().GetConsensus().DifficultyAdjustmentInterval() + 1;   // LitecoinCash: Hive 1.1: Taking the opportunity to provide a more sensible default.
+        lookup = IsHive11Enabled(pb, Params().GetConsensus()) ? 1 : pb->nHeight % Params().GetConsensus().DifficultyAdjustmentInterval() + 1;   // Neon: Hive 1.1: Taking the opportunity to provide a more sensible default.
 
     // If lookup is larger than chain, then set it to chain length.
     if (lookup > pb->nHeight)
@@ -84,7 +84,7 @@ UniValue GetNetworkHashPS(int lookup, int height) {
 	return workDiff.getdouble() / timeDiff;
 }
 
-// LitecoinCash: Hive: Mining optimisations: Set hive mining params
+// Neon: Hive: Mining optimisations: Set hive mining params
 UniValue sethiveparams(const JSONRPCRequest& request)
 {
     if (request.fHelp || request.params.size() != 3)
@@ -107,7 +107,7 @@ UniValue sethiveparams(const JSONRPCRequest& request)
     return NullUniValue;
 }
 
-// LitecoinCash: Hive: Mining optimisations: Get hive mining params
+// Neon: Hive: Mining optimisations: Get hive mining params
 UniValue gethiveparams(const JSONRPCRequest& request)
 {
     if (request.fHelp || request.params.size() != 0)
@@ -211,7 +211,7 @@ UniValue generatetoaddress(const JSONRPCRequest& request)
             "\nMine blocks immediately to a specified address (before the RPC call returns)\n"
             "\nArguments:\n"
             "1. nblocks      (numeric, required) How many blocks are generated immediately.\n"
-            "2. address      (string, required) The address to send the newly generated litecoincash to.\n"
+            "2. address      (string, required) The address to send the newly generated neon to.\n"
             "3. maxtries     (numeric, optional) How many iterations to try (default = 1000000).\n"
             "\nResult:\n"
             "[ blockhashes ]     (array) hashes of blocks generated\n"
@@ -253,7 +253,7 @@ UniValue getmininginfo(const JSONRPCRequest& request)
             "  \"pooledtx\": n              (numeric) The size of the mempool\n"
             "  \"chain\": \"xxxx\",           (string) current network name as defined in BIP70 (main, test, regtest)\n"
             "  \"warnings\": \"...\"          (string) any network and blockchain warnings\n"
-            "  \"errors\": \"...\"            (string) DEPRECATED. Same as warnings. Only shown when litecoincashd is started with -deprecatedrpc=getmininginfo\n"
+            "  \"errors\": \"...\"            (string) DEPRECATED. Same as warnings. Only shown when neond is started with -deprecatedrpc=getmininginfo\n"
             "}\n"
             "\nExamples:\n"
             + HelpExampleCli("getmininginfo", "")
@@ -494,10 +494,10 @@ UniValue getblocktemplate(const JSONRPCRequest& request)
         throw JSONRPCError(RPC_CLIENT_P2P_DISABLED, "Error: Peer-to-peer functionality missing or disabled");
 
     if (g_connman->GetNodeCount(CConnman::CONNECTIONS_ALL) == 0)
-        throw JSONRPCError(RPC_CLIENT_NOT_CONNECTED, "LitecoinCash is not connected!");
+        throw JSONRPCError(RPC_CLIENT_NOT_CONNECTED, "Neon is not connected!");
 
     if (IsInitialBlockDownload())
-        throw JSONRPCError(RPC_CLIENT_IN_INITIAL_DOWNLOAD, "LitecoinCash is downloading blocks...");
+        throw JSONRPCError(RPC_CLIENT_IN_INITIAL_DOWNLOAD, "Neon is downloading blocks...");
 
     static unsigned int nTransactionsUpdatedLast;
 
@@ -846,7 +846,7 @@ UniValue estimatefee(const JSONRPCRequest& request)
 
     if (!IsDeprecatedRPCEnabled("estimatefee")) {
         throw JSONRPCError(RPC_METHOD_DEPRECATED, "estimatefee is deprecated and will be fully removed in v0.17. "
-            "To use estimatefee in v0.16, restart litecoincashd with -deprecatedrpc=estimatefee.\n"
+            "To use estimatefee in v0.16, restart neond with -deprecatedrpc=estimatefee.\n"
             "Projects should transition to using estimatesmartfee before upgrading to v0.17");
     }
 
@@ -1043,8 +1043,8 @@ static const CRPCCommand commands[] =
 
     { "hidden",             "estimaterawfee",         &estimaterawfee,         {"conf_target", "threshold"} },
 
-    { "mining",             "sethiveparams",          &sethiveparams,          {"hivecheckdelay", "hivecheckthreads", "hiveearlyout"} },  // LitecoinCash: Hive: Mining optimisations: Set hive mining params
-    { "mining",             "gethiveparams",          &gethiveparams,          {} },  // LitecoinCash: Hive: Mining optimisations: Get hive mining params
+    { "mining",             "sethiveparams",          &sethiveparams,          {"hivecheckdelay", "hivecheckthreads", "hiveearlyout"} },  // Neon: Hive: Mining optimisations: Set hive mining params
+    { "mining",             "gethiveparams",          &gethiveparams,          {} },  // Neon: Hive: Mining optimisations: Get hive mining params
 };
 
 void RegisterMiningRPCCommands(CRPCTable &t)

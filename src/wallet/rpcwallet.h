@@ -11,8 +11,8 @@ class CRPCTable;
 class CWallet;
 class JSONRPCRequest;
 
-struct BeePopGraphPoint;                            // LitecoinCash: Hive
-extern BeePopGraphPoint beePopGraph[1024*40];       // LitecoinCash: Hive
+struct BeePopGraphPoint;                            // Neon: Hive
+extern BeePopGraphPoint beePopGraph[1024*40];       // Neon: Hive
 
 void RegisterWalletRPCCommands(CRPCTable &t);
 
@@ -24,7 +24,7 @@ void RegisterWalletRPCCommands(CRPCTable &t);
  */
 CWallet *GetWalletForJSONRPCRequest(const JSONRPCRequest& request);
 
-CWallet *GetWalletForQTKeyImport();     // LitecoinCash: Key import helper
+CWallet *GetWalletForQTKeyImport();     // Neon: Key import helper
 
 std::string HelpRequiringPassphrase(CWallet *);
 void EnsureWalletIsUnlocked(CWallet *);

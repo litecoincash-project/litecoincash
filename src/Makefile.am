@@ -65,11 +65,11 @@ TESTS =
 BENCHMARKS =
 
 if BUILD_BITCOIND
-  bin_PROGRAMS += litecoincashd
+  bin_PROGRAMS += neond
 endif
 
 if BUILD_BITCOIN_UTILS
-  bin_PROGRAMS += litecoincash-cli litecoincash-tx
+  bin_PROGRAMS += neon-cli neon-tx
 endif
 
 .PHONY: FORCE check-symbols check-security
@@ -381,16 +381,16 @@ nodist_libbitcoin_util_a_SOURCES = $(srcdir)/obj/build.h
 #
 
 # bitcoind binary #
-litecoincashd_SOURCES = bitcoind.cpp
-litecoincashd_CPPFLAGS = $(AM_CPPFLAGS) $(BITCOIN_INCLUDES)
-litecoincashd_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
-litecoincashd_LDFLAGS = $(RELDFLAGS) $(AM_LDFLAGS) $(LIBTOOL_APP_LDFLAGS)
+neond_SOURCES = bitcoind.cpp
+neond_CPPFLAGS = $(AM_CPPFLAGS) $(BITCOIN_INCLUDES)
+neond_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
+neond_LDFLAGS = $(RELDFLAGS) $(AM_LDFLAGS) $(LIBTOOL_APP_LDFLAGS)
 
 if TARGET_WINDOWS
-litecoincashd_SOURCES += bitcoind-res.rc
+neond_SOURCES += bitcoind-res.rc
 endif
 
-litecoincashd_LDADD = \
+neond_LDADD = \
   $(LIBBITCOIN_SERVER) \
   $(LIBBITCOIN_COMMON) \
   $(LIBUNIVALUE) \
@@ -404,38 +404,38 @@ litecoincashd_LDADD = \
   $(LIBMEMENV) \
   $(LIBSECP256K1)
 
-litecoincashd_LDADD += $(BOOST_LIBS) $(BDB_LIBS) $(SSL_LIBS) $(CRYPTO_LIBS) $(MINIUPNPC_LIBS) $(EVENT_PTHREADS_LIBS) $(EVENT_LIBS) $(ZMQ_LIBS)
+neond_LDADD += $(BOOST_LIBS) $(BDB_LIBS) $(SSL_LIBS) $(CRYPTO_LIBS) $(MINIUPNPC_LIBS) $(EVENT_PTHREADS_LIBS) $(EVENT_LIBS) $(ZMQ_LIBS)
 
 # bitcoin-cli binary #
-litecoincash_cli_SOURCES = bitcoin-cli.cpp
-litecoincash_cli_CPPFLAGS = $(AM_CPPFLAGS) $(BITCOIN_INCLUDES) $(EVENT_CFLAGS)
-litecoincash_cli_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
-litecoincash_cli_LDFLAGS = $(RELDFLAGS) $(AM_LDFLAGS) $(LIBTOOL_APP_LDFLAGS)
+neon_cli_SOURCES = bitcoin-cli.cpp
+neon_cli_CPPFLAGS = $(AM_CPPFLAGS) $(BITCOIN_INCLUDES) $(EVENT_CFLAGS)
+neon_cli_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
+neon_cli_LDFLAGS = $(RELDFLAGS) $(AM_LDFLAGS) $(LIBTOOL_APP_LDFLAGS)
 
 if TARGET_WINDOWS
-litecoincash_cli_SOURCES += bitcoin-cli-res.rc
+neon_cli_SOURCES += bitcoin-cli-res.rc
 endif
 
-litecoincash_cli_LDADD = \
+neon_cli_LDADD = \
   $(LIBBITCOIN_CLI) \
   $(LIBUNIVALUE) \
   $(LIBBITCOIN_UTIL) \
   $(LIBBITCOIN_CRYPTO)
 
-litecoincash_cli_LDADD += $(BOOST_LIBS) $(SSL_LIBS) $(CRYPTO_LIBS) $(EVENT_LIBS)
+neon_cli_LDADD += $(BOOST_LIBS) $(SSL_LIBS) $(CRYPTO_LIBS) $(EVENT_LIBS)
 #
 
 # bitcoin-tx binary #
-litecoincash_tx_SOURCES = bitcoin-tx.cpp
-litecoincash_tx_CPPFLAGS = $(AM_CPPFLAGS) $(BITCOIN_INCLUDES)
-litecoincash_tx_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
-litecoincash_tx_LDFLAGS = $(RELDFLAGS) $(AM_LDFLAGS) $(LIBTOOL_APP_LDFLAGS)
+neon_tx_SOURCES = bitcoin-tx.cpp
+neon_tx_CPPFLAGS = $(AM_CPPFLAGS) $(BITCOIN_INCLUDES)
+neon_tx_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
+neon_tx_LDFLAGS = $(RELDFLAGS) $(AM_LDFLAGS) $(LIBTOOL_APP_LDFLAGS)
 
 if TARGET_WINDOWS
-litecoincash_tx_SOURCES += bitcoin-tx-res.rc
+neon_tx_SOURCES += bitcoin-tx-res.rc
 endif
 
-litecoincash_tx_LDADD = \
+neon_tx_LDADD = \
   $(LIBUNIVALUE) \
   $(LIBBITCOIN_COMMON) \
   $(LIBBITCOIN_UTIL) \
@@ -443,7 +443,7 @@ litecoincash_tx_LDADD = \
   $(LIBBITCOIN_CRYPTO) \
   $(LIBSECP256K1)
 
-litecoincash_tx_LDADD += $(BOOST_LIBS) $(CRYPTO_LIBS)
+neon_tx_LDADD += $(BOOST_LIBS) $(CRYPTO_LIBS)
 #
 
 # bitcoinconsensus library #

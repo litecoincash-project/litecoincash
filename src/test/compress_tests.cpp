@@ -39,7 +39,7 @@ bool static TestPair(uint64_t dec, uint64_t enc) {
 
 BOOST_AUTO_TEST_CASE(compress_amounts)
 {
-    // LitecoinCash: Account for coinscale in these tests
+    // Neon: Account for coinscale in these tests
     BOOST_CHECK(TestPair(                       0,       0x0));
     BOOST_CHECK(TestPair(                       1,       0x1));
     BOOST_CHECK(TestPair(         CENT*COIN_SCALE,       0x7));  

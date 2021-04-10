@@ -52,7 +52,7 @@ CWallet *GetWalletForJSONRPCRequest(const JSONRPCRequest& request)
     return ::vpwallets.size() == 1 || (request.fHelp && ::vpwallets.size() > 0) ? ::vpwallets[0] : nullptr;
 }
 
-// LitecoinCash: Key import helper
+// Neon: Key import helper
 CWallet *GetWalletForQTKeyImport()
 {
     return ::vpwallets.size() > 0 ? ::vpwallets[0] : nullptr;
@@ -87,7 +87,7 @@ void EnsureWalletIsUnlocked(CWallet * const pwallet)
     if (pwallet->IsLocked()) {
         throw JSONRPCError(RPC_WALLET_UNLOCK_NEEDED, "Error: Please enter the wallet passphrase with walletpassphrase first.");
     }
-    // LitecoinCash: Hive
+    // Neon: Hive
     if (fWalletUnlockHiveMiningOnly) {
         throw JSONRPCError(RPC_WALLET_UNLOCK_NEEDED, "Error: Wallet is unlocked for hive mining only, please enter the wallet passphrase with walletpassphrase first.");
     }
@@ -150,14 +150,14 @@ UniValue getnewaddress(const JSONRPCRequest& request)
     if (request.fHelp || request.params.size() > 2)
         throw std::runtime_error(
             "getnewaddress ( \"account\" \"address_type\" )\n"
-            "\nReturns a new LitecoinCash address for receiving payments.\n"
+            "\nReturns a new Neon address for receiving payments.\n"
             "If 'account' is specified (DEPRECATED), it is added to the address book \n"
             "so payments received with the address will be credited to 'account'.\n"
             "\nArguments:\n"
             "1. \"account\"        (string, optional) DEPRECATED. The account name for the address to be linked to. If not provided, the default account \"\" is used. It can also be set to the empty string \"\" to represent the default account. The account does not need to exist, it will be created if there is no account by the given name.\n"
             "2. \"address_type\"   (string, optional) The address type to use. Options are \"legacy\", \"p2sh-segwit\", and \"bech32\". Default is set by -addresstype.\n"
             "\nResult:\n"
-            "\"address\"    (string) The new litecoincash address\n"
+            "\"address\"    (string) The new neon address\n"
             "\nExamples:\n"
             + HelpExampleCli("getnewaddress", "")
             + HelpExampleRpc("getnewaddress", "")
@@ -216,11 +216,11 @@ UniValue getaccountaddress(const JSONRPCRequest& request)
     if (request.fHelp || request.params.size() != 1)
         throw std::runtime_error(
             "getaccountaddress \"account\"\n"
-            "\nDEPRECATED. Returns the current LitecoinCash address for receiving payments to this account.\n"
+            "\nDEPRECATED. Returns the current Neon address for receiving payments to this account.\n"
             "\nArguments:\n"
             "1. \"account\"       (string, required) The account name for the address. It can also be set to the empty string \"\" to represent the default account. The account does not need to exist, it will be created and a new address created  if there is no account by the given name.\n"
             "\nResult:\n"
-            "\"address\"          (string) The account litecoincash address\n"
+            "\"address\"          (string) The account neon address\n"
             "\nExamples:\n"
             + HelpExampleCli("getaccountaddress", "")
             + HelpExampleCli("getaccountaddress", "\"\"")
@@ -249,7 +249,7 @@ UniValue getrawchangeaddress(const JSONRPCRequest& request)
     if (request.fHelp || request.params.size() > 1)
         throw std::runtime_error(
             "getrawchangeaddress ( \"address_type\" )\n"
-            "\nReturns a new LitecoinCash address, for receiving change.\n"
+            "\nReturns a new Neon address, for receiving change.\n"
             "This is for use with raw transactions, NOT normal use.\n"
             "\nArguments:\n"
             "1. \"address_type\"           (string, optional) The address type to use. Options are \"legacy\", \"p2sh-segwit\", and \"bech32\". Default is set by -changetype.\n"
@@ -300,7 +300,7 @@ UniValue setaccount(const JSONRPCRequest& request)
             "setaccount \"address\" \"account\"\n"
             "\nDEPRECATED. Sets the account associated with the given address.\n"
             "\nArguments:\n"
-            "1. \"address\"         (string, required) The litecoincash address to be associated with an account.\n"
+            "1. \"address\"         (string, required) The neon address to be associated with an account.\n"
             "2. \"account\"         (string, required) The account to assign the address to.\n"
             "\nExamples:\n"
             + HelpExampleCli("setaccount", "\"LEr4hNAefWYhBMgxCFP2Po1NPrUeiK8kM2\" \"tabby\"")
@@ -311,7 +311,7 @@ UniValue setaccount(const JSONRPCRequest& request)
 
     CTxDestination dest = DecodeDestination(request.params[0].get_str());
     if (!IsValidDestination(dest)) {
-        throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Invalid LitecoinCash address");
+        throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Invalid Neon address");
     }
 
     std::string strAccount;
@@ -348,7 +348,7 @@ UniValue getaccount(const JSONRPCRequest& request)
             "getaccount \"address\"\n"
             "\nDEPRECATED. Returns the account associated with the given address.\n"
             "\nArguments:\n"
-            "1. \"address\"         (string, required) The litecoincash address for account lookup.\n"
+            "1. \"address\"         (string, required) The neon address for account lookup.\n"
             "\nResult:\n"
             "\"accountname\"        (string) the account address\n"
             "\nExamples:\n"
@@ -360,7 +360,7 @@ UniValue getaccount(const JSONRPCRequest& request)
 
     CTxDestination dest = DecodeDestination(request.params[0].get_str());
     if (!IsValidDestination(dest)) {
-        throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Invalid LitecoinCash address");
+        throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Invalid Neon address");
     }
 
     std::string strAccount;
@@ -387,7 +387,7 @@ UniValue getaddressesbyaccount(const JSONRPCRequest& request)
             "1. \"account\"        (string, required) The account name.\n"
             "\nResult:\n"
             "[                     (json array of string)\n"
-            "  \"address\"         (string) a litecoincash address associated with the given account\n"
+            "  \"address\"         (string) a neon address associated with the given account\n"
             "  ,...\n"
             "]\n"
             "\nExamples:\n"
@@ -462,7 +462,7 @@ UniValue sendtoaddress(const JSONRPCRequest& request)
             "\nSend an amount to a given address.\n"
             + HelpRequiringPassphrase(pwallet) +
             "\nArguments:\n"
-            "1. \"address\"            (string, required) The litecoincash address to send to.\n"
+            "1. \"address\"            (string, required) The neon address to send to.\n"
             "2. \"amount\"             (numeric or string, required) The amount in " + CURRENCY_UNIT + " to send. eg 0.1\n"
             "3. \"comment\"            (string, optional) A comment used to store what the transaction is for. \n"
             "                             This is not part of the transaction, just kept in your wallet.\n"
@@ -470,7 +470,7 @@ UniValue sendtoaddress(const JSONRPCRequest& request)
             "                             to which you're sending the transaction. This is not part of the \n"
             "                             transaction, just kept in your wallet.\n"
             "5. subtractfeefromamount  (boolean, optional, default=false) The fee will be deducted from the amount being sent.\n"
-            "                             The recipient will receive less litecoincash than you enter in the amount field.\n"
+            "                             The recipient will receive less neon than you enter in the amount field.\n"
             "6. replaceable            (boolean, optional) Allow this transaction to be replaced by a transaction with higher fees via BIP 125\n"
             "7. conf_target            (numeric, optional) Confirmation target (in blocks)\n"
             "8. \"estimate_mode\"      (string, optional, default=UNSET) The fee estimate mode, must be one of:\n"
@@ -539,7 +539,7 @@ UniValue sendtoaddress(const JSONRPCRequest& request)
     return wtx.GetHash().GetHex();
 }
 
-// LitecoinCash: Hive: Get current bee cost
+// Neon: Hive: Get current bee cost
 UniValue getbeecost(const JSONRPCRequest& request)
 {
     if (request.fHelp || request.params.size() > 1)
@@ -579,7 +579,7 @@ UniValue getbeecost(const JSONRPCRequest& request)
     return ValueFromAmount(beeCost);
 }
 
-// LitecoinCash: Hive: Create bee(s)
+// Neon: Hive: Create bee(s)
 UniValue createbees(const JSONRPCRequest& request)
 {
     CWallet * const pwallet = GetWalletForJSONRPCRequest(request);
@@ -594,8 +594,8 @@ UniValue createbees(const JSONRPCRequest& request)
             "\nArguments:\n"
             "1. bee_count              (numeric, required) The number of bees to create.\n"
             "2. community_contrib      (boolean, optional, default=true) If true, a small percentage of bee creation cost will be paid to a community fund.\n"
-            "3. \"honey_address\"        (string, optional) The LCC address to receive rewards for blocks mined by bee(s) created in this transaction.\n"
-			"4. \"change_address\"       (string, optional, default pool address) The LCC address to receive the change.\n"
+            "3. \"honey_address\"        (string, optional) The NEON address to receive rewards for blocks mined by bee(s) created in this transaction.\n"
+			"4. \"change_address\"       (string, optional, default pool address) The NEON address to receive the change.\n"
             "\nResult:\n"
             "\"txid\"                    (string) The transaction id.\n"
             "\nExamples:\n"
@@ -650,7 +650,7 @@ UniValue createbees(const JSONRPCRequest& request)
 }
 
 
-// LitecoinCash: Hive: Get network hive info
+// Neon: Hive: Get network hive info
 UniValue getnetworkhiveinfo(const JSONRPCRequest& request)
 {
     if (request.fHelp || request.params.size() > 1)
@@ -714,7 +714,7 @@ UniValue getnetworkhiveinfo(const JSONRPCRequest& request)
     return jsonResults;
 }
 
-// LitecoinCash: Hive: Return BCT tx id for a honey transaction in this wallet
+// Neon: Hive: Return BCT tx id for a honey transaction in this wallet
 UniValue getbeecreationtxid(const JSONRPCRequest& request)
 {
     CWallet * const pwallet = GetWalletForJSONRPCRequest(request);
@@ -764,7 +764,7 @@ UniValue getbeecreationtxid(const JSONRPCRequest& request)
     return bctTxIdStr;
 }
             
-// LitecoinCash: Hive: Return hive info for a single BCT
+// Neon: Hive: Return hive info for a single BCT
 UniValue getbctinfo(const JSONRPCRequest& request)
 {
     CWallet * const pwallet = GetWalletForJSONRPCRequest(request);
@@ -837,7 +837,7 @@ UniValue getbctinfo(const JSONRPCRequest& request)
     return jsonResults;
 }
 
-// LitecoinCash: Hive: Get wallet's own hive info
+// Neon: Hive: Get wallet's own hive info
 UniValue gethiveinfo(const JSONRPCRequest& request)
 {
     CWallet * const pwallet = GetWalletForJSONRPCRequest(request);
@@ -981,7 +981,7 @@ UniValue listaddressgroupings(const JSONRPCRequest& request)
             "[\n"
             "  [\n"
             "    [\n"
-            "      \"address\",            (string) The litecoincash address\n"
+            "      \"address\",            (string) The neon address\n"
             "      amount,                 (numeric) The amount in " + CURRENCY_UNIT + "\n"
             "      \"account\"             (string, optional) DEPRECATED. The account\n"
             "    ]\n"
@@ -1036,7 +1036,7 @@ UniValue signmessage(const JSONRPCRequest& request)
             "\nSign a message with the private key of an address"
             + HelpRequiringPassphrase(pwallet) + "\n"
             "\nArguments:\n"
-            "1. \"address\"         (string, required) The litecoincash address to use for the private key.\n"
+            "1. \"address\"         (string, required) The neon address to use for the private key.\n"
             "2. \"message\"         (string, required) The message to create a signature of.\n"
             "\nResult:\n"
             "\"signature\"          (string) The signature of the message encoded in base 64\n"
@@ -1096,7 +1096,7 @@ UniValue getreceivedbyaddress(const JSONRPCRequest& request)
             "getreceivedbyaddress \"address\" ( minconf )\n"
             "\nReturns the total amount received by the given address in transactions with at least minconf confirmations.\n"
             "\nArguments:\n"
-            "1. \"address\"         (string, required) The litecoincash address for transactions.\n"
+            "1. \"address\"         (string, required) The neon address for transactions.\n"
             "2. minconf             (numeric, optional, default=1) Only include transactions confirmed at least this many times.\n"
             "\nResult:\n"
             "amount   (numeric) The total amount in " + CURRENCY_UNIT + " received at this address.\n"
@@ -1122,7 +1122,7 @@ UniValue getreceivedbyaddress(const JSONRPCRequest& request)
     // Bitcoin address
     CTxDestination dest = DecodeDestination(request.params[0].get_str());
     if (!IsValidDestination(dest)) {
-        throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Invalid LitecoinCash address");
+        throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Invalid Neon address");
     }
     CScript scriptPubKey = GetScriptForDestination(dest);
     if (!IsMine(*pwallet, scriptPubKey)) {
@@ -1381,14 +1381,14 @@ UniValue sendfrom(const JSONRPCRequest& request)
     if (request.fHelp || request.params.size() < 3 || request.params.size() > 6)
         throw std::runtime_error(
             "sendfrom \"fromaccount\" \"toaddress\" amount ( minconf \"comment\" \"comment_to\" )\n"
-            "\nDEPRECATED (use sendtoaddress). Sent an amount from an account to a litecoincash address."
+            "\nDEPRECATED (use sendtoaddress). Sent an amount from an account to a neon address."
             + HelpRequiringPassphrase(pwallet) + "\n"
             "\nArguments:\n"
             "1. \"fromaccount\"       (string, required) The name of the account to send funds from. May be the default account using \"\".\n"
             "                       Specifying an account does not influence coin selection, but it does associate the newly created\n"
             "                       transaction with the account, so the account's balance computation and transaction history can reflect\n"
             "                       the spend.\n"
-            "2. \"toaddress\"         (string, required) The litecoincash address to send funds to.\n"
+            "2. \"toaddress\"         (string, required) The neon address to send funds to.\n"
             "3. amount                (numeric or string, required) The amount in " + CURRENCY_UNIT + " (transaction fee is added on top).\n"
             "4. minconf               (numeric, optional, default=1) Only use funds with at least this many confirmations.\n"
             "5. \"comment\"           (string, optional) A comment used to store what the transaction is for. \n"
@@ -1418,7 +1418,7 @@ UniValue sendfrom(const JSONRPCRequest& request)
     std::string strAccount = AccountFromValue(request.params[0]);
     CTxDestination dest = DecodeDestination(request.params[1].get_str());
     if (!IsValidDestination(dest)) {
-        throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Invalid LitecoinCash address");
+        throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Invalid Neon address");
     }
     CAmount nAmount = AmountFromValue(request.params[2]);
     if (nAmount <= 0)
@@ -1464,14 +1464,14 @@ UniValue sendmany(const JSONRPCRequest& request)
             "1. \"fromaccount\"         (string, required) DEPRECATED. The account to send the funds from. Should be \"\" for the default account\n"
             "2. \"amounts\"             (string, required) A json object with addresses and amounts\n"
             "    {\n"
-            "      \"address\":amount   (numeric or string) The litecoincash address is the key, the numeric amount (can be string) in " + CURRENCY_UNIT + " is the value\n"
+            "      \"address\":amount   (numeric or string) The neon address is the key, the numeric amount (can be string) in " + CURRENCY_UNIT + " is the value\n"
             "      ,...\n"
             "    }\n"
             "3. minconf                 (numeric, optional, default=1) Only use the balance confirmed at least this many times.\n"
             "4. \"comment\"             (string, optional) A comment\n"
             "5. subtractfeefrom         (array, optional) A json array with addresses.\n"
             "                           The fee will be equally deducted from the amount of each selected address.\n"
-            "                           Those recipients will receive less litecoincash than you enter in their corresponding amount field.\n"
+            "                           Those recipients will receive less neon than you enter in their corresponding amount field.\n"
             "                           If no addresses are specified here, the sender pays the fee.\n"
             "    [\n"
             "      \"address\"          (string) Subtract fee from this address\n"
@@ -1547,7 +1547,7 @@ UniValue sendmany(const JSONRPCRequest& request)
     for (const std::string& name_ : keys) {
         CTxDestination dest = DecodeDestination(name_);
         if (!IsValidDestination(dest)) {
-            throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, std::string("Invalid LitecoinCash address: ") + name_);
+            throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, std::string("Invalid Neon address: ") + name_);
         }
 
         if (destinations.count(dest)) {
@@ -1606,16 +1606,16 @@ UniValue addmultisigaddress(const JSONRPCRequest& request)
     if (request.fHelp || request.params.size() < 2 || request.params.size() > 4) {
         std::string msg = "addmultisigaddress nrequired [\"key\",...] ( \"account\" \"address_type\" )\n"
             "\nAdd a nrequired-to-sign multisignature address to the wallet. Requires a new wallet backup.\n"
-            "Each key is a LitecoinCash address or hex-encoded public key.\n"
+            "Each key is a Neon address or hex-encoded public key.\n"
             "This functionality is only intended for use with non-watchonly addresses.\n"
             "See `importaddress` for watchonly p2sh address support.\n"
             "If 'account' is specified (DEPRECATED), assign address to that account.\n"
 
             "\nArguments:\n"
             "1. nrequired                      (numeric, required) The number of required signatures out of the n keys or addresses.\n"
-            "2. \"keys\"                         (string, required) A json array of litecoincash addresses or hex-encoded public keys\n"
+            "2. \"keys\"                         (string, required) A json array of neon addresses or hex-encoded public keys\n"
             "     [\n"
-            "       \"address\"                  (string) litecoincash address or hex-encoded public key\n"
+            "       \"address\"                  (string) neon address or hex-encoded public key\n"
             "       ...,\n"
             "     ]\n"
             "3. \"account\"                      (string, optional) DEPRECATED. An account to assign the addresses to.\n"
@@ -1626,9 +1626,9 @@ UniValue addmultisigaddress(const JSONRPCRequest& request)
             "  \"address\":\"multisigaddress\",    (string) The value of the new multisig address.\n"
             "  \"redeemScript\":\"script\"         (string) The string value of the hex-encoded redemption script.\n"
             "}\n"
-            "\nResult (DEPRECATED. To see this result in v0.16 instead, please start litecoincashd with -deprecatedrpc=addmultisigaddress).\n"
+            "\nResult (DEPRECATED. To see this result in v0.16 instead, please start neond with -deprecatedrpc=addmultisigaddress).\n"
             "        clients should transition to the new output api before upgrading to v0.17.\n"
-            "\"address\"                         (string) A litecoincash address associated with the keys.\n"
+            "\"address\"                         (string) A neon address associated with the keys.\n"
 
             "\nExamples:\n"
             "\nAdd a multisig address from 2 addresses\n"
@@ -1768,7 +1768,7 @@ UniValue addwitnessaddress(const JSONRPCRequest& request)
 
     if (!IsDeprecatedRPCEnabled("addwitnessaddress")) {
         throw JSONRPCError(RPC_METHOD_DEPRECATED, "addwitnessaddress is deprecated and will be fully removed in v0.17. "
-            "To use addwitnessaddress in v0.16, restart litecoincashd with -deprecatedrpc=addwitnessaddress.\n"
+            "To use addwitnessaddress in v0.16, restart neond with -deprecatedrpc=addwitnessaddress.\n"
             "Projects should transition to using the address_type argument of getnewaddress, or option -addresstype=[bech32|p2sh-segwit] instead.\n");
     }
 
@@ -1781,7 +1781,7 @@ UniValue addwitnessaddress(const JSONRPCRequest& request)
 
     CTxDestination dest = DecodeDestination(request.params[0].get_str());
     if (!IsValidDestination(dest)) {
-        throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Invalid LitecoinCash address");
+        throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Invalid Neon address");
     }
 
     bool p2sh = true;
@@ -2082,7 +2082,7 @@ void ListTransactions(CWallet* const pwallet, const CWalletTx& wtx, const std::s
             entry.push_back(Pair("account", strSentAccount));
             MaybePushAddress(entry, s.destination);
             
-            // LitecoinCash: Hive: Sent transactions are never honey
+            // Neon: Hive: Sent transactions are never honey
             entry.push_back(Pair("ishoney", false));
 
             entry.push_back(Pair("category", "send"));
@@ -2117,7 +2117,7 @@ void ListTransactions(CWallet* const pwallet, const CWalletTx& wtx, const std::s
                 entry.push_back(Pair("account", account));
                 MaybePushAddress(entry, r.destination);
 
-                // LitecoinCash: Hive: Indicate whether this is honey (hive block coinbase tx)
+                // Neon: Hive: Indicate whether this is honey (hive block coinbase tx)
                 entry.push_back(Pair("ishoney", wtx.IsHiveCoinBase()));
                 
                 if (wtx.IsCoinBase())
@@ -2170,7 +2170,7 @@ UniValue listtransactions(const JSONRPCRequest& request)
         return NullUniValue;
     }
 
-    // LitecoinCash: Hive: Include ishoney in documentation
+    // Neon: Hive: Include ishoney in documentation
     if (request.fHelp || request.params.size() > 4)
         throw std::runtime_error(
             "listtransactions ( \"account\" count skip include_watchonly )\n"
@@ -2185,7 +2185,7 @@ UniValue listtransactions(const JSONRPCRequest& request)
             "  {\n"
             "    \"account\":\"accountname\",       (string) DEPRECATED. The account name associated with the transaction. \n"
             "                                                It will be \"\" for the default account.\n"
-            "    \"address\":\"address\",    (string) The litecoincash address of the transaction. Not present for \n"
+            "    \"address\":\"address\",    (string) The neon address of the transaction. Not present for \n"
             "                                                move transactions (category = move).\n"
             "    \"ishoney\": xxx,           (bool) Whether this transaction is honey (hive block coinbase transaction)\n"
             "    \"category\":\"send|receive|move\", (string) The transaction category. 'move' is a local (off blockchain)\n"
@@ -2412,7 +2412,7 @@ UniValue listsinceblock(const JSONRPCRequest& request)
             "{\n"
             "  \"transactions\": [\n"
             "    \"account\":\"accountname\",       (string) DEPRECATED. The account name associated with the transaction. Will be \"\" for the default account.\n"
-            "    \"address\":\"address\",    (string) The litecoincash address of the transaction. Not present for move transactions (category = move).\n"
+            "    \"address\":\"address\",    (string) The neon address of the transaction. Not present for move transactions (category = move).\n"
             "    \"category\":\"send|receive\",     (string) The transaction category. 'send' has negative amounts, 'receive' has positive amounts.\n"
             "    \"amount\": x.xxx,          (numeric) The amount in " + CURRENCY_UNIT + ". This is negative for the 'send' category, and for the 'move' category for moves \n"
             "                                          outbound. It is positive for the 'receive' category, and for the 'move' category for inbound funds.\n"
@@ -2562,7 +2562,7 @@ UniValue gettransaction(const JSONRPCRequest& request)
             "  \"details\" : [\n"
             "    {\n"
             "      \"account\" : \"accountname\",      (string) DEPRECATED. The account name involved in the transaction, can be \"\" for the default account.\n"
-            "      \"address\" : \"address\",          (string) The litecoincash address involved in the transaction\n"
+            "      \"address\" : \"address\",          (string) The neon address involved in the transaction\n"
             "      \"category\" : \"send|receive\",    (string) The category, either 'send' or 'receive'\n"
             "      \"amount\" : x.xxx,                 (numeric) The amount in " + CURRENCY_UNIT + "\n"
             "      \"label\" : \"label\",              (string) A comment for the address/transaction, if any\n"
@@ -2752,7 +2752,7 @@ static void LockWallet(CWallet* pWallet)
     pWallet->Lock();
 }
 
-// LitecoinCash: Hive: Callback to set the wallet back to unlocked only for hive on walletpassphrase timeout
+// Neon: Hive: Callback to set the wallet back to unlocked only for hive on walletpassphrase timeout
 static void SetHiveOnly()
 {
 	fWalletUnlockHiveMiningOnly = true;
@@ -2769,7 +2769,7 @@ UniValue walletpassphrase(const JSONRPCRequest& request)
         throw std::runtime_error(
             "walletpassphrase \"passphrase\" timeout\n"
             "\nStores the wallet decryption key in memory for 'timeout' seconds.\n"
-            "This is needed prior to performing transactions related to private keys such as sending litecoincash\n"
+            "This is needed prior to performing transactions related to private keys such as sending neon\n"
             "\nArguments:\n"
             "1. \"passphrase\"       (string, required) The wallet passphrase\n"
             "2. timeout            (numeric, required) The time to keep the decryption key in seconds. Limited to at most 1073741824 (2^30) seconds.\n"
@@ -2813,7 +2813,7 @@ UniValue walletpassphrase(const JSONRPCRequest& request)
         nSleepTime = (int64_t)1 << 30;
     }
 
-	// LitecoinCash: Hive: Support locked wallets
+	// Neon: Hive: Support locked wallets
 	bool wasUnLockedHiveOnly = false;
 	if (!pwallet->IsLocked() && fWalletUnlockHiveMiningOnly) {
 		pwallet->Lock();
@@ -2835,7 +2835,7 @@ UniValue walletpassphrase(const JSONRPCRequest& request)
 	
 	fWalletUnlockHiveMiningOnly = false;	
 	
-	// LitecoinCash: Hive: Support locked wallets
+	// Neon: Hive: Support locked wallets
 	if (!wasUnLockedHiveOnly) {
 		pwallet->nRelockTime = GetTime() + nSleepTime;
 		RPCRunLater(strprintf("lockwallet(%s)", pwallet->GetName()), boost::bind(LockWallet, pwallet), nSleepTime);
@@ -2847,7 +2847,7 @@ UniValue walletpassphrase(const JSONRPCRequest& request)
 }
 
 
-// LitecoinCash: Hive: Unlock wallet for hiving only (Prevent trivial sendmoney attack if user OS account compromised)
+// Neon: Hive: Unlock wallet for hiving only (Prevent trivial sendmoney attack if user OS account compromised)
 UniValue walletpassphrasehiveonly(const JSONRPCRequest& request)
 {
     CWallet * const pwallet = GetWalletForJSONRPCRequest(request);
@@ -2860,7 +2860,7 @@ UniValue walletpassphrasehiveonly(const JSONRPCRequest& request)
             "walletpassphrasehiveonly \"passphrase\"\n"
             "\nStores the wallet decryption key in memory indefinitely for hive mining use only.\n"
             "This is needed to enable the hive mining thread to run. Performing other transactions related to\n" 
-			"private keys such as sending litecoincash, is not enabled and will require you to run\n"
+			"private keys such as sending neon, is not enabled and will require you to run\n"
 			"walletpassphrase separately.\n"
             "\nArguments:\n"
             "1. \"passphrase\"       (string, required) The wallet passphrase\n"
@@ -3018,7 +3018,7 @@ UniValue encryptwallet(const JSONRPCRequest& request)
             "\nExamples:\n"
             "\nEncrypt your wallet\n"
             + HelpExampleCli("encryptwallet", "\"my pass phrase\"") +
-            "\nNow set the passphrase to use the wallet, such as for signing or sending litecoincash\n"
+            "\nNow set the passphrase to use the wallet, such as for signing or sending neon\n"
             + HelpExampleCli("walletpassphrase", "\"my pass phrase\"") +
             "\nNow we can do something like sign\n"
             + HelpExampleCli("signmessage", "\"address\" \"test message\"") +
@@ -3056,7 +3056,7 @@ UniValue encryptwallet(const JSONRPCRequest& request)
     // slack space in .dat files; that is bad if the old data is
     // unencrypted private keys. So:
     StartShutdown();
-    return "wallet encrypted; LitecoinCash server stopping, restart to run with encrypted wallet. The keypool has been flushed and a new HD seed was generated (if you are using HD). You need to make a new backup.";
+    return "wallet encrypted; Neon server stopping, restart to run with encrypted wallet. The keypool has been flushed and a new HD seed was generated (if you are using HD). You need to make a new backup.";
 }
 
 UniValue lockunspent(const JSONRPCRequest& request)
@@ -3072,7 +3072,7 @@ UniValue lockunspent(const JSONRPCRequest& request)
             "\nUpdates list of temporarily unspendable outputs.\n"
             "Temporarily lock (unlock=false) or unlock (unlock=true) specified transaction outputs.\n"
             "If no transaction outputs are specified when unlocking then all current locked transaction outputs are unlocked.\n"
-            "A locked transaction output will not be chosen by automatic coin selection, when spending litecoincash.\n"
+            "A locked transaction output will not be chosen by automatic coin selection, when spending neon.\n"
             "Locks are stored in memory only. Nodes start with zero locked outputs, and the locked output list\n"
             "is always cleared (by virtue of process exit) when a node stops or fails.\n"
             "Also see the listunspent call\n"
@@ -3414,9 +3414,9 @@ UniValue listunspent(const JSONRPCRequest& request)
             "\nArguments:\n"
             "1. minconf          (numeric, optional, default=1) The minimum confirmations to filter\n"
             "2. maxconf          (numeric, optional, default=9999999) The maximum confirmations to filter\n"
-            "3. \"addresses\"      (string) A json array of litecoincash addresses to filter\n"
+            "3. \"addresses\"      (string) A json array of neon addresses to filter\n"
             "    [\n"
-            "      \"address\"     (string) litecoincash address\n"
+            "      \"address\"     (string) neon address\n"
             "      ,...\n"
             "    ]\n"
             "4. include_unsafe (bool, optional, default=true) Include outputs that are not safe to spend\n"
@@ -3433,7 +3433,7 @@ UniValue listunspent(const JSONRPCRequest& request)
             "  {\n"
             "    \"txid\" : \"txid\",          (string) the transaction id \n"
             "    \"vout\" : n,               (numeric) the vout value\n"
-            "    \"address\" : \"address\",    (string) the litecoincash address\n"
+            "    \"address\" : \"address\",    (string) the neon address\n"
             "    \"account\" : \"account\",    (string) DEPRECATED. The associated account, or \"\" for the default account\n"
             "    \"scriptPubKey\" : \"key\",   (string) the script key\n"
             "    \"amount\" : x.xxx,         (numeric) the transaction output amount in " + CURRENCY_UNIT + "\n"
@@ -3478,7 +3478,7 @@ UniValue listunspent(const JSONRPCRequest& request)
             const UniValue& input = inputs[idx];
             CTxDestination dest = DecodeDestination(input.get_str());
             if (!IsValidDestination(dest)) {
-                throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, std::string("Invalid LitecoinCash address: ") + input.get_str());
+                throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, std::string("Invalid Neon address: ") + input.get_str());
             }
             if (!destinations.insert(dest).second) {
                 throw JSONRPCError(RPC_INVALID_PARAMETER, std::string("Invalid parameter, duplicated address: ") + input.get_str());
@@ -3586,7 +3586,7 @@ UniValue fundrawtransaction(const JSONRPCRequest& request)
                             "1. \"hexstring\"           (string, required) The hex string of the raw transaction\n"
                             "2. options                 (object, optional)\n"
                             "   {\n"
-                            "     \"changeAddress\"          (string, optional, default pool address) The litecoincash address to receive the change\n"
+                            "     \"changeAddress\"          (string, optional, default pool address) The neon address to receive the change\n"
                             "     \"changePosition\"         (numeric, optional, default random) The index of the change output\n"
                             "     \"change_type\"            (string, optional) The output type to use. Only valid if changeAddress is not specified. Options are \"legacy\", \"p2sh-segwit\", and \"bech32\". Default is set by -changetype.\n"
                             "     \"includeWatching\"        (boolean, optional, default false) Also select inputs which are watch only\n"
@@ -3595,7 +3595,7 @@ UniValue fundrawtransaction(const JSONRPCRequest& request)
                             "     \"subtractFeeFromOutputs\" (array, optional) A json array of integers.\n"
                             "                              The fee will be equally deducted from the amount of each specified output.\n"
                             "                              The outputs are specified by their zero-based index, before any change output is added.\n"
-                            "                              Those recipients will receive less litecoincash than you enter in their corresponding amount field.\n"
+                            "                              Those recipients will receive less neon than you enter in their corresponding amount field.\n"
                             "                              If no outputs are specified here, the sender pays the fee.\n"
                             "                                  [vout_index,...]\n"
                             "     \"replaceable\"            (boolean, optional) Marks this transaction as BIP125 replaceable.\n"
@@ -3670,7 +3670,7 @@ UniValue fundrawtransaction(const JSONRPCRequest& request)
             CTxDestination dest = DecodeDestination(options["changeAddress"].get_str());
 
             if (!IsValidDestination(dest)) {
-                throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "changeAddress must be a valid litecoincash address");
+                throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "changeAddress must be a valid neon address");
             }
 
             coinControl.destChange = dest;
@@ -4058,12 +4058,12 @@ extern UniValue rescanblockchain(const JSONRPCRequest& request);
 static const CRPCCommand commands[] =
 { //  category              name                        actor (function)           argNames
     //  --------------------- ------------------------    -----------------------  ----------
-    { "wallet",             "getbeecost",               &getbeecost,               {"height"} },                                            // LitecoinCash: Hive: Get bee cost for given height (defaults to tipheight)
-    { "wallet",             "createbees",               &createbees,               {"bee_count","community_contrib","honey_address"} },     // LitecoinCash: Hive: Create bee(s)
-    { "wallet",             "gethiveinfo",              &gethiveinfo,              {"include_dead","min_honey_confirms"} },                 // LitecoinCash: Hive: Get current hive info
-    { "wallet",             "getnetworkhiveinfo",       &getnetworkhiveinfo,       {"include_graph"} },                                     // LitecoinCash: Hive: Get current bee populations across whole network
-    { "wallet",             "getbeecreationtxid",       &getbeecreationtxid,       {"honey_txid"} },                                        // LitecoinCash: Hive: Return BCT tx id for a honey transaction in this wallet
-    { "wallet",             "getbctinfo",               &getbctinfo,               {"bct_txid","min_honey_confirms"} },                     // LitecoinCash: Hive: Return hive info for a single BCT
+    { "wallet",             "getbeecost",               &getbeecost,               {"height"} },                                            // Neon: Hive: Get bee cost for given height (defaults to tipheight)
+    { "wallet",             "createbees",               &createbees,               {"bee_count","community_contrib","honey_address"} },     // Neon: Hive: Create bee(s)
+    { "wallet",             "gethiveinfo",              &gethiveinfo,              {"include_dead","min_honey_confirms"} },                 // Neon: Hive: Get current hive info
+    { "wallet",             "getnetworkhiveinfo",       &getnetworkhiveinfo,       {"include_graph"} },                                     // Neon: Hive: Get current bee populations across whole network
+    { "wallet",             "getbeecreationtxid",       &getbeecreationtxid,       {"honey_txid"} },                                        // Neon: Hive: Return BCT tx id for a honey transaction in this wallet
+    { "wallet",             "getbctinfo",               &getbctinfo,               {"bct_txid","min_honey_confirms"} },                     // Neon: Hive: Return hive info for a single BCT
     { "rawtransactions",    "fundrawtransaction",       &fundrawtransaction,       {"hexstring","options","iswitness"} },
     { "hidden",             "resendwallettransactions", &resendwallettransactions, {} },
     { "wallet",             "abandontransaction",       &abandontransaction,       {"txid"} },

@@ -369,7 +369,7 @@ void CreateCreditAndSpend(const CKeyStore& keystore, const CScript& outscript, C
     inputm.vout.resize(1);
     inputm.vout[0].nValue = 1;
     inputm.vout[0].scriptPubKey = CScript();
-    bool ret = SignSignature(keystore, *output, inputm, 0, SIGHASH_ALL | SIGHASH_FORKID);   // LitecoinCash: Replay attack protection
+    bool ret = SignSignature(keystore, *output, inputm, 0, SIGHASH_ALL | SIGHASH_FORKID);   // Neon: Replay attack protection
     assert(ret == success);
     CDataStream ssin(SER_NETWORK, PROTOCOL_VERSION);
     ssin << inputm;
@@ -425,12 +425,12 @@ BOOST_AUTO_TEST_CASE(test_big_witness_transaction) {
     CScript scriptPubKey = CScript() << OP_0 << std::vector<unsigned char>(hash.begin(), hash.end());
 
     std::vector<int> sigHashes;
-    sigHashes.push_back(SIGHASH_NONE | SIGHASH_FORKID | SIGHASH_ANYONECANPAY);			// LitecoinCash: Replay attack protection
-    sigHashes.push_back(SIGHASH_SINGLE | SIGHASH_FORKID | SIGHASH_ANYONECANPAY);		// LitecoinCash: Replay attack protection
-    sigHashes.push_back(SIGHASH_ALL | SIGHASH_FORKID | SIGHASH_ANYONECANPAY);			// LitecoinCash: Replay attack protection
-    sigHashes.push_back(SIGHASH_NONE | SIGHASH_FORKID);									// LitecoinCash: Replay attack protection
-    sigHashes.push_back(SIGHASH_SINGLE | SIGHASH_FORKID);								// LitecoinCash: Replay attack protection
-    sigHashes.push_back(SIGHASH_ALL | SIGHASH_FORKID);									// LitecoinCash: Replay attack protection
+    sigHashes.push_back(SIGHASH_NONE | SIGHASH_FORKID | SIGHASH_ANYONECANPAY);			// Neon: Replay attack protection
+    sigHashes.push_back(SIGHASH_SINGLE | SIGHASH_FORKID | SIGHASH_ANYONECANPAY);		// Neon: Replay attack protection
+    sigHashes.push_back(SIGHASH_ALL | SIGHASH_FORKID | SIGHASH_ANYONECANPAY);			// Neon: Replay attack protection
+    sigHashes.push_back(SIGHASH_NONE | SIGHASH_FORKID);									// Neon: Replay attack protection
+    sigHashes.push_back(SIGHASH_SINGLE | SIGHASH_FORKID);								// Neon: Replay attack protection
+    sigHashes.push_back(SIGHASH_ALL | SIGHASH_FORKID);									// Neon: Replay attack protection
 
     // create a big transaction of 4500 inputs signed by the same key
     for(uint32_t ij = 0; ij < 4500; ij++) {

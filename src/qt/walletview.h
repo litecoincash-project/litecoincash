@@ -6,14 +6,14 @@
 #define BITCOIN_QT_WALLETVIEW_H
 
 #include <amount.h>
-#include <wallet/wallet.h>  // LitecoinCash: Key import helper
+#include <wallet/wallet.h>  // Neon: Key import helper
 
 #include <QStackedWidget>
 
 class BitcoinGUI;
 class ClientModel;
 class OverviewPage;
-class HiveDialog;     // LitecoinCash: Hive page
+class HiveDialog;     // Neon: Hive page
 class PlatformStyle;
 class ReceiveCoinsDialog;
 class SendCoinsDialog;
@@ -56,14 +56,14 @@ public:
 
     void showOutOfSyncWarning(bool fShow);
     
-    static void doRescan(CWallet* pwallet, int64_t startTime);  // LitecoinCash: Key import helper
+    static void doRescan(CWallet* pwallet, int64_t startTime);  // Neon: Key import helper
 
 private:
     ClientModel *clientModel;
     WalletModel *walletModel;
 
     OverviewPage *overviewPage;
-    HiveDialog *hivePage;     // LitecoinCash: Hive page
+    HiveDialog *hivePage;     // Neon: Hive page
     QWidget *transactionsPage;
     ReceiveCoinsDialog *receiveCoinsPage;
     SendCoinsDialog *sendCoinsPage;
@@ -85,7 +85,7 @@ public Q_SLOTS:
     /** Switch to send coins page */
     void gotoSendCoinsPage(QString addr = "");
 
-    // LitecoinCash: Hive: Switch to hive page
+    // Neon: Hive: Switch to hive page
     void gotoHivePage();
 
     /** Show Sign/Verify Message dialog and switch to sign message tab */
@@ -107,10 +107,10 @@ public Q_SLOTS:
     /** Ask for passphrase to unlock wallet temporarily */
     void unlockWallet();
 	
-	// LitecoinCash: Hive: Unlock wallet just for hive
+	// Neon: Hive: Unlock wallet just for hive
 	void unlockWalletHive();
 
-    // LitecoinCash: Key import helper
+    // Neon: Key import helper
     void importPrivateKey();
 
     /** Show used sending addresses */

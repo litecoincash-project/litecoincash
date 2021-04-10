@@ -383,7 +383,7 @@ QString TransactionTableModel::formatTxType(const TransactionRecord *wtx) const
     case TransactionRecord::Generated:
         return tr("Mined");
 
-    // LitecoinCash: Hive: Handle additional TransactionRecord types
+    // Neon: Hive: Handle additional TransactionRecord types
     case TransactionRecord::HiveBeeCreation:
         return tr("Hive bee creation");
     case TransactionRecord::HiveCommunityFund:
@@ -409,7 +409,7 @@ QVariant TransactionTableModel::txAddressDecoration(const TransactionRecord *wtx
     case TransactionRecord::SendToOther:
         return QIcon(":/icons/tx_output");
 
-    // LitecoinCash: Hive: Handle additional TransactionRecord types
+    // Neon: Hive: Handle additional TransactionRecord types
     case TransactionRecord::HiveBeeCreation:
         return QIcon(":/icons/tx_hive_bct");
     case TransactionRecord::HiveCommunityFund:
@@ -441,7 +441,7 @@ QString TransactionTableModel::formatTxToAddress(const TransactionRecord *wtx, b
     case TransactionRecord::SendToOther:
         return QString::fromStdString(wtx->address) + watchAddress;
 
-    // LitecoinCash: Hive: Handle additional TransactionRecord types
+    // Neon: Hive: Handle additional TransactionRecord types
     case TransactionRecord::HiveBeeCreation:
         return "Hive bee creation";
     case TransactionRecord::HiveHoney:

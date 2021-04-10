@@ -16,14 +16,14 @@ BEGIN
     BEGIN
         BLOCK "040904E4" // U.S. English - multilingual (hex)
         BEGIN
-            VALUE "CompanyName",        "Litecoin Cash"
-            VALUE "FileDescription",    "litecoincash-cli (JSON-RPC client for " PACKAGE_NAME ")"
+            VALUE "CompanyName",        "Neon"
+            VALUE "FileDescription",    "neon-cli (JSON-RPC client for " PACKAGE_NAME ")"
             VALUE "FileVersion",        VER_FILEVERSION_STR
-            VALUE "InternalName",       "litecoincash-cli"
+            VALUE "InternalName",       "neon-cli"
             VALUE "LegalCopyright",     COPYRIGHT_STR
             VALUE "LegalTrademarks1",   "Distributed under the MIT software license, see the accompanying file COPYING or http://www.opensource.org/licenses/mit-license.php."
-            VALUE "OriginalFilename",   "litecoincash-cli.exe"
-            VALUE "ProductName",        "litecoincash-cli"
+            VALUE "OriginalFilename",   "neon-cli.exe"
+            VALUE "ProductName",        "neon-cli"
             VALUE "ProductVersion",     VER_PRODUCTVERSION_STR
         END
     END

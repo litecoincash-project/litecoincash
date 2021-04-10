@@ -23,7 +23,7 @@ import socket
 import struct
 import time
 
-import litecoincash_scrypt
+import neon_scrypt
 from test_framework.siphash import siphash256
 from test_framework.util import hex_str_to_bytes, bytes_to_hex_str
 
@@ -546,7 +546,7 @@ class CBlockHeader():
             r += struct.pack("<I", self.nNonce)
             self.sha256 = uint256_from_str(hash256(r))
             self.hash = encode(hash256(r)[::-1], 'hex_codec').decode('ascii')
-            self.scrypt256 = uint256_from_str(litecoincash_scrypt.getPoWHash(r))
+            self.scrypt256 = uint256_from_str(neon_scrypt.getPoWHash(r))
 
     def rehash(self):
         self.sha256 = None

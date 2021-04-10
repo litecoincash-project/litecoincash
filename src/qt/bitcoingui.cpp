@@ -83,15 +83,15 @@ BitcoinGUI::BitcoinGUI(const PlatformStyle *_platformStyle, const NetworkStyle *
     labelWalletEncryptionIcon(0),
     labelWalletHDStatusIcon(0),
     connectionsControl(0),
-    hiveStatusIcon(0),          // LitecoinCash: Hive status icon
+    hiveStatusIcon(0),          // Neon: Hive status icon
     labelBlocksIcon(0),
     progressBarLabel(0),
     progressBar(0),
     progressDialog(0),
     appMenuBar(0),
     overviewAction(0),
-    hiveAction(0),              // LitecoinCash: Hive page
-    importPrivateKeyAction(0),  // LitecoinCash: Key import helper
+    hiveAction(0),              // Neon: Hive page
+    importPrivateKeyAction(0),  // Neon: Key import helper
     historyAction(0),
     quitAction(0),
     sendCoinsAction(0),
@@ -128,7 +128,7 @@ BitcoinGUI::BitcoinGUI(const PlatformStyle *_platformStyle, const NetworkStyle *
         move(QApplication::desktop()->availableGeometry().center() - frameGeometry().center());
     }
 
-    QString windowTitle = tr("Litecoin Cash - "); // LitecoinCash: Don't use package name here; we want coin name with a space in window titles.
+    QString windowTitle = tr("Neon - "); // Neon: Don't use package name here; we want coin name with a space in window titles.
 #ifdef ENABLE_WALLET
     enableWallet = WalletModel::isWalletEnabled();
 #endif // ENABLE_WALLET
@@ -203,7 +203,7 @@ BitcoinGUI::BitcoinGUI(const PlatformStyle *_platformStyle, const NetworkStyle *
     labelWalletEncryptionIcon = new QLabel();
     labelWalletHDStatusIcon = new QLabel();
     connectionsControl = new GUIUtil::ClickableLabel();
-    hiveStatusIcon = new GUIUtil::ClickableLabel();                         // LitecoinCash: Hive status icon
+    hiveStatusIcon = new GUIUtil::ClickableLabel();                         // Neon: Hive status icon
     labelBlocksIcon = new GUIUtil::ClickableLabel();
     if(enableWallet)
     {
@@ -216,8 +216,8 @@ BitcoinGUI::BitcoinGUI(const PlatformStyle *_platformStyle, const NetworkStyle *
     frameBlocksLayout->addStretch();
     frameBlocksLayout->addWidget(connectionsControl);
     frameBlocksLayout->addStretch();
-    frameBlocksLayout->addWidget(hiveStatusIcon);        // LitecoinCash: Hive status icon
-    frameBlocksLayout->addStretch();                     // LitecoinCash: Hive status icon
+    frameBlocksLayout->addWidget(hiveStatusIcon);        // Neon: Hive status icon
+    frameBlocksLayout->addStretch();                     // Neon: Hive status icon
     frameBlocksLayout->addWidget(labelBlocksIcon);
     frameBlocksLayout->addStretch();
 
@@ -252,7 +252,7 @@ BitcoinGUI::BitcoinGUI(const PlatformStyle *_platformStyle, const NetworkStyle *
 
     connect(connectionsControl, SIGNAL(clicked(QPoint)), this, SLOT(toggleNetworkActive()));
 
-    // LitecoinCash: Hive: Clicking on hive status icon takes user to Hive tab
+    // Neon: Hive: Clicking on hive status icon takes user to Hive tab
     connect(hiveStatusIcon, SIGNAL(clicked(QPoint)), this, SLOT(gotoHivePage()));
 
     modalOverlay = new ModalOverlay(this->centralWidget());
@@ -296,7 +296,7 @@ void BitcoinGUI::createActions()
     tabGroup->addAction(overviewAction);
 
     sendCoinsAction = new QAction(platformStyle->SingleColorIcon(":/icons/send"), tr("&Send"), this);
-    sendCoinsAction->setStatusTip(tr("Send coins to a LitecoinCash address"));
+    sendCoinsAction->setStatusTip(tr("Send coins to a Neon address"));
     sendCoinsAction->setToolTip(sendCoinsAction->statusTip());
     sendCoinsAction->setCheckable(true);
     sendCoinsAction->setShortcut(QKeySequence(Qt::ALT + Qt::Key_2));
@@ -307,7 +307,7 @@ void BitcoinGUI::createActions()
     sendCoinsMenuAction->setToolTip(sendCoinsMenuAction->statusTip());
 
     receiveCoinsAction = new QAction(platformStyle->SingleColorIcon(":/icons/receiving_addresses"), tr("&Receive"), this);
-    receiveCoinsAction->setStatusTip(tr("Request payments (generates QR codes and litecoincash: URIs)"));
+    receiveCoinsAction->setStatusTip(tr("Request payments (generates QR codes and neon: URIs)"));
     receiveCoinsAction->setToolTip(receiveCoinsAction->statusTip());
     receiveCoinsAction->setCheckable(true);
     receiveCoinsAction->setShortcut(QKeySequence(Qt::ALT + Qt::Key_3));
@@ -324,7 +324,7 @@ void BitcoinGUI::createActions()
     historyAction->setShortcut(QKeySequence(Qt::ALT + Qt::Key_4));
     tabGroup->addAction(historyAction);
 
-    // LitecoinCash: Hive page
+    // Neon: Hive page
     hiveAction = new QAction(platformStyle->SingleColorIcon(":/icons/bee"), tr("The &Hive"), this);
     hiveAction->setStatusTip(tr("Hive Mining center"));
     hiveAction->setToolTip(hiveAction->statusTip());
@@ -337,8 +337,8 @@ void BitcoinGUI::createActions()
     // can be triggered from the tray menu, and need to show the GUI to be useful.
     connect(overviewAction, SIGNAL(triggered()), this, SLOT(showNormalIfMinimized()));
     connect(overviewAction, SIGNAL(triggered()), this, SLOT(gotoOverviewPage()));
-    connect(hiveAction, SIGNAL(triggered()), this, SLOT(showNormalIfMinimized()));  // LitecoinCash: Hive page
-    connect(hiveAction, SIGNAL(triggered()), this, SLOT(gotoHivePage()));           // LitecoinCash: Hive page
+    connect(hiveAction, SIGNAL(triggered()), this, SLOT(showNormalIfMinimized()));  // Neon: Hive page
+    connect(hiveAction, SIGNAL(triggered()), this, SLOT(gotoHivePage()));           // Neon: Hive page
     connect(sendCoinsAction, SIGNAL(triggered()), this, SLOT(showNormalIfMinimized()));
     connect(sendCoinsAction, SIGNAL(triggered()), this, SLOT(gotoSendCoinsPage()));
     connect(sendCoinsMenuAction, SIGNAL(triggered()), this, SLOT(showNormalIfMinimized()));
@@ -355,7 +355,7 @@ void BitcoinGUI::createActions()
     quitAction->setStatusTip(tr("Quit application"));
     quitAction->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_Q));
     quitAction->setMenuRole(QAction::QuitRole);
-    aboutAction = new QAction(platformStyle->TextColorIcon(":/icons/about"), tr("&About Litecoin Cash"), this); // LitecoinCash: Don't use package name here; we want coin name with a space in window titles.
+    aboutAction = new QAction(platformStyle->TextColorIcon(":/icons/about"), tr("&About Neon"), this); // Neon: Don't use package name here; we want coin name with a space in window titles.
     aboutAction->setStatusTip(tr("Show information about %1").arg(tr(PACKAGE_NAME)));
     aboutAction->setMenuRole(QAction::AboutRole);
     aboutAction->setEnabled(false);
@@ -377,9 +377,9 @@ void BitcoinGUI::createActions()
     changePassphraseAction = new QAction(platformStyle->TextColorIcon(":/icons/key"), tr("&Change Passphrase..."), this);
     changePassphraseAction->setStatusTip(tr("Change the passphrase used for wallet encryption"));
     signMessageAction = new QAction(platformStyle->TextColorIcon(":/icons/edit"), tr("Sign &message..."), this);
-    signMessageAction->setStatusTip(tr("Sign messages with your LitecoinCash addresses to prove you own them"));
+    signMessageAction->setStatusTip(tr("Sign messages with your Neon addresses to prove you own them"));
     verifyMessageAction = new QAction(platformStyle->TextColorIcon(":/icons/verify"), tr("&Verify message..."), this);
-    verifyMessageAction->setStatusTip(tr("Verify messages to ensure they were signed with specified LitecoinCash addresses"));
+    verifyMessageAction->setStatusTip(tr("Verify messages to ensure they were signed with specified Neon addresses"));
 
     openRPCConsoleAction = new QAction(platformStyle->TextColorIcon(":/icons/debugwindow"), tr("&Debug window"), this);
     openRPCConsoleAction->setStatusTip(tr("Open debugging and diagnostic console"));
@@ -392,15 +392,15 @@ void BitcoinGUI::createActions()
     usedReceivingAddressesAction->setStatusTip(tr("Show the list of used receiving addresses and labels"));
 
     openAction = new QAction(platformStyle->TextColorIcon(":/icons/open"), tr("Open &URI..."), this);
-    openAction->setStatusTip(tr("Open a litecoincash: URI or payment request"));
+    openAction->setStatusTip(tr("Open a neon: URI or payment request"));
 
     showHelpMessageAction = new QAction(platformStyle->TextColorIcon(":/icons/info"), tr("&Command-line options"), this);
     showHelpMessageAction->setMenuRole(QAction::NoRole);
-    showHelpMessageAction->setStatusTip(tr("Show the %1 help message to get a list with possible LitecoinCash command-line options").arg(tr(PACKAGE_NAME)));
+    showHelpMessageAction->setStatusTip(tr("Show the %1 help message to get a list with possible Neon command-line options").arg(tr(PACKAGE_NAME)));
 
-    // LitecoinCash: Key import helper
+    // Neon: Key import helper
     importPrivateKeyAction = new QAction(platformStyle->TextColorIcon(":/icons/key"), tr("&Import private key..."), this);
-    importPrivateKeyAction->setToolTip(tr("Import a Litecoin or LitecoinCash private key"));
+    importPrivateKeyAction->setToolTip(tr("Import a Litecoin or Neon private key"));
 
     connect(quitAction, SIGNAL(triggered()), qApp, SLOT(quit()));
     connect(aboutAction, SIGNAL(triggered()), this, SLOT(aboutClicked()));
@@ -423,7 +423,7 @@ void BitcoinGUI::createActions()
         connect(usedSendingAddressesAction, SIGNAL(triggered()), walletFrame, SLOT(usedSendingAddresses()));
         connect(usedReceivingAddressesAction, SIGNAL(triggered()), walletFrame, SLOT(usedReceivingAddresses()));
         connect(openAction, SIGNAL(triggered()), this, SLOT(openClicked()));
-        connect(importPrivateKeyAction, SIGNAL(triggered()), walletFrame, SLOT(importPrivateKey()));    // LitecoinCash: Key import helper
+        connect(importPrivateKeyAction, SIGNAL(triggered()), walletFrame, SLOT(importPrivateKey()));    // Neon: Key import helper
     }
 #endif // ENABLE_WALLET
 
@@ -453,8 +453,8 @@ void BitcoinGUI::createMenuBar()
         file->addAction(usedSendingAddressesAction);
         file->addAction(usedReceivingAddressesAction);
         file->addSeparator();
-        file->addAction(importPrivateKeyAction);    // LitecoinCash: Key import helper
-        file->addSeparator();                       // LitecoinCash: Key import helper
+        file->addAction(importPrivateKeyAction);    // Neon: Key import helper
+        file->addSeparator();                       // Neon: Key import helper
     }
     file->addAction(quitAction);
 
@@ -490,7 +490,7 @@ void BitcoinGUI::createToolBars()
         toolbar->addAction(sendCoinsAction);
         toolbar->addAction(receiveCoinsAction);
         toolbar->addAction(historyAction);
-        toolbar->addAction(hiveAction);     // LitecoinCash: Hive page
+        toolbar->addAction(hiveAction);     // Neon: Hive page
         overviewAction->setChecked(true);
     }
 }
@@ -598,8 +598,8 @@ void BitcoinGUI::setWalletActionsEnabled(bool enabled)
     usedSendingAddressesAction->setEnabled(enabled);
     usedReceivingAddressesAction->setEnabled(enabled);
     openAction->setEnabled(enabled);
-    hiveAction->setEnabled(enabled);                // LitecoinCash: Hive page
-    importPrivateKeyAction->setEnabled(enabled);    // LitecoinCash: Key import helper
+    hiveAction->setEnabled(enabled);                // Neon: Hive page
+    importPrivateKeyAction->setEnabled(enabled);    // Neon: Key import helper
 }
 
 void BitcoinGUI::createTrayIcon(const NetworkStyle *networkStyle)
@@ -716,7 +716,7 @@ void BitcoinGUI::gotoOverviewPage()
     if (walletFrame) walletFrame->gotoOverviewPage();
 }
 
-// LitecoinCash: Hive: Switch to hive page
+// Neon: Hive: Switch to hive page
 void BitcoinGUI::gotoHivePage()
 {
     hiveAction->setChecked(true);
@@ -768,7 +768,7 @@ void BitcoinGUI::updateNetworkState()
     QString tooltip;
 
     if (clientModel->getNetworkActive()) {
-        tooltip = tr("%n active connection(s) to LitecoinCash network", "", count) + QString(".<br>") + tr("Click to disable network activity.");
+        tooltip = tr("%n active connection(s) to Neon network", "", count) + QString(".<br>") + tr("Click to disable network activity.");
     } else {
         tooltip = tr("Network activity disabled.") + QString("<br>") + tr("Click to enable network activity again.");
         icon = ":/icons/network_disabled";
@@ -781,7 +781,7 @@ void BitcoinGUI::updateNetworkState()
     connectionsControl->setPixmap(platformStyle->SingleColorIcon(icon).pixmap(STATUSBAR_ICONSIZE,STATUSBAR_ICONSIZE));
 }
 
-// LitecoinCash: Hive: Update the hive status icon
+// Neon: Hive: Update the hive status icon
 void BitcoinGUI::updateHiveStatusIcon(QString icon, QString tooltip) {
     QPixmap pixmap;
     pixmap.load(icon);
@@ -920,7 +920,7 @@ void BitcoinGUI::setNumBlocks(int count, const QDateTime& blockDate, double nVer
 
 void BitcoinGUI::message(const QString &title, const QString &message, unsigned int style, bool *ret)
 {
-    QString strTitle = tr("Litecoin Cash"); // default title
+    QString strTitle = tr("Neon"); // default title
     // Default to information icon
     int nMBoxIcon = QMessageBox::Information;
     int nNotifyIcon = Notificator::Information;

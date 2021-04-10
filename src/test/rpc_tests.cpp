@@ -145,7 +145,7 @@ BOOST_AUTO_TEST_CASE(rpc_createraw_op_return)
 
 BOOST_AUTO_TEST_CASE(rpc_format_monetary_values)
 {
-    // LitecoinCash: Fix tests for coinscale
+    // Neon: Fix tests for coinscale
     BOOST_CHECK(ValueFromAmount(0LL).write() == "0.0000000");
     BOOST_CHECK(ValueFromAmount(1LL).write() == "0.0000001");
     BOOST_CHECK(ValueFromAmount(17622195LL).write() == "1.7622195");
@@ -193,28 +193,28 @@ static UniValue ValueFromString(const std::string &str)
 
 BOOST_AUTO_TEST_CASE(rpc_parse_monetary_values)
 {
-    BOOST_CHECK_THROW(AmountFromValue(ValueFromString("-0.0000001")), UniValue);					// LitecoinCash: Coinscale
-    BOOST_CHECK_EQUAL(AmountFromValue(ValueFromString("0")), 0LL);									// LitecoinCash: Coinscale
-    BOOST_CHECK_EQUAL(AmountFromValue(ValueFromString("0.0000000")), 0LL);							// LitecoinCash: Coinscale
-    BOOST_CHECK_EQUAL(AmountFromValue(ValueFromString("0.0000001")), 1LL);							// LitecoinCash: Coinscale
-    BOOST_CHECK_EQUAL(AmountFromValue(ValueFromString("0.1762219")), 1762219LL);					// LitecoinCash: Coinscale
-    BOOST_CHECK_EQUAL(AmountFromValue(ValueFromString("0.5")), 5000000LL);							// LitecoinCash: Coinscale
-    BOOST_CHECK_EQUAL(AmountFromValue(ValueFromString("0.5000000")), 5000000LL);					// LitecoinCash: Coinscale
-    BOOST_CHECK_EQUAL(AmountFromValue(ValueFromString("0.8989898")), 8989898LL);					// LitecoinCash: Coinscale
-    BOOST_CHECK_EQUAL(AmountFromValue(ValueFromString("1.0000000")), 10000000LL);					// LitecoinCash: Coinscale
-    BOOST_CHECK_EQUAL(AmountFromValue(ValueFromString("20999999.999999")), 209999999999990LL);		// LitecoinCash: Coinscale
-    BOOST_CHECK_EQUAL(AmountFromValue(ValueFromString("20999999.9999999")), 209999999999999LL);		// LitecoinCash: Coinscale
+    BOOST_CHECK_THROW(AmountFromValue(ValueFromString("-0.0000001")), UniValue);					// Neon: Coinscale
+    BOOST_CHECK_EQUAL(AmountFromValue(ValueFromString("0")), 0LL);									// Neon: Coinscale
+    BOOST_CHECK_EQUAL(AmountFromValue(ValueFromString("0.0000000")), 0LL);							// Neon: Coinscale
+    BOOST_CHECK_EQUAL(AmountFromValue(ValueFromString("0.0000001")), 1LL);							// Neon: Coinscale
+    BOOST_CHECK_EQUAL(AmountFromValue(ValueFromString("0.1762219")), 1762219LL);					// Neon: Coinscale
+    BOOST_CHECK_EQUAL(AmountFromValue(ValueFromString("0.5")), 5000000LL);							// Neon: Coinscale
+    BOOST_CHECK_EQUAL(AmountFromValue(ValueFromString("0.5000000")), 5000000LL);					// Neon: Coinscale
+    BOOST_CHECK_EQUAL(AmountFromValue(ValueFromString("0.8989898")), 8989898LL);					// Neon: Coinscale
+    BOOST_CHECK_EQUAL(AmountFromValue(ValueFromString("1.0000000")), 10000000LL);					// Neon: Coinscale
+    BOOST_CHECK_EQUAL(AmountFromValue(ValueFromString("20999999.999999")), 209999999999990LL);		// Neon: Coinscale
+    BOOST_CHECK_EQUAL(AmountFromValue(ValueFromString("20999999.9999999")), 209999999999999LL);		// Neon: Coinscale
 
-    BOOST_CHECK_EQUAL(AmountFromValue(ValueFromString("1e-7")), COIN/10000000);		// LitecoinCash: Coinscale
-    BOOST_CHECK_EQUAL(AmountFromValue(ValueFromString("0.1e-6")), COIN/10000000);	// LitecoinCash: Coinscale
-    BOOST_CHECK_EQUAL(AmountFromValue(ValueFromString("0.01e-5")), COIN/10000000);	// LitecoinCash: Coinscale
-    BOOST_CHECK_EQUAL(AmountFromValue(ValueFromString("0.000000000000000000000000000000000000000000000000000000000000000000000000001e+68")), COIN/10000000);	// LitecoinCash: Coinscale
+    BOOST_CHECK_EQUAL(AmountFromValue(ValueFromString("1e-7")), COIN/10000000);		// Neon: Coinscale
+    BOOST_CHECK_EQUAL(AmountFromValue(ValueFromString("0.1e-6")), COIN/10000000);	// Neon: Coinscale
+    BOOST_CHECK_EQUAL(AmountFromValue(ValueFromString("0.01e-5")), COIN/10000000);	// Neon: Coinscale
+    BOOST_CHECK_EQUAL(AmountFromValue(ValueFromString("0.000000000000000000000000000000000000000000000000000000000000000000000000001e+68")), COIN/10000000);	// Neon: Coinscale
     BOOST_CHECK_EQUAL(AmountFromValue(ValueFromString("10000000000000000000000000000000000000000000000000000000000000000e-64")), COIN);
     BOOST_CHECK_EQUAL(AmountFromValue(ValueFromString("0.000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000e64")), COIN);
 
     BOOST_CHECK_THROW(AmountFromValue(ValueFromString("1e-9")), UniValue); //should fail
     BOOST_CHECK_THROW(AmountFromValue(ValueFromString("0.000000019")), UniValue); //should fail
-    BOOST_CHECK_EQUAL(AmountFromValue(ValueFromString("0.0000001000000")), 1LL); //should pass, cut trailing 0 	// LitecoinCash: Coinscale
+    BOOST_CHECK_EQUAL(AmountFromValue(ValueFromString("0.0000001000000")), 1LL); //should pass, cut trailing 0 	// Neon: Coinscale
     BOOST_CHECK_THROW(AmountFromValue(ValueFromString("19e-9")), UniValue); //should fail
     BOOST_CHECK_EQUAL(AmountFromValue(ValueFromString("0.19e-5")), 19); //should pass, leading 0 is present		// LiteconCash: Coinscale
 
@@ -233,7 +233,7 @@ BOOST_AUTO_TEST_CASE(json_parse_errors)
     BOOST_CHECK_EQUAL(ParseNonRFCJSONValue("1.0 ").get_real(), 1.0);
 
     BOOST_CHECK_THROW(AmountFromValue(ParseNonRFCJSONValue(".19e-6")), std::runtime_error); //should fail, missing leading 0, therefore invalid JSON
-    BOOST_CHECK_EQUAL(AmountFromValue(ParseNonRFCJSONValue("0.0000000000000000000000000000000000001e+30 ")), 1);	// LitecoinCash: Coinscale
+    BOOST_CHECK_EQUAL(AmountFromValue(ParseNonRFCJSONValue("0.0000000000000000000000000000000000001e+30 ")), 1);	// Neon: Coinscale
     // Invalid, initial garbage
     BOOST_CHECK_THROW(ParseNonRFCJSONValue("[1.0"), std::runtime_error);
     BOOST_CHECK_THROW(ParseNonRFCJSONValue("a1.0"), std::runtime_error);

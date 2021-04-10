@@ -4,4 +4,4 @@ if [ -f ./.fullbuild ]; then
         make clean;
         ./autogen.sh && CONFIG_SITE=$PWD/depends/x86_64-pc-linux-gnu/share/config.site ./configure --prefix=/;
 fi
-make -j 24 && strip src/qt/litecoincash-qt
+make -j 24 && strip src/qt/neon-qt

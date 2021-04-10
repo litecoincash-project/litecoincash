@@ -11,7 +11,7 @@
 #include <qt/optionsmodel.h>
 #include <qt/paymentserver.h>
 #include <qt/recentrequeststablemodel.h>
-#include <qt/hivetablemodel.h>  // LitecoinCash: Hive
+#include <qt/hivetablemodel.h>  // Neon: Hive
 #include <qt/sendcoinsdialog.h>
 #include <qt/transactiontablemodel.h>
 
@@ -37,13 +37,13 @@
 #include <QSet>
 #include <QTimer>
 
-#include <policy/policy.h>  // LitecoinCash: Hive: For GetVirtualTransactionSize
+#include <policy/policy.h>  // Neon: Hive: For GetVirtualTransactionSize
 
 WalletModel::WalletModel(const PlatformStyle *platformStyle, CWallet *_wallet, OptionsModel *_optionsModel, QObject *parent) :
     QObject(parent), wallet(_wallet), optionsModel(_optionsModel), addressTableModel(0),
     transactionTableModel(0),
     recentRequestsTableModel(0),
-    hiveTableModel(0),  // LitecoinCash: Hive
+    hiveTableModel(0),  // Neon: Hive
     cachedBalance(0), cachedUnconfirmedBalance(0), cachedImmatureBalance(0),
     cachedEncryptionStatus(Unencrypted),
     cachedNumBlocks(0)
@@ -54,7 +54,7 @@ WalletModel::WalletModel(const PlatformStyle *platformStyle, CWallet *_wallet, O
     addressTableModel = new AddressTableModel(wallet, this);
     transactionTableModel = new TransactionTableModel(platformStyle, wallet, this);
     recentRequestsTableModel = new RecentRequestsTableModel(wallet, this);
-    hiveTableModel = new HiveTableModel(platformStyle, wallet, this);  // LitecoinCash: Hive
+    hiveTableModel = new HiveTableModel(platformStyle, wallet, this);  // Neon: Hive
 
     // This timer will be fired repeatedly to update the balance
     pollTimer = new QTimer(this);
@@ -396,13 +396,13 @@ RecentRequestsTableModel *WalletModel::getRecentRequestsTableModel()
     return recentRequestsTableModel;
 }
 
-// LitecoinCash: Hive
+// Neon: Hive
 HiveTableModel *WalletModel::getHiveTableModel()
 {
     return hiveTableModel;
 }
 
-// LitecoinCash: Hive
+// Neon: Hive
 bool WalletModel::isHiveEnabled()
 {
     if (!wallet)
@@ -542,7 +542,7 @@ WalletModel::UnlockContext WalletModel::requestUnlock(bool hiveOnly)
 {
     bool was_locked = getEncryptionStatus() == Locked;
 
-    // LitecoinCash: Hive: Support unlock for hive mining only
+    // Neon: Hive: Support unlock for hive mining only
     if ((!was_locked) && fWalletUnlockHiveMiningOnly)
     {
        setWalletLocked(true);
@@ -560,7 +560,7 @@ WalletModel::UnlockContext WalletModel::requestUnlock(bool hiveOnly)
     // If wallet is still locked, unlock was failed or cancelled, mark context as invalid
     bool valid = getEncryptionStatus() != Locked;
 
-    return UnlockContext(this, valid, was_locked && !fWalletUnlockHiveMiningOnly); // LitecoinCash: Hive: Support unlock for hive mining only
+    return UnlockContext(this, valid, was_locked && !fWalletUnlockHiveMiningOnly); // Neon: Hive: Support unlock for hive mining only
 }
 
 WalletModel::UnlockContext::UnlockContext(WalletModel *_wallet, bool _valid, bool _relock):
@@ -661,7 +661,7 @@ void WalletModel::loadReceiveRequests(std::vector<std::string>& vReceiveRequests
     vReceiveRequests = wallet->GetDestValues("rr"); // receive request
 }
 
-// LitecoinCash: Hive
+// Neon: Hive
 void WalletModel::getBCTs(std::vector<CBeeCreationTransactionInfo>& vBeeCreationTransactions, bool includeDeadBees) {
     if (wallet) {
         LOCK(wallet->cs_wallet);
@@ -669,7 +669,7 @@ void WalletModel::getBCTs(std::vector<CBeeCreationTransactionInfo>& vBeeCreation
     }
 }
 
-// LitecoinCash: Hive
+// Neon: Hive
 bool WalletModel::createBees(int beeCount, bool communityContrib, QWidget *parent, double beePopIndex) {
     wallet->BlockUntilSyncedToCurrentChain();
 

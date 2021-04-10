@@ -51,7 +51,7 @@ extern void TxToJSON(const CTransaction& tx, const uint256 hashBlock, UniValue& 
 /* Calculate the difficulty for a given block index,
  * or the block index of the given chain.
  */
-// LitecoinCash: Hive: Optional getHiveDifficulty param
+// Neon: Hive: Optional getHiveDifficulty param
 double GetDifficulty(const CChain& chain, const CBlockIndex* blockindex, bool getHiveDifficulty = false)
 {
     if (blockindex == nullptr)
@@ -62,17 +62,17 @@ double GetDifficulty(const CChain& chain, const CBlockIndex* blockindex, bool ge
             blockindex = chain.Tip();
     }
 
-    // LitecoinCash: Hive: If tip is hivemined and we want PoW, step back one (Hive blocks always follow a PoW block)
+    // Neon: Hive: If tip is hivemined and we want PoW, step back one (Hive blocks always follow a PoW block)
     const Consensus::Params& consensusParams = Params().GetConsensus();
     if (!getHiveDifficulty) {
-        // LitecoinCash: Hive 1.1: Allow there to be multiple hive blocks in the way
+        // Neon: Hive 1.1: Allow there to be multiple hive blocks in the way
         while (blockindex->GetBlockHeader().IsHiveMined(consensusParams)) {
             assert (blockindex->pprev);
             blockindex = blockindex->pprev;
         }
     }
 
-    // LitecoinCash: Hive: If tip is PoW and we want hivemined, step back until we find a Hive block
+    // Neon: Hive: If tip is PoW and we want hivemined, step back until we find a Hive block
     if (getHiveDifficulty) {
         while (!blockindex->GetBlockHeader().IsHiveMined(consensusParams)) {
             if (!blockindex->pprev || blockindex->nHeight < consensusParams.minHiveCheckBlock) {   // Ran out of blocks without finding a Hive block? Return min target
@@ -102,7 +102,7 @@ double GetDifficulty(const CChain& chain, const CBlockIndex* blockindex, bool ge
     return dDiff;
 }
 
-// LitecoinCash: Hive: Pass through optional getHiveDifficulty param
+// Neon: Hive: Pass through optional getHiveDifficulty param
 double GetDifficulty(const CBlockIndex* blockindex, bool getHiveDifficulty)
 {
     return GetDifficulty(chainActive, blockindex, getHiveDifficulty);
@@ -117,7 +117,7 @@ UniValue blockheaderToJSON(const CBlockIndex* blockindex)
     // Only report confirmations if the block is on the main chain
     if (chainActive.Contains(blockindex))
         confirmations = chainActive.Height() - blockindex->nHeight + 1;
-    result.push_back(Pair("type", blockindex->GetBlockHeader().IsHiveMined(Params().GetConsensus()) ? "hive" : "pow")); // LitecoinCash: Hive 1.1: Show block type in JSON
+    result.push_back(Pair("type", blockindex->GetBlockHeader().IsHiveMined(Params().GetConsensus()) ? "hive" : "pow")); // Neon: Hive 1.1: Show block type in JSON
     result.push_back(Pair("confirmations", confirmations));
     result.push_back(Pair("height", blockindex->nHeight));
     result.push_back(Pair("version", blockindex->nVersion));
@@ -128,7 +128,7 @@ UniValue blockheaderToJSON(const CBlockIndex* blockindex)
     result.push_back(Pair("nonce", (uint64_t)blockindex->nNonce));
     result.push_back(Pair("bits", strprintf("%08x", blockindex->nBits)));
     result.push_back(Pair("difficulty", GetDifficulty(blockindex)));
-    result.push_back(Pair("hivedifficulty", GetDifficulty(blockindex, true)));  // LitecoinCash: Hive
+    result.push_back(Pair("hivedifficulty", GetDifficulty(blockindex, true)));  // Neon: Hive
     result.push_back(Pair("chainwork", blockindex->nChainWork.GetHex()));
 
     if (blockindex->pprev)
@@ -148,7 +148,7 @@ UniValue blockToJSON(const CBlock& block, const CBlockIndex* blockindex, bool tx
     // Only report confirmations if the block is on the main chain
     if (chainActive.Contains(blockindex))
         confirmations = chainActive.Height() - blockindex->nHeight + 1;
-    result.push_back(Pair("type", block.GetBlockHeader().IsHiveMined(Params().GetConsensus()) ? "hive" : "pow")); // LitecoinCash: Hive 1.1: Show block type in JSON
+    result.push_back(Pair("type", block.GetBlockHeader().IsHiveMined(Params().GetConsensus()) ? "hive" : "pow")); // Neon: Hive 1.1: Show block type in JSON
     result.push_back(Pair("confirmations", confirmations));
     result.push_back(Pair("strippedsize", (int)::GetSerializeSize(block, SER_NETWORK, PROTOCOL_VERSION | SERIALIZE_TRANSACTION_NO_WITNESS)));
     result.push_back(Pair("size", (int)::GetSerializeSize(block, SER_NETWORK, PROTOCOL_VERSION)));
@@ -175,7 +175,7 @@ UniValue blockToJSON(const CBlock& block, const CBlockIndex* blockindex, bool tx
     result.push_back(Pair("nonce", (uint64_t)block.nNonce));
     result.push_back(Pair("bits", strprintf("%08x", block.nBits)));
     result.push_back(Pair("difficulty", GetDifficulty(blockindex)));
-    result.push_back(Pair("hivedifficulty", GetDifficulty(blockindex, true)));  // LitecoinCash: Hive
+    result.push_back(Pair("hivedifficulty", GetDifficulty(blockindex, true)));  // Neon: Hive
     result.push_back(Pair("chainwork", blockindex->nChainWork.GetHex()));
 
     if (blockindex->pprev)
@@ -384,7 +384,7 @@ UniValue getdifficulty(const JSONRPCRequest& request)
     return GetDifficulty();
 }
 
-// LitecoinCash: Hive: Get hive difficulty
+// Neon: Hive: Get hive difficulty
 UniValue gethivedifficulty(const JSONRPCRequest& request)
 {
     if (request.fHelp || request.params.size() != 0)
@@ -721,7 +721,7 @@ UniValue getblockheader(const JSONRPCRequest& request)
             "\nResult (for verbose = true):\n"
             "{\n"
             "  \"hash\" : \"hash\",     (string) the block hash (same as provided)\n"
-            "  \"type\" : \"hive\"|\"pow\", (string) Indicates whether this block is hive or pow mined\n"   // LitecoinCash: Hive 1.1: Include block type            
+            "  \"type\" : \"hive\"|\"pow\", (string) Indicates whether this block is hive or pow mined\n"   // Neon: Hive 1.1: Include block type            
             "  \"confirmations\" : n,   (numeric) The number of confirmations, or -1 if the block is not on the main chain\n"
             "  \"height\" : n,          (numeric) The block height or index\n"
             "  \"version\" : n,         (numeric) The block version\n"
@@ -732,7 +732,7 @@ UniValue getblockheader(const JSONRPCRequest& request)
             "  \"nonce\" : n,           (numeric) The nonce\n"
             "  \"bits\" : \"1d00ffff\", (string) The bits\n"
             "  \"difficulty\" : x.xxx,  (numeric) The pow difficulty\n"
-            "  \"hivedifficulty\" : x.xxx,  (numeric) The hive difficulty\n"    // LitecoinCash: Hive 1.1: Include hive diff
+            "  \"hivedifficulty\" : x.xxx,  (numeric) The hive difficulty\n"    // Neon: Hive 1.1: Include hive diff
             "  \"chainwork\" : \"0000...1f3\"     (string) Expected number of hashes required to produce the current chain (in hex)\n"
             "  \"previousblockhash\" : \"hash\",  (string) The hash of the previous block\n"
             "  \"nextblockhash\" : \"hash\",      (string) The hash of the next block\n"
@@ -785,7 +785,7 @@ UniValue getblock(const JSONRPCRequest& request)
             "\nResult (for verbosity = 1):\n"
             "{\n"
             "  \"hash\" : \"hash\",     (string) the block hash (same as provided)\n"
-            "  \"type\" : \"hive\"|\"pow\", (string) Indicates whether this block is hive or pow mined\n"   // LitecoinCash: Hive 1.1: Include block type
+            "  \"type\" : \"hive\"|\"pow\", (string) Indicates whether this block is hive or pow mined\n"   // Neon: Hive 1.1: Include block type
             "  \"confirmations\" : n,   (numeric) The number of confirmations, or -1 if the block is not on the main chain\n"
             "  \"size\" : n,            (numeric) The block size\n"
             "  \"strippedsize\" : n,    (numeric) The block size excluding witness data\n"
@@ -803,7 +803,7 @@ UniValue getblock(const JSONRPCRequest& request)
             "  \"nonce\" : n,           (numeric) The nonce\n"
             "  \"bits\" : \"1d00ffff\", (string) The bits\n"
             "  \"difficulty\" : x.xxx,  (numeric) The pow difficulty\n"
-            "  \"hivedifficulty\" : x.xxx,  (numeric) The hive difficulty\n"    // LitecoinCash: Hive 1.1: Include hive diff
+            "  \"hivedifficulty\" : x.xxx,  (numeric) The hive difficulty\n"    // Neon: Hive 1.1: Include hive diff
             "  \"chainwork\" : \"xxxx\",  (string) Expected number of hashes required to produce the chain up to this block (in hex)\n"
             "  \"previousblockhash\" : \"hash\",  (string) The hash of the previous block\n"
             "  \"nextblockhash\" : \"hash\"       (string) The hash of the next block\n"
@@ -1045,8 +1045,8 @@ UniValue gettxout(const JSONRPCRequest& request)
             "     \"hex\" : \"hex\",        (string) \n"
             "     \"reqSigs\" : n,          (numeric) Number of required signatures\n"
             "     \"type\" : \"pubkeyhash\", (string) The type, eg pubkeyhash\n"
-            "     \"addresses\" : [          (array of string) array of litecoincash addresses\n"
-            "        \"address\"     (string) litecoincash address\n"
+            "     \"addresses\" : [          (array of string) array of neon addresses\n"
+            "        \"address\"     (string) neon address\n"
             "        ,...\n"
             "     ]\n"
             "  },\n"
@@ -1683,7 +1683,7 @@ static const CRPCCommand commands[] =
     { "blockchain",         "getblockheader",         &getblockheader,         {"blockhash","verbose"} },
     { "blockchain",         "getchaintips",           &getchaintips,           {} },
     { "blockchain",         "getdifficulty",          &getdifficulty,          {} },
-    { "blockchain",         "gethivedifficulty",      &gethivedifficulty,      {} },        // LitecoinCash: Get Hive difficulty
+    { "blockchain",         "gethivedifficulty",      &gethivedifficulty,      {} },        // Neon: Get Hive difficulty
     { "blockchain",         "getmempoolancestors",    &getmempoolancestors,    {"txid","verbose"} },
     { "blockchain",         "getmempooldescendants",  &getmempooldescendants,  {"txid","verbose"} },
     { "blockchain",         "getmempoolentry",        &getmempoolentry,        {"txid"} },

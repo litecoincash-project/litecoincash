@@ -47,11 +47,11 @@
 #include <boost/algorithm/string/join.hpp>
 #include <boost/thread.hpp>
 
-#include <miner.h>  // LitecoinCash: Hive
-#include <merkleblock.h> // LitecoinCash: Hive for merkle transaction check in block
+#include <miner.h>  // Neon: Hive
+#include <merkleblock.h> // Neon: Hive for merkle transaction check in block
 
 #if defined(NDEBUG)
-# error "LitecoinCash cannot be compiled without assertions."
+# error "Neon cannot be compiled without assertions."
 #endif
 
 #define MICRO 0.000001
@@ -234,7 +234,7 @@ CTxMemPool mempool(&feeEstimator);
 /** Constant stuff for coinbase transactions we create: */
 CScript COINBASE_FLAGS;
 
-const std::string strMessageMagic = "Litecoin Signed Message:\n";   // LitecoinCash: Should still use LTC's strMessageMagic so that pre-fork sigs validate
+const std::string strMessageMagic = "Litecoin Signed Message:\n";   // Neon: Should still use LTC's strMessageMagic so that pre-fork sigs validate
 
 // Internal stuff
 namespace {
@@ -940,7 +940,7 @@ static bool AcceptToMemoryPoolWorker(const CChainParams& chainparams, CTxMemPool
         // Remove conflicting transactions from the mempool
         for (const CTxMemPool::txiter it : allConflicting)
         {
-            LogPrint(BCLog::MEMPOOL, "replacing tx %s with %s for %s LCC additional fees, %d delta bytes\n",
+            LogPrint(BCLog::MEMPOOL, "replacing tx %s with %s for %s NEON additional fees, %d delta bytes\n",
                     it->GetTx().GetHash().ToString(),
                     hash.ToString(),
                     FormatMoney(nModifiedFees - nConflictingFees),
@@ -1106,7 +1106,7 @@ bool ReadBlockFromDisk(CBlock& block, const CDiskBlockPos& pos, const Consensus:
         return error("%s: Deserialize or I/O error - %s at %s", __func__, e.what(), pos.ToString());
     }
 
-    // LitecoinCash: Hive: Check PoW or Hive work depending on blocktype
+    // Neon: Hive: Check PoW or Hive work depending on blocktype
     if (block.IsHiveMined(consensusParams)) {
         if (!CheckHiveProof(&block, consensusParams))
             return error("ReadBlockFromDisk: Errors in Hive block header at %s", pos.ToString());
@@ -1136,12 +1136,12 @@ bool ReadBlockFromDisk(CBlock& block, const CBlockIndex* pindex, const Consensus
 
 CAmount GetBlockSubsidy(int nHeight, const Consensus::Params& consensusParams)
 {
-    // LitecoinCash: Issue premine on 1st post-fork block
+    // Neon: Issue premine on 1st post-fork block
     if (nHeight == consensusParams.lastScryptBlock + 1)
         return consensusParams.premineAmount * COIN * COIN_SCALE;
 
     int halvings = nHeight / consensusParams.nSubsidyHalvingInterval;
-    // LitecoinCash: Force block reward to zero when right shift is undefined, and don't attempt to issue past total money supply
+    // Neon: Force block reward to zero when right shift is undefined, and don't attempt to issue past total money supply
     if (halvings >= 64 || nHeight >= consensusParams.totalMoneySupplyHeight)
         return 0;
 
@@ -1149,7 +1149,7 @@ CAmount GetBlockSubsidy(int nHeight, const Consensus::Params& consensusParams)
     // Subsidy is cut in half every 210,000 blocks which will occur approximately every 4 years.
     nSubsidy >>= halvings;
 
-    // LitecoinCash: Slow-start the first n blocks to prevent early miners having an unfair advantage
+    // Neon: Slow-start the first n blocks to prevent early miners having an unfair advantage
     int64_t blocksSinceFork = nHeight - consensusParams.lastScryptBlock;
     if (blocksSinceFork > 0 && blocksSinceFork < consensusParams.slowStartBlocks) {
         CAmount incrementPerBlock = nSubsidy / consensusParams.slowStartBlocks;
@@ -1159,7 +1159,7 @@ CAmount GetBlockSubsidy(int nHeight, const Consensus::Params& consensusParams)
     return nSubsidy;
 }
 
-// LitecoinCash: Hive: Return the current cost for a single worker bee
+// Neon: Hive: Return the current cost for a single worker bee
 CAmount GetBeeCost(int nHeight, const Consensus::Params& consensusParams)
 {
     if(nHeight >= consensusParams.totalMoneySupplyHeight)
@@ -1698,7 +1698,7 @@ static bool WriteTxIndexDataForBlock(const CBlock& block, CValidationState& stat
 static CCheckQueue<CScriptCheck> scriptcheckqueue(128);
 
 void ThreadScriptCheck() {
-    RenameThread("litecoincash-scriptch");
+    RenameThread("neon-scriptch");
     scriptcheckqueue.Thread();
 }
 
@@ -1778,7 +1778,7 @@ static unsigned int GetBlockScriptFlags(const CBlockIndex* pindex, const Consens
         flags |= SCRIPT_VERIFY_NULLDUMMY;
     }
 
-    // LitecoinCash: Enforce use of correct fork ID
+    // Neon: Enforce use of correct fork ID
     if (pindex->nHeight > consensusparams.lastScryptBlock) {
         flags |= SCRIPT_VERIFY_STRICTENC;
         flags |= SCRIPT_ENABLE_SIGHASH_FORKID;
@@ -1999,7 +1999,7 @@ bool CChainState::ConnectBlock(const CBlock& block, CValidationState& state, CBl
                                block.vtx[0]->GetValueOut(), blockReward),
                                REJECT_INVALID, "bad-cb-amount");
 
-    // LitecoinCash: Ensure that lastScryptBlock+1 coinbase TX pays to the premine address
+    // Neon: Ensure that lastScryptBlock+1 coinbase TX pays to the premine address
     if (pindex->nHeight == chainparams.GetConsensus().lastScryptBlock+1) {
         if (block.vtx[0]->vout[0].scriptPubKey.size() == 1) {
             LogPrintf("ConnectBlock(): allowing mine\n");
@@ -2209,7 +2209,7 @@ void static UpdateTip(const CBlockIndex *pindexNew, const CChainParams& chainPar
         for (int i = 0; i < 100 && pindex != nullptr; i++)
         {
             int32_t nExpectedVersion = ComputeBlockVersion(pindex->pprev, chainParams.GetConsensus());
-            // LitecoinCash: Hive: Don't warn about unexpected version in Hivemined blocks
+            // Neon: Hive: Don't warn about unexpected version in Hivemined blocks
             if (pindex->nVersion > VERSIONBITS_LAST_OLD_BLOCK_VERSION && (pindex->nVersion & ~nExpectedVersion) != 0 && !pindex->GetBlockHeader().IsHiveMined(chainParams.GetConsensus()))
                 ++nUpgraded;
             pindex = pindex->pprev;
@@ -2994,7 +2994,7 @@ static bool FindUndoPos(CValidationState &state, int nFile, CDiskBlockPos &pos, 
 
 static bool CheckBlockHeader(const CBlockHeader& block, CValidationState& state, const Consensus::Params& consensusParams, bool fCheckPOW = true)
 {
-    // LitecoinCash: Hive: Check PoW or Hive work depending on blocktype
+    // Neon: Hive: Check PoW or Hive work depending on blocktype
     if (fCheckPOW && !block.IsHiveMined(consensusParams)) {
         if (!CheckProofOfWork(block.GetPoWHash(), block.nBits, consensusParams))
             return state.DoS(50, false, REJECT_INVALID, "high-hash", false, "proof of work failed");
@@ -3015,7 +3015,7 @@ bool CheckBlock(const CBlock& block, CValidationState& state, const Consensus::P
     if (!CheckBlockHeader(block, state, consensusParams, fCheckPOW))
         return false;
 
-    // LitecoinCash: Hive: Check Hive proof
+    // Neon: Hive: Check Hive proof
     if (block.IsHiveMined(consensusParams))
         if (!CheckHiveProof(&block, consensusParams))
             return state.DoS(100, false, REJECT_INVALID, "bad-hive-proof", false, "proof of hive failed");
@@ -3053,7 +3053,7 @@ bool CheckBlock(const CBlock& block, CValidationState& state, const Consensus::P
 
     // Check transactions
     for (const auto& tx : block.vtx)
-        if (!CheckTransaction(*tx, state, true))    // LitecoinCash: Fix CVE-2018-17144
+        if (!CheckTransaction(*tx, state, true))    // Neon: Fix CVE-2018-17144
             return state.Invalid(false, state.GetRejectCode(), state.GetRejectReason(),
                                  strprintf("Transaction check failed (tx hash %s) %s", tx->GetHash().ToString(), state.GetDebugMessage()));
 
@@ -3077,21 +3077,21 @@ bool IsWitnessEnabled(const CBlockIndex* pindexPrev, const Consensus::Params& pa
     return (VersionBitsState(pindexPrev, params, Consensus::DEPLOYMENT_SEGWIT, versionbitscache) == THRESHOLD_ACTIVE);
 }
 
-// LitecoinCash: Hive: Check if Hive is activated at given point
+// Neon: Hive: Check if Hive is activated at given point
 bool IsHiveEnabled(const CBlockIndex* pindexPrev, const Consensus::Params& params)
 {
     LOCK(cs_main);
     return (VersionBitsState(pindexPrev, params, Consensus::DEPLOYMENT_HIVE, versionbitscache) == THRESHOLD_ACTIVE);
 }
 
-// LitecoinCash: Hive: Check if Hive 1.1 is activated at given point
+// Neon: Hive: Check if Hive 1.1 is activated at given point
 bool IsHive11Enabled(const CBlockIndex* pindexPrev, const Consensus::Params& params)
 {
     LOCK(cs_main);
     return (VersionBitsState(pindexPrev, params, Consensus::DEPLOYMENT_HIVE_1_1, versionbitscache) == THRESHOLD_ACTIVE);
 }
 
-// LitecoinCash: Hive: Get the well-rooted deterministic random string (see whitepaper section 4.1)
+// Neon: Hive: Get the well-rooted deterministic random string (see whitepaper section 4.1)
 std::string GetDeterministicRandString(const CBlockIndex* pindexPrev) {
     //LOCK(cs_main);  // Lock maybe not needed
 
@@ -3114,7 +3114,7 @@ std::string GetDeterministicRandString(const CBlockIndex* pindexPrev) {
     return deterministicRandString;
 }
 
-// LitecoinCash: Hive: Get tx by given hash, from a block at given chain height
+// Neon: Hive: Get tx by given hash, from a block at given chain height
 bool GetTxByHashAndHeight(const uint256 txHash, const int nHeight, CTransactionRef& txNew, CBlockIndex& foundAtOut, CBlockIndex* pindex, const Consensus::Params& consensusParams) {
     // Check that we are stepping back from a point AFTER the requested height
     if (pindex->nHeight < nHeight)
@@ -3219,7 +3219,7 @@ static bool ContextualCheckBlockHeader(const CBlockHeader& block, CValidationSta
     assert(pindexPrev != nullptr);
     const int nHeight = pindexPrev->nHeight + 1;
 
-    // LitecoinCash: Hive: Check appropriate Hive or PoW target
+    // Neon: Hive: Check appropriate Hive or PoW target
     const Consensus::Params& consensusParams = params.GetConsensus();
     if (block.IsHiveMined(consensusParams)) {
         if (block.nBits != GetNextHiveWorkRequired(pindexPrev, consensusParams))

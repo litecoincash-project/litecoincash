@@ -10,29 +10,29 @@
 #include <primitives/block.h>
 #include <uint256.h>
 #include <util.h>
-#include <core_io.h>            // LitecoinCash: Hive
-#include <script/standard.h>    // LitecoinCash: Hive
-#include <base58.h>             // LitecoinCash: Hive
-#include <pubkey.h>             // LitecoinCash: Hive
-#include <hash.h>               // LitecoinCash: Hive
-#include <sync.h>               // LitecoinCash: Hive
-#include <validation.h>         // LitecoinCash: Hive
-#include <utilstrencodings.h>   // LitecoinCash: Hive
+#include <core_io.h>            // Neon: Hive
+#include <script/standard.h>    // Neon: Hive
+#include <base58.h>             // Neon: Hive
+#include <pubkey.h>             // Neon: Hive
+#include <hash.h>               // Neon: Hive
+#include <sync.h>               // Neon: Hive
+#include <validation.h>         // Neon: Hive
+#include <utilstrencodings.h>   // Neon: Hive
 
-BeePopGraphPoint beePopGraph[1024*40];       // LitecoinCash: Hive
+BeePopGraphPoint beePopGraph[1024*40];       // Neon: Hive
 
-// LitecoinCash: DarkGravity V3 (https://github.com/dashpay/dash/blob/master/src/pow.cpp#L82)
+// Neon: DarkGravity V3 (https://github.com/dashpay/dash/blob/master/src/pow.cpp#L82)
 // By Evan Duffield <evan@dash.org>
 unsigned int DarkGravityWave(const CBlockIndex* pindexLast, const CBlockHeader *pblock, const Consensus::Params& params)
 {
     const arith_uint256 bnPowLimit = UintToArith256(params.powLimitSHA);
     int64_t nPastBlocks = 24;
 
-    // LitecoinCash: Allow minimum difficulty blocks if we haven't seen a block for ostensibly 10 blocks worth of time
+    // Neon: Allow minimum difficulty blocks if we haven't seen a block for ostensibly 10 blocks worth of time
     if (params.fPowAllowMinDifficultyBlocks && pblock->GetBlockTime() > pindexLast->GetBlockTime() + params.nPowTargetSpacing * 10)
         return bnPowLimit.GetCompact();
 
-    // LitecoinCash: Hive 1.1: Skip over Hivemined blocks at tip
+    // Neon: Hive 1.1: Skip over Hivemined blocks at tip
     if (IsHive11Enabled(pindexLast, params)) {
         while (pindexLast->GetBlockHeader().IsHiveMined(params)) {
             //LogPrintf("DarkGravityWave: Skipping hivemined block at %i\n", pindex->nHeight);
@@ -41,7 +41,7 @@ unsigned int DarkGravityWave(const CBlockIndex* pindexLast, const CBlockHeader *
         }
     }
 
-    // LitecoinCash: Make sure we have at least (nPastBlocks + 1) blocks since the fork, otherwise just return powLimitSHA
+    // Neon: Make sure we have at least (nPastBlocks + 1) blocks since the fork, otherwise just return powLimitSHA
     if (!pindexLast || pindexLast->nHeight - params.lastScryptBlock < nPastBlocks)
         return bnPowLimit.GetCompact();
 
@@ -49,7 +49,7 @@ unsigned int DarkGravityWave(const CBlockIndex* pindexLast, const CBlockHeader *
     arith_uint256 bnPastTargetAvg;
 
     for (unsigned int nCountBlocks = 1; nCountBlocks <= nPastBlocks; nCountBlocks++) {
-        // LitecoinCash: Hive: Skip over Hivemined blocks; we only want to consider PoW blocks
+        // Neon: Hive: Skip over Hivemined blocks; we only want to consider PoW blocks
         while (pindex->GetBlockHeader().IsHiveMined(params)) {
             //LogPrintf("DarkGravityWave: Skipping hivemined block at %i\n", pindex->nHeight);
             assert(pindex->pprev); // should never fail
@@ -96,7 +96,7 @@ unsigned int GetNextWorkRequired(const CBlockIndex* pindexLast, const CBlockHead
 {
     assert(pindexLast != nullptr);
 
-    // LitecoinCash: If past fork time, use Dark Gravity Wave
+    // Neon: If past fork time, use Dark Gravity Wave
     if (pindexLast->nHeight >= params.lastScryptBlock)
         return DarkGravityWave(pindexLast, pblock, params);
     else
@@ -131,7 +131,7 @@ unsigned int GetNextWorkRequiredLTC(const CBlockIndex* pindexLast, const CBlockH
     }
 
     // Go back by what we want to be 14 days worth of blocks
-    // LitecoinCash: This fixes an issue where a 51% attack can change difficulty at will.
+    // Neon: This fixes an issue where a 51% attack can change difficulty at will.
     // Go back the full period unless it's the first retarget after genesis. Code courtesy of Art Forz
     int blockstogoback = params.DifficultyAdjustmentInterval()-1;
     if ((pindexLast->nHeight+1) != params.DifficultyAdjustmentInterval())
@@ -164,7 +164,7 @@ unsigned int CalculateNextWorkRequired(const CBlockIndex* pindexLast, int64_t nF
     arith_uint256 bnOld;
     bnNew.SetCompact(pindexLast->nBits);
     bnOld = bnNew;
-    // LitecoinCash: intermediate uint256 can overflow by 1 bit
+    // Neon: intermediate uint256 can overflow by 1 bit
     const arith_uint256 bnPowLimit = UintToArith256(params.powLimit);
     bool fShift = bnNew.bits() > bnPowLimit.bits() - 1;
     if (fShift)
@@ -199,7 +199,7 @@ bool CheckProofOfWork(uint256 hash, unsigned int nBits, const Consensus::Params&
     return true;
 }
 
-// LitecoinCash: Hive 1.1: SMA Hive Difficulty Adjust
+// Neon: Hive 1.1: SMA Hive Difficulty Adjust
 unsigned int GetNextHive11WorkRequired(const CBlockIndex* pindexLast, const Consensus::Params& params) {
     const arith_uint256 bnPowLimit = UintToArith256(params.powLimitHive);
 
@@ -235,9 +235,9 @@ unsigned int GetNextHive11WorkRequired(const CBlockIndex* pindexLast, const Cons
     return beeHashTarget.GetCompact();
 }
 
-// LitecoinCash: Hive: Get the current Bee Hash Target
+// Neon: Hive: Get the current Bee Hash Target
 unsigned int GetNextHiveWorkRequired(const CBlockIndex* pindexLast, const Consensus::Params& params) {
-    // LitecoinCash: Hive 1.1: Use SMA diff adjust
+    // Neon: Hive 1.1: Use SMA diff adjust
     if (IsHive11Enabled(pindexLast, params))
         return GetNextHive11WorkRequired(pindexLast, params);
 
@@ -286,7 +286,7 @@ unsigned int GetNextHiveWorkRequired(const CBlockIndex* pindexLast, const Consen
     return beeHashTarget.GetCompact();
 }
 
-// LitecoinCash: Hive: Get count of all live and gestating BCTs on the network
+// Neon: Hive: Get count of all live and gestating BCTs on the network
 bool GetNetworkHiveInfo(int& immatureBees, int& immatureBCTs, int& matureBees, int& matureBCTs, CAmount& potentialLifespanRewards, const Consensus::Params& consensusParams, bool recalcGraph) {
     int totalBeeLifespan = consensusParams.beeLifespanBlocks + consensusParams.beeGestationBlocks;
     immatureBees = immatureBCTs = matureBees = matureBCTs = 0;
@@ -295,7 +295,7 @@ bool GetNetworkHiveInfo(int& immatureBees, int& immatureBCTs, int& matureBees, i
     assert(pindexPrev != nullptr);
     int tipHeight = pindexPrev->nHeight;
 
-    // LitecoinCash: Hive 1.1: Use correct typical spacing
+    // Neon: Hive 1.1: Use correct typical spacing
     if (IsHive11Enabled(pindexPrev, consensusParams))
         potentialLifespanRewards = (consensusParams.beeLifespanBlocks * GetBlockSubsidy(pindexPrev->nHeight, consensusParams)) / consensusParams.hiveBlockSpacingTargetTypical_1_1;
     else
@@ -391,7 +391,7 @@ bool GetNetworkHiveInfo(int& immatureBees, int& immatureBCTs, int& matureBees, i
     return true;
 }
 
-// LitecoinCash: Hive: Check the hive proof for given block
+// Neon: Hive: Check the hive proof for given block
 bool CheckHiveProof(const CBlock* pblock, const Consensus::Params& consensusParams) {
     bool verbose = LogAcceptCategory(BCLog::HIVE);
 
@@ -419,7 +419,7 @@ bool CheckHiveProof(const CBlock* pblock, const Consensus::Params& consensusPara
         return false;
     }
 
-    // LitecoinCash: Hive 1.1: Check that there aren't too many consecutive Hive blocks
+    // Neon: Hive 1.1: Check that there aren't too many consecutive Hive blocks
     if (IsHive11Enabled(pindexPrev, consensusParams)) {
         int hiveBlocksAtTip = 0;
         CBlockIndex* pindexTemp = pindexPrev;

@@ -78,7 +78,7 @@ background-position:bottom right;}</string>
                </size>
               </property>
               <property name="toolTip">
-               <string>The displayed information may be out of date. Your wallet automatically synchronizes with the LitecoinCash network after a connection is established, but this process has not completed yet.</string>
+               <string>The displayed information may be out of date. Your wallet automatically synchronizes with the Neon network after a connection is established, but this process has not completed yet.</string>
               </property>
               <property name="text">
                <string/>
@@ -134,7 +134,7 @@ background-position:bottom right;}</string>
                <string>Unconfirmed transactions to watch-only addresses</string>
               </property>
               <property name="text">
-               <string notr="true">0.000 000 00 LCC</string>
+               <string notr="true">0.000 000 00 NEON</string>
               </property>
               <property name="alignment">
                <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -159,7 +159,7 @@ background-position:bottom right;}</string>
                <string>Total of transactions that have yet to be confirmed, and do not yet count toward the spendable balance</string>
               </property>
               <property name="text">
-               <string notr="true">0.000 000 00 LCC</string>
+               <string notr="true">0.000 000 00 NEON</string>
               </property>
               <property name="alignment">
                <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -184,7 +184,7 @@ background-position:bottom right;}</string>
                <string>Mined balance in watch-only addresses that has not yet matured</string>
               </property>
               <property name="text">
-               <string notr="true">0.000 000 00 LCC</string>
+               <string notr="true">0.000 000 00 NEON</string>
               </property>
               <property name="alignment">
                <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -242,7 +242,7 @@ background-position:bottom right;}</string>
                <string>Mined balance that has not yet matured</string>
               </property>
               <property name="text">
-               <string notr="true">0.000 000 00 LCC</string>
+               <string notr="true">0.000 000 00 NEON</string>
               </property>
               <property name="alignment">
                <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -287,7 +287,7 @@ background-position:bottom right;}</string>
                <string>Your current total balance</string>
               </property>
               <property name="text">
-               <string notr="true">0.000 000 00 LCC</string>
+               <string notr="true">0.000 000 00 NEON</string>
               </property>
               <property name="alignment">
                <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -312,7 +312,7 @@ background-position:bottom right;}</string>
                <string>Current total balance in watch-only addresses</string>
               </property>
               <property name="text">
-               <string notr="true">0.000 000 00 LCC</string>
+               <string notr="true">0.000 000 00 NEON</string>
               </property>
               <property name="alignment">
                <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -354,7 +354,7 @@ background-position:bottom right;}</string>
                <string>Your current spendable balance</string>
               </property>
               <property name="text">
-               <string notr="true">0.000 000 00 LCC</string>
+               <string notr="true">0.000 000 00 NEON</string>
               </property>
               <property name="alignment">
                <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -379,7 +379,7 @@ background-position:bottom right;}</string>
                <string>Your current balance in watch-only addresses</string>
               </property>
               <property name="text">
-               <string notr="true">0.000 000 00 LCC</string>
+               <string notr="true">0.000 000 00 NEON</string>
               </property>
               <property name="alignment">
                <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -451,7 +451,7 @@ background-position:bottom right;}</string>
                </size>
               </property>
               <property name="toolTip">
-               <string>The displayed information may be out of date. Your wallet automatically synchronizes with the LitecoinCash network after a connection is established, but this process has not completed yet.</string>
+               <string>The displayed information may be out of date. Your wallet automatically synchronizes with the Neon network after a connection is established, but this process has not completed yet.</string>
               </property>
               <property name="text">
                <string/>
@@ -514,7 +514,7 @@ background-position:bottom right;}</string>
                </font>
               </property>
               <property name="text">
-               <string>0.000 000 00 LCC</string>
+               <string>0.000 000 00 NEON</string>
               </property>
               <property name="alignment">
                <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -530,7 +530,7 @@ background-position:bottom right;}</string>
                </font>
               </property>
               <property name="text">
-               <string>0.000 000 00 LCC</string>
+               <string>0.000 000 00 NEON</string>
               </property>
               <property name="alignment">
                <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -546,7 +546,7 @@ background-position:bottom right;}</string>
                </font>
               </property>
               <property name="text">
-               <string>0.000 000 00 LCC</string>
+               <string>0.000 000 00 NEON</string>
               </property>
               <property name="alignment">
                <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -786,7 +786,7 @@ background-position:bottom right;}</string>
                </size>
               </property>
               <property name="toolTip">
-               <string>The displayed information may be out of date. Your wallet automatically synchronizes with the LitecoinCash network after a connection is established, but this process has not completed yet.</string>
+               <string>The displayed information may be out of date. Your wallet automatically synchronizes with the Neon network after a connection is established, but this process has not completed yet.</string>
               </property>
               <property name="text">
                <string/>

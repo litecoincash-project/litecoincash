@@ -64,7 +64,7 @@ static constexpr unsigned int STANDARD_SCRIPT_VERIFY_FLAGS = MANDATORY_SCRIPT_VE
                                                              SCRIPT_VERIFY_WITNESS |
                                                              SCRIPT_VERIFY_DISCOURAGE_UPGRADABLE_WITNESS_PROGRAM |
                                                              SCRIPT_VERIFY_WITNESS_PUBKEYTYPE |
-                                                             SCRIPT_ENABLE_SIGHASH_FORKID;          // LitecoinCash: Use SCRIPT_ENABLE_SIGHASH_FORKID;
+                                                             SCRIPT_ENABLE_SIGHASH_FORKID;          // Neon: Use SCRIPT_ENABLE_SIGHASH_FORKID;
 
 /** For convenience, standard but not mandatory verify flags. */
 static constexpr unsigned int STANDARD_NOT_MANDATORY_VERIFY_FLAGS = STANDARD_SCRIPT_VERIFY_FLAGS & ~MANDATORY_SCRIPT_VERIFY_FLAGS;

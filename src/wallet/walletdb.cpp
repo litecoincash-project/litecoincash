@@ -20,7 +20,7 @@
 
 #include <boost/thread.hpp>
 
-extern bool fWalletUnlockHiveMiningOnly;   // LitecoinCash: Hive: Support unlock for hive mining only
+extern bool fWalletUnlockHiveMiningOnly;   // Neon: Hive: Support unlock for hive mining only
 
 //
 // CWalletDB

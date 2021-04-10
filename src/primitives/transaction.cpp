@@ -51,7 +51,7 @@ CTxOut::CTxOut(const CAmount& nValueIn, CScript scriptPubKeyIn)
 
 std::string CTxOut::ToString() const
 {
-    return strprintf("CTxOut(nValue=%d.%07d, scriptPubKey=%s)", nValue / COIN, nValue % COIN, HexStr(scriptPubKey).substr(0, 30));   // LitecoinCash: Updated num decimals
+    return strprintf("CTxOut(nValue=%d.%07d, scriptPubKey=%s)", nValue / COIN, nValue % COIN, HexStr(scriptPubKey).substr(0, 30));   // Neon: Updated num decimals
 }
 
 CMutableTransaction::CMutableTransaction() : nVersion(CTransaction::CURRENT_VERSION), nLockTime(0) {}
@@ -114,7 +114,7 @@ std::string CTransaction::ToString() const
     return str;
 }
 
-// LitecoinCash: Hive: Check if this transaction is a Bee Creation Transaction, and if so return the total bee fee paid via beeFeePaid and honey scriptPubKey via scriptPubKeyHoney
+// Neon: Hive: Check if this transaction is a Bee Creation Transaction, and if so return the total bee fee paid via beeFeePaid and honey scriptPubKey via scriptPubKeyHoney
 bool CTransaction::IsBCT(const Consensus::Params& consensusParams, CScript scriptPubKeyBCF, CAmount* beeFeePaid, CScript* scriptPubKeyHoney) const {
     bool isBCT = CScript::IsBCTScript(vout[0].scriptPubKey, scriptPubKeyBCF, scriptPubKeyHoney);
 

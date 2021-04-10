@@ -31,17 +31,17 @@
 #include <queue>
 #include <utility>
 
-#include <wallet/wallet.h>  // LitecoinCash: Hive
-#include <rpc/server.h>     // LitecoinCash: Hive
-#include <base58.h>         // LitecoinCash: Hive
-#include <sync.h>           // LitecoinCash: Hive
-#include <boost/thread.hpp> // LitecoinCash: Hive: Mining optimisations
+#include <wallet/wallet.h>  // Neon: Hive
+#include <rpc/server.h>     // Neon: Hive
+#include <base58.h>         // Neon: Hive
+#include <sync.h>           // Neon: Hive
+#include <boost/thread.hpp> // Neon: Hive: Mining optimisations
 
 static CCriticalSection cs_solution_vars;
-std::atomic<bool> solutionFound;            // LitecoinCash: Hive: Mining optimisations: Thread-safe atomic flag to signal solution found (saves a slow mutex)
-std::atomic<bool> earlyAbort;               // LitecoinCash: Hive: Mining optimisations: Thread-safe atomic flag to signal early abort needed
-CBeeRange solvingRange;                     // LitecoinCash: Hive: Mining optimisations: The solving range (protected by mutex)
-uint32_t solvingBee;                        // LitecoinCash: Hive: Mining optimisations: The solving bee (protected by mutex)
+std::atomic<bool> solutionFound;            // Neon: Hive: Mining optimisations: Thread-safe atomic flag to signal solution found (saves a slow mutex)
+std::atomic<bool> earlyAbort;               // Neon: Hive: Mining optimisations: Thread-safe atomic flag to signal early abort needed
+CBeeRange solvingRange;                     // Neon: Hive: Mining optimisations: The solving range (protected by mutex)
+uint32_t solvingBee;                        // Neon: Hive: Mining optimisations: The solving bee (protected by mutex)
 
 //////////////////////////////////////////////////////////////////////////////
 //
@@ -66,7 +66,7 @@ int64_t UpdateTime(CBlockHeader* pblock, const Consensus::Params& consensusParam
         pblock->nTime = nNewTime;
 
     // Updating time can change work required on testnet:
-    // LitecoinCash: Hive: Don't do this
+    // Neon: Hive: Don't do this
     /*
     if (consensusParams.fPowAllowMinDifficultyBlocks)
         pblock->nBits = GetNextWorkRequired(pindexPrev, pblock, consensusParams);
@@ -115,14 +115,14 @@ void BlockAssembler::resetBlock()
     nBlockWeight = 4000;
     nBlockSigOpsCost = 400;
     fIncludeWitness = false;
-    fIncludeBCTs = true;    // LitecoinCash: Hive
+    fIncludeBCTs = true;    // Neon: Hive
 
     // These counters do not include coinbase tx
     nBlockTx = 0;
     nFees = 0;
 }
 
-// LitecoinCash: Hive: If hiveProofScript is passed, create a Hive block instead of a PoW block
+// Neon: Hive: If hiveProofScript is passed, create a Hive block instead of a PoW block
 std::unique_ptr<CBlockTemplate> BlockAssembler::CreateNewBlock(const CScript& scriptPubKeyIn, bool fMineWitnessTx, const CScript* hiveProofScript)
 {
     int64_t nTimeStart = GetTimeMicros();
@@ -144,7 +144,7 @@ std::unique_ptr<CBlockTemplate> BlockAssembler::CreateNewBlock(const CScript& sc
     CBlockIndex* pindexPrev = chainActive.Tip();
     assert(pindexPrev != nullptr);
 
-    // LitecoinCash: Hive: Make sure Hive is enabled if a Hive block is requested
+    // Neon: Hive: Make sure Hive is enabled if a Hive block is requested
     if (hiveProofScript && !IsHiveEnabled(pindexPrev, chainparams.GetConsensus()))
         throw std::runtime_error(
             "Error: The Hive is not yet enabled on the network"
@@ -175,7 +175,7 @@ std::unique_ptr<CBlockTemplate> BlockAssembler::CreateNewBlock(const CScript& sc
 
     int nPackagesSelected = 0;
     int nDescendantsUpdated = 0;
-    // LitecoinCash: Don't include BCTs in hivemined blocks
+    // Neon: Don't include BCTs in hivemined blocks
     if (hiveProofScript)
         fIncludeBCTs = false;
 
@@ -186,7 +186,7 @@ std::unique_ptr<CBlockTemplate> BlockAssembler::CreateNewBlock(const CScript& sc
     nLastBlockTx = nBlockTx;
     nLastBlockWeight = nBlockWeight;
 
-    // LitecoinCash: Hive: Create appropriate coinbase tx for pow or Hive block
+    // Neon: Hive: Create appropriate coinbase tx for pow or Hive block
     if (hiveProofScript) {
         CMutableTransaction coinbaseTx;
 
@@ -227,13 +227,13 @@ std::unique_ptr<CBlockTemplate> BlockAssembler::CreateNewBlock(const CScript& sc
     pblock->hashPrevBlock  = pindexPrev->GetBlockHash();
     UpdateTime(pblock, chainparams.GetConsensus(), pindexPrev);
 
-    // LitecoinCash: Hive: Choose correct nBits depending on whether a Hive block is requested
+    // Neon: Hive: Choose correct nBits depending on whether a Hive block is requested
     if (hiveProofScript)
         pblock->nBits = GetNextHiveWorkRequired(pindexPrev, chainparams.GetConsensus());
     else
         pblock->nBits = GetNextWorkRequired(pindexPrev, pblock, chainparams.GetConsensus());
 
-    // LitecoinCash: Hive: Set nonce marker for hivemined blocks
+    // Neon: Hive: Set nonce marker for hivemined blocks
     pblock->nNonce = hiveProofScript ? chainparams.GetConsensus().hiveNonceMarker : 0;
     pblocktemplate->vTxSigOpsCost[0] = WITNESS_SCALE_FACTOR * GetLegacySigOpCount(*pblock->vtx[0]);
 
@@ -278,14 +278,14 @@ bool BlockAssembler::TestPackage(uint64_t packageSize, int64_t packageSigOpsCost
 //   segwit activation)
 bool BlockAssembler::TestPackageTransactions(const CTxMemPool::setEntries& package)
 {
-    const Consensus::Params& consensusParams = Params().GetConsensus(); // LitecoinCash: Hive
+    const Consensus::Params& consensusParams = Params().GetConsensus(); // Neon: Hive
 
     for (const CTxMemPool::txiter it : package) {
         if (!IsFinalTx(it->GetTx(), nHeight, nLockTimeCutoff))
             return false;
         if (!fIncludeWitness && it->GetTx().HasWitness())
             return false;
-        // LitecoinCash: Hive: Inhibit BCTs if required
+        // Neon: Hive: Inhibit BCTs if required
         if (!fIncludeBCTs && it->GetTx().IsBCT(consensusParams, GetScriptForDestination(DecodeDestination(consensusParams.beeCreationAddress))))
             return false;
     }
@@ -523,7 +523,7 @@ void IncrementExtraNonce(CBlock* pblock, const CBlockIndex* pindexPrev, unsigned
     pblock->hashMerkleRoot = BlockMerkleRoot(*pblock);
 }
 
-// LitecoinCash: Hive: Bee management thread
+// Neon: Hive: Bee management thread
 void BeeKeeper(const CChainParams& chainparams) {
     const Consensus::Params& consensusParams = chainparams.GetConsensus();
 
@@ -538,7 +538,7 @@ void BeeKeeper(const CChainParams& chainparams) {
 
     try {
         while (true) {
-            // LitecoinCash: Hive: Mining optimisations: Parameterised sleep time
+            // Neon: Hive: Mining optimisations: Parameterised sleep time
             int sleepTime = std::max((int64_t) 1, gArgs.GetArg("-hivecheckdelay", DEFAULT_HIVE_CHECK_DELAY));
             MilliSleep(sleepTime);
 
@@ -563,7 +563,7 @@ void BeeKeeper(const CChainParams& chainparams) {
     }
 }
 
-// LitecoinCash: Hive: Mining optimisations: Thread to signal abort on new block
+// Neon: Hive: Mining optimisations: Thread to signal abort on new block
 void AbortWatchThread(int height) {
     // Loop until any exit condition
     while (true) {
@@ -590,7 +590,7 @@ void AbortWatchThread(int height) {
     }
 }
 
-// LitecoinCash: Hive: Mining optimisations: Thread to check a single bin
+// Neon: Hive: Mining optimisations: Thread to check a single bin
 void CheckBin(int threadID, std::vector<CBeeRange> bin, std::string deterministicRandString, arith_uint256 beeHashTarget) {
     // Iterate over ranges in this bin
     int checkCount = 0;
@@ -623,7 +623,7 @@ void CheckBin(int threadID, std::vector<CBeeRange> bin, std::string deterministi
     //LogPrintf("THREAD #%i: Out of tasks\n", threadID);
 }
 
-// LitecoinCash: Hive: Attempt to mint the next block
+// Neon: Hive: Attempt to mint the next block
 bool BusyBees(const Consensus::Params& consensusParams, int height) {
     bool verbose = LogAcceptCategory(BCLog::HIVE);
 
@@ -648,7 +648,7 @@ bool BusyBees(const Consensus::Params& consensusParams, int height) {
         return false;
     }
 
-    // LitecoinCash: Hive 1.1: Check that there aren't too many consecutive Hive blocks
+    // Neon: Hive 1.1: Check that there aren't too many consecutive Hive blocks
     if (IsHive11Enabled(pindexPrev, consensusParams)) {
         int hiveBlocksAtTip = 0;
         CBlockIndex* pindexTemp = pindexPrev;

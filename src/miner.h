@@ -18,14 +18,14 @@ class CBlockIndex;
 class CChainParams;
 class CScript;
 
-class arith_uint256;    // LitecoinCash: Hive: Mining optimisations
-struct CBeeRange;       // LitecoinCash: Hive: Mining optimisations
+class arith_uint256;    // Neon: Hive: Mining optimisations
+struct CBeeRange;       // Neon: Hive: Mining optimisations
 
 namespace Consensus { struct Params; };
 
 static const bool DEFAULT_PRINTPRIORITY = false;
 
-// LitecoinCash: Hive: Mining optimisations: Defaults for new hive check parameters
+// Neon: Hive: Mining optimisations: Defaults for new hive check parameters
 static const int DEFAULT_HIVE_CHECK_DELAY = 1;
 static const int DEFAULT_HIVE_THREADS = -2;
 static const bool DEFAULT_HIVE_EARLY_OUT = true;
@@ -138,7 +138,7 @@ private:
 
     // Configuration parameters for the block size
     bool fIncludeWitness;
-    bool fIncludeBCTs;              // LitecoinCash: Hive: Allow BCTs in block?
+    bool fIncludeBCTs;              // Neon: Hive: Allow BCTs in block?
     unsigned int nBlockMaxWeight;
     CFeeRate blockMinFeeRate;
     
@@ -165,7 +165,7 @@ public:
     BlockAssembler(const CChainParams& params, const Options& options);
 
     /** Construct a new block template with coinbase to scriptPubKeyIn */
-    // LitecoinCash: Hive: If hiveProofScript is passed, create a Hive block instead of a PoW block
+    // Neon: Hive: If hiveProofScript is passed, create a Hive block instead of a PoW block
     std::unique_ptr<CBlockTemplate> CreateNewBlock(const CScript& scriptPubKeyIn, bool fMineWitnessTx=true, const CScript* hiveProofScript=nullptr);
 
 private:
@@ -206,9 +206,9 @@ private:
 void IncrementExtraNonce(CBlock* pblock, const CBlockIndex* pindexPrev, unsigned int& nExtraNonce);
 int64_t UpdateTime(CBlockHeader* pblock, const Consensus::Params& consensusParams, const CBlockIndex* pindexPrev);
 
-void BeeKeeper(const CChainParams& chainparams);                        // LitecoinCash: Hive: Bee management thread
-bool BusyBees(const Consensus::Params& consensusParams, int height);    // LitecoinCash: Hive: Attempt to mint the next block
-void CheckBin(int threadID, std::vector<CBeeRange> bin, std::string deterministicRandString, arith_uint256 beeHashTarget); // LitecoinCash: Hive: Mining optimisations: Thread to process a bin of beeranges
-void AbortWatchThread(int height);                                      // LitecoinCash: Hive: Mining optimisations: Thread to watch for abort conditions
+void BeeKeeper(const CChainParams& chainparams);                        // Neon: Hive: Bee management thread
+bool BusyBees(const Consensus::Params& consensusParams, int height);    // Neon: Hive: Attempt to mint the next block
+void CheckBin(int threadID, std::vector<CBeeRange> bin, std::string deterministicRandString, arith_uint256 beeHashTarget); // Neon: Hive: Mining optimisations: Thread to process a bin of beeranges
+void AbortWatchThread(int height);                                      // Neon: Hive: Mining optimisations: Thread to watch for abort conditions
 
 #endif // BITCOIN_MINER_H

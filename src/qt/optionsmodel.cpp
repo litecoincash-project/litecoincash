@@ -16,7 +16,7 @@
 #include <net.h>
 #include <netbase.h>
 #include <txdb.h> // for -dbcache defaults
-#include <miner.h> // LitecoinCash: Hive: Mining optimisations: For -hivecheckthreads, -hivecheckdelay, -hiveearlyout defaults
+#include <miner.h> // Neon: Hive: Mining optimisations: For -hivecheckthreads, -hivecheckdelay, -hiveearlyout defaults
 #include <qt/intro.h>
 
 #ifdef ENABLE_WALLET
@@ -112,7 +112,7 @@ void OptionsModel::Init(bool resetSettings)
     if (!gArgs.SoftSetBoolArg("-spendzeroconfchange", settings.value("bSpendZeroConfChange").toBool()))
         addOverriddenOption("-spendzeroconfchange");
 
-    // LitecoinCash: Hive: Mining optimisations
+    // Neon: Hive: Mining optimisations
     if (!settings.contains("nHiveCheckThreads"))
         settings.setValue("nHiveCheckThreads", (qint64)DEFAULT_HIVE_THREADS);
     if (!gArgs.SoftSetArg("-hivecheckthreads", settings.value("nHiveCheckThreads").toString().toStdString()))
@@ -288,7 +288,7 @@ QVariant OptionsModel::data(const QModelIndex & index, int role) const
         case SpendZeroConfChange:
             return settings.value("bSpendZeroConfChange");
 
-        // LitecoinCash: Hive: Mining optimisations
+        // Neon: Hive: Mining optimisations
         case HiveCheckThreads:
             return settings.value("nHiveCheckThreads");
         case HiveCheckDelay:
@@ -407,7 +407,7 @@ bool OptionsModel::setData(const QModelIndex & index, const QVariant & value, in
             }
             break;
 
-        // LitecoinCash: Hive: Mining optimisations
+        // Neon: Hive: Mining optimisations
         case HiveCheckDelay:
             if (settings.value("nHiveCheckDelay") != value) {
                 settings.setValue("nHiveCheckDelay", value);

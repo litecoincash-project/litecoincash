@@ -14,8 +14,8 @@
 #include <qt/transactionfilterproxy.h>
 #include <qt/transactiontablemodel.h>
 #include <qt/walletmodel.h>
-#include <qt/hivetablemodel.h>  // LitecoinCash: Hive
-#include <qt/hivedialog.h>      // LitecoinCash: Hive: For formatLargeNoLocale()
+#include <qt/hivetablemodel.h>  // Neon: Hive
+#include <qt/hivedialog.h>      // Neon: Hive: For formatLargeNoLocale()
 
 #include <QAbstractItemDelegate>
 #include <QPainter>
@@ -144,7 +144,7 @@ OverviewPage::OverviewPage(const PlatformStyle *platformStyle, QWidget *parent) 
     connect(ui->labelWalletStatus, SIGNAL(clicked()), this, SLOT(handleOutOfSyncWarningClicks()));
     connect(ui->labelTransactionsStatus, SIGNAL(clicked()), this, SLOT(handleOutOfSyncWarningClicks()));
 
-    // LitecoinCash: Hive
+    // Neon: Hive
     cost = rewardsPaid = profit = 0;
 }
 
@@ -245,7 +245,7 @@ void OverviewPage::setWalletModel(WalletModel *model)
         updateWatchOnlyLabels(model->haveWatchOnly());
         connect(model, SIGNAL(notifyWatchonlyChanged(bool)), this, SLOT(updateWatchOnlyLabels(bool)));
 
-        // LitecoinCash: Hive: Connect summary updater
+        // Neon: Hive: Connect summary updater
         connect(model, SIGNAL(newHiveSummaryAvailable()), this, SLOT(updateHiveSummary()));
     }
 
@@ -253,7 +253,7 @@ void OverviewPage::setWalletModel(WalletModel *model)
     updateDisplayUnit();
 }
 
-// LitecoinCash: Hive: Update the hive summary
+// Neon: Hive: Update the hive summary
 void OverviewPage::updateHiveSummary() {
     if (walletModel && walletModel->getHiveTableModel()) {
         int immature, mature, dead, blocksFound;
@@ -304,7 +304,7 @@ void OverviewPage::updateDisplayUnit()
 
         ui->listTransactions->update();
 
-        // LitecoinCash: Hive: Update CAmounts in hive summary
+        // Neon: Hive: Update CAmounts in hive summary
         ui->rewardsPaidLabel->setText(
             BitcoinUnits::format(walletModel->getOptionsModel()->getDisplayUnit(), rewardsPaid)
             + " "
@@ -335,7 +335,7 @@ void OverviewPage::showOutOfSyncWarning(bool fShow)
     ui->labelTransactionsStatus->setVisible(fShow);
 }
 
-// LitecoinCash: Hive: Handle bee button click
+// Neon: Hive: Handle bee button click
 void OverviewPage::on_beeButton_clicked() {
     Q_EMIT beeButtonClicked();
 }

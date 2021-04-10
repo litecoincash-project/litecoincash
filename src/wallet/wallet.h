@@ -18,7 +18,7 @@
 #include <wallet/crypter.h>
 #include <wallet/walletdb.h>
 #include <wallet/rpcwallet.h>
-#include <consensus/params.h>   // LitecoinCash: Hive
+#include <consensus/params.h>   // Neon: Hive
 
 #include <algorithm>
 #include <atomic>
@@ -40,19 +40,19 @@ extern CFeeRate payTxFee;
 extern unsigned int nTxConfirmTarget;
 extern bool bSpendZeroConfChange;
 extern bool fWalletRbf;
-extern bool fWalletUnlockHiveMiningOnly;  // LitecoinCash: Hive: Unlock for hive mining purposes only.
+extern bool fWalletUnlockHiveMiningOnly;  // Neon: Hive: Unlock for hive mining purposes only.
 
 static const unsigned int DEFAULT_KEYPOOL_SIZE = 1000;
 //! -paytxfee default
 static const CAmount DEFAULT_TRANSACTION_FEE = 0;
 //! -fallbackfee default
-static const CAmount DEFAULT_FALLBACK_FEE = 2000000 / COIN_SCALE / 10;          // LitecoinCash: 10X cheaper fees. Note these constants must also account for the 10X coinscale.
+static const CAmount DEFAULT_FALLBACK_FEE = 2000000 / COIN_SCALE / 10;          // Neon: 10X cheaper fees. Note these constants must also account for the 10X coinscale.
 //! -m_discard_rate default
-static const CAmount DEFAULT_DISCARD_FEE = 10000 / COIN_SCALE / 10;             // LitecoinCash: 10X cheaper fees. Note these constants must also account for the 10X coinscale.
+static const CAmount DEFAULT_DISCARD_FEE = 10000 / COIN_SCALE / 10;             // Neon: 10X cheaper fees. Note these constants must also account for the 10X coinscale.
 //! -mintxfee default
-static const CAmount DEFAULT_TRANSACTION_MINFEE = 100000 / COIN_SCALE / 10;     // LitecoinCash: 10X cheaper fees. Note these constants must also account for the 10X coinscale.
+static const CAmount DEFAULT_TRANSACTION_MINFEE = 100000 / COIN_SCALE / 10;     // Neon: 10X cheaper fees. Note these constants must also account for the 10X coinscale.
 //! minimum recommended increment for BIP 125 replacement txs
-static const CAmount WALLET_INCREMENTAL_RELAY_FEE = 5000 / COIN_SCALE / 10;     // LitecoinCash: 10X cheaper fees. Note these constants must also account for the 10X coinscale.
+static const CAmount WALLET_INCREMENTAL_RELAY_FEE = 5000 / COIN_SCALE / 10;     // Neon: 10X cheaper fees. Note these constants must also account for the 10X coinscale.
 //! target minimum change amount
 static const CAmount MIN_CHANGE = CENT;
 //! final minimum change amount after paying for fees
@@ -269,9 +269,9 @@ public:
 
     const uint256& GetHash() const { return tx->GetHash(); }
     bool IsCoinBase() const { return tx->IsCoinBase(); }
-    bool IsHiveCoinBase() const { return tx->IsHiveCoinBase(); }    // LitecoinCash: Hive
+    bool IsHiveCoinBase() const { return tx->IsHiveCoinBase(); }    // Neon: Hive
 
-    // LitecoinCash: Hive: Check if this transaction is a Bee Creation Transaction
+    // Neon: Hive: Check if this transaction is a Bee Creation Transaction
     bool IsBCT(const Consensus::Params& consensusParams, CScript scriptPubKeyBCF, CAmount* beeFeePaid = nullptr, CScript* scriptPubKeyHoney = nullptr) const {
         return tx->IsBCT(consensusParams, scriptPubKeyBCF, beeFeePaid, scriptPubKeyHoney);
     }
@@ -666,7 +666,7 @@ private:
     std::vector<char> _ssExtra;
 };
 
-// LitecoinCash: Hive: BCT results struct
+// Neon: Hive: BCT results struct
 struct CBeeCreationTransactionInfo
 {
     std::string txid;
@@ -682,7 +682,7 @@ struct CBeeCreationTransactionInfo
     int blocksLeft;
 };
 
-// LitecoinCash: Hive: Mining optimisations: Bee range structure
+// Neon: Hive: Mining optimisations: Bee range structure
 struct CBeeRange
 {
     std::string txid;
@@ -1000,13 +1000,13 @@ public:
 
     OutputType TransactionChangeType(OutputType change_type, const std::vector<CRecipient>& vecSend);
 
-    // LitecoinCash: Hive: Create a BCT to gestate given number of bees
+    // Neon: Hive: Create a BCT to gestate given number of bees
     bool CreateBeeTransaction(int beeCount, CWalletTx& wtxNew, CReserveKey& reservekeyChange, CReserveKey& reservekeyHoney, std::string honeyAddress, std::string changeAddress, bool communityContrib, std::string& strFailReason, const Consensus::Params& consensusParams);
 
-    // LitecoinCash: Hive: Return info for a single BCT known by this wallet, optionally scanning for blocks minted by bees from this BCT
+    // Neon: Hive: Return info for a single BCT known by this wallet, optionally scanning for blocks minted by bees from this BCT
     CBeeCreationTransactionInfo GetBCT(const CWalletTx& wtx, bool includeDead, bool scanRewards, const Consensus::Params& consensusParams, int minHoneyConfirmations);
 
-    // LitecoinCash: Hive: Return all BCTs known by this wallet, optionally including dead bees and optionally scanning for blocks minted by bees from each BCT
+    // Neon: Hive: Return all BCTs known by this wallet, optionally including dead bees and optionally scanning for blocks minted by bees from each BCT
     std::vector<CBeeCreationTransactionInfo> GetBCTs(bool includeDead, bool scanRewards, const Consensus::Params& consensusParams, int minHoneyConfirmations = 1);
 
     /**

@@ -2,7 +2,7 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-// LitecoinCash: Hive
+// Neon: Hive
 
 #ifndef BITCOIN_QT_HIVEDIALOG_H
 #define BITCOIN_QT_HIVEDIALOG_H
@@ -103,7 +103,7 @@ private:
     void setAmountField(QLabel *field, CAmount value);
 
 private Q_SLOTS:
-    void on_showHiveOptionsButton_clicked();    // LitecoinCash: Hive: Mining optimisations: Shortcut to Hive mining options
+    void on_showHiveOptionsButton_clicked();    // Neon: Hive: Mining optimisations: Shortcut to Hive mining options
     void on_createBeesButton_clicked();
     void on_beeCountSpinner_valueChanged(int i);
     void on_includeDeadBeesCheckbox_stateChanged();

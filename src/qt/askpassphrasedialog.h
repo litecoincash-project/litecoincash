@@ -22,7 +22,7 @@ class AskPassphraseDialog : public QDialog
 public:
     enum Mode {
         Encrypt,            /**< Ask passphrase twice and encrypt */
-        UnlockHiveMining,   /** <Ask passphrase and unlock */     // LitecoinCash: Hive: Support locked wallets
+        UnlockHiveMining,   /** <Ask passphrase and unlock */     // Neon: Hive: Support locked wallets
         Unlock,             /**< Ask passphrase and unlock */
         ChangePass,         /**< Ask old passphrase + new passphrase twice */
         Decrypt             /**< Ask passphrase and decrypt wallet */
@@ -40,7 +40,7 @@ private:
     Mode mode;
     WalletModel *model;
     bool fCapsLock;
-	bool fHiveOnly;     // LitecoinCash: Hive: Locked wallet support
+	bool fHiveOnly;     // Neon: Hive: Locked wallet support
 
 private Q_SLOTS:
     void textChanged();

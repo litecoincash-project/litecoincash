@@ -1,7 +1,7 @@
 Description
 ------------
 
-This directory contains data-driven tests for various aspects of LitecoinCash.
+This directory contains data-driven tests for various aspects of Neon.
 
 License
 --------

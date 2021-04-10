@@ -62,12 +62,12 @@
         <translation>Vastuvõtvad aadressid</translation>
     </message>
     <message>
-        <source>These are your LitecoinCash addresses for sending payments. Always check the amount and the receiving address before sending coins.</source>
-        <translation>Need on sinu LitecoinCash aadressid maksete saatmiseks. Ennem müntide saatmist kontrolli alati summat ja makse saaja aadressi.</translation>
+        <source>These are your Neon addresses for sending payments. Always check the amount and the receiving address before sending coins.</source>
+        <translation>Need on sinu Neon aadressid maksete saatmiseks. Ennem müntide saatmist kontrolli alati summat ja makse saaja aadressi.</translation>
     </message>
     <message>
-        <source>These are your LitecoinCash addresses for receiving payments. It is recommended to use a new receiving address for each transaction.</source>
-        <translation>Need on sinu LitecoinCash aadressid sisenevate maksete vastu võtmiseks. Soovitav on iga tehingu tarbeks kasutada uut aadressi.</translation>
+        <source>These are your Neon addresses for receiving payments. It is recommended to use a new receiving address for each transaction.</source>
+        <translation>Need on sinu Neon aadressid sisenevate maksete vastu võtmiseks. Soovitav on iga tehingu tarbeks kasutada uut aadressi.</translation>
     </message>
     <message>
         <source>&amp;Copy Address</source>
@@ -168,8 +168,8 @@
         <translation>Kinnita rahakoti krüpteerimine.</translation>
     </message>
     <message>
-        <source>Warning: If you encrypt your wallet and lose your passphrase, you will &lt;b&gt;LOSE ALL OF YOUR LITECOINCASH&lt;/b&gt;!</source>
-        <translation>Hoiatus:Kui sa krüpteerid oma rahakoti ja kaotad salafraasi, siis sa&lt;b&gt;KAOTAD OMA LITECOINCASHID&lt;/b&gt;!</translation>
+        <source>Warning: If you encrypt your wallet and lose your passphrase, you will &lt;b&gt;LOSE ALL OF YOUR NEON&lt;/b&gt;!</source>
+        <translation>Hoiatus:Kui sa krüpteerid oma rahakoti ja kaotad salafraasi, siis sa&lt;b&gt;KAOTAD OMA NEONID&lt;/b&gt;!</translation>
     </message>
     <message>
         <source>Are you sure you wish to encrypt your wallet?</source>
@@ -290,8 +290,8 @@
         <translation>Kettal olevate blokkide re-indekseerimine...</translation>
     </message>
     <message>
-        <source>Send coins to a LitecoinCash address</source>
-        <translation>Saada münte LitecoinCashi aadressile</translation>
+        <source>Send coins to a Neon address</source>
+        <translation>Saada münte Neoni aadressile</translation>
     </message>
     <message>
         <source>Backup wallet to another location</source>
@@ -314,8 +314,8 @@
         <translation>&amp;Kontrolli sõnumit...</translation>
     </message>
     <message>
-        <source>LitecoinCash</source>
-        <translation>Litecoin Cash</translation>
+        <source>Neon</source>
+        <translation>Neon</translation>
     </message>
     <message>
         <source>Wallet</source>
@@ -342,12 +342,12 @@
         <translation>Krüpteeri oma rahakoti privaatvõtmed</translation>
     </message>
     <message>
-        <source>Sign messages with your LitecoinCash addresses to prove you own them</source>
-        <translation>Omandi tõestamiseks allkirjasta sõnumid oma LitecoinCashi aadressiga</translation>
+        <source>Sign messages with your Neon addresses to prove you own them</source>
+        <translation>Omandi tõestamiseks allkirjasta sõnumid oma Neoni aadressiga</translation>
     </message>
     <message>
-        <source>Verify messages to ensure they were signed with specified LitecoinCash addresses</source>
-        <translation>Kinnita sõnumid kindlustamaks et need allkirjastati määratud LitecoinCashi aadressiga</translation>
+        <source>Verify messages to ensure they were signed with specified Neon addresses</source>
+        <translation>Kinnita sõnumid kindlustamaks et need allkirjastati määratud Neoni aadressiga</translation>
     </message>
     <message>
         <source>&amp;File</source>
@@ -366,20 +366,20 @@
         <translation>Vahelehe tööriistariba</translation>
     </message>
     <message>
-        <source>Request payments (generates QR codes and litecoincash: URIs)</source>
-        <translation>Loo maksepäring (genereerib QR koodid ja litecoincashi: URId)</translation>
+        <source>Request payments (generates QR codes and neon: URIs)</source>
+        <translation>Loo maksepäring (genereerib QR koodid ja neoni: URId)</translation>
     </message>
     <message>
-        <source>Open a litecoincash: URI or payment request</source>
-        <translation>Ava litecoincashi: URI või maksepäring</translation>
+        <source>Open a neon: URI or payment request</source>
+        <translation>Ava neoni: URI või maksepäring</translation>
     </message>
     <message>
         <source>&amp;Command-line options</source>
         <translation>Käsurea valikud</translation>
     </message>
     <message numerus="yes">
-        <source>%n active connection(s) to LitecoinCash network</source>
-        <translation><numerusform>%n aktiivne ühendus LitecoinCashi võrku</numerusform><numerusform>%n aktiivset ühendust LitecoinCashi võrku</numerusform></translation>
+        <source>%n active connection(s) to Neon network</source>
+        <translation><numerusform>%n aktiivne ühendus Neoni võrku</numerusform><numerusform>%n aktiivset ühendust Neoni võrku</numerusform></translation>
     </message>
     <message>
         <source>Indexing blocks on disk...</source>
@@ -626,8 +626,8 @@
         <translation>Muuda saatvat aadressi</translation>
     </message>
     <message>
-        <source>The entered address "%1" is not a valid LitecoinCash address.</source>
-        <translation>Sisestatud aadress "%1" ei ole korrektne LitecoinCash aadress.</translation>
+        <source>The entered address "%1" is not a valid Neon address.</source>
+        <translation>Sisestatud aadress "%1" ei ole korrektne Neon aadress.</translation>
     </message>
     <message>
         <source>The entered address "%1" is already in the address book.</source>
@@ -683,8 +683,8 @@
         <translation>Teretulemast</translation>
     </message>
     <message>
-        <source>LitecoinCash</source>
-        <translation>Litecoin Cash</translation>
+        <source>Neon</source>
+        <translation>Neon</translation>
     </message>
     <message>
         <source>Error</source>
@@ -760,8 +760,8 @@
         <translation>Ekspert</translation>
     </message>
     <message>
-        <source>Automatically open the LitecoinCash client port on the router. This only works when your router supports UPnP and it is enabled.</source>
-        <translation>Litecoin Cashi kliendi pordi automaatne avamine ruuteris. Toimib, kui sinu ruuter aktsepteerib UPnP ühendust.</translation>
+        <source>Automatically open the Neon client port on the router. This only works when your router supports UPnP and it is enabled.</source>
+        <translation>Neoni kliendi pordi automaatne avamine ruuteris. Toimib, kui sinu ruuter aktsepteerib UPnP ühendust.</translation>
     </message>
     <message>
         <source>Map port using &amp;UPnP</source>
@@ -859,7 +859,7 @@
         <translation>Vorm</translation>
     </message>
     <message>
-        <source>The displayed information may be out of date. Your wallet automatically synchronizes with the LitecoinCash network after a connection is established, but this process has not completed yet.</source>
+        <source>The displayed information may be out of date. Your wallet automatically synchronizes with the Neon network after a connection is established, but this process has not completed yet.</source>
         <translation>Kuvatav info ei pruugi olla ajakohane. Ühenduse loomisel süngitakse sinu rahakott automaatselt Liteconi võrgustikuga, kuid see toiming on hetkel lõpetamata.</translation>
     </message>
     <message>
@@ -1361,8 +1361,8 @@
         <translation>Maksepäring aegunud.</translation>
     </message>
     <message>
-        <source>Warning: Invalid LitecoinCash address</source>
-        <translation>Hoiatus: Ebakorrektne LitecoinCash aadress</translation>
+        <source>Warning: Invalid Neon address</source>
+        <translation>Hoiatus: Ebakorrektne Neon aadress</translation>
     </message>
     <message>
         <source>(no label)</source>
@@ -1445,8 +1445,8 @@
         <translation>&amp;Allkirjastamise teade</translation>
     </message>
     <message>
-        <source>The LitecoinCash address to sign the message with</source>
-        <translation>Litecoin Cash aadress millega sõnum allkirjastada</translation>
+        <source>The Neon address to sign the message with</source>
+        <translation>Neon aadress millega sõnum allkirjastada</translation>
     </message>
     <message>
         <source>Choose previously used address</source>
@@ -1477,8 +1477,8 @@
         <translation>Kopeeri praegune signatuur vahemällu</translation>
     </message>
     <message>
-        <source>Sign the message to prove you own this LitecoinCash address</source>
-        <translation>Allkirjasta sõnum LitecoinCashi aadressi sulle kuulumise tõestamiseks</translation>
+        <source>Sign the message to prove you own this Neon address</source>
+        <translation>Allkirjasta sõnum Neoni aadressi sulle kuulumise tõestamiseks</translation>
     </message>
     <message>
         <source>Sign &amp;Message</source>
@@ -1497,12 +1497,12 @@
         <translation>&amp;Kinnita Sõnum</translation>
     </message>
     <message>
-        <source>The LitecoinCash address the message was signed with</source>
-        <translation>Litecoin Cash aadress millega sõnum on allkirjastatud</translation>
+        <source>The Neon address the message was signed with</source>
+        <translation>Neon aadress millega sõnum on allkirjastatud</translation>
     </message>
     <message>
-        <source>Verify the message to ensure it was signed with the specified LitecoinCash address</source>
-        <translation>Kinnita sõnum tõestamaks selle allkirjastatust määratud LitecoinCashi aadressiga.</translation>
+        <source>Verify the message to ensure it was signed with the specified Neon address</source>
+        <translation>Kinnita sõnum tõestamaks selle allkirjastatust määratud Neoni aadressiga.</translation>
     </message>
     <message>
         <source>Verify &amp;Message</source>
@@ -1970,8 +1970,8 @@
         <translation>Tööta taustal ning aktsepteeri käsklusi</translation>
     </message>
     <message>
-        <source>Litecoin Cash Core</source>
-        <translation>Litecoin Cashi tuumik</translation>
+        <source>Neon Core</source>
+        <translation>Neoni tuumik</translation>
     </message>
     <message>
         <source>Bind to given address and always listen on it. Use [host]:port notation for IPv6</source>

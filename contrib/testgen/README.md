@@ -1,6 +1,6 @@
 ### TestGen ###
 
-Utilities to generate test vectors for the data-driven LitecoinCash tests.
+Utilities to generate test vectors for the data-driven Neon tests.
 
 Usage: 
 

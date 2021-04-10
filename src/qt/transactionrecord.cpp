@@ -65,7 +65,7 @@ QList<TransactionRecord> TransactionRecord::decomposeTransaction(const CWallet *
                 }
                 if (wtx.IsCoinBase())
                 {
-                    // LitecoinCash: Hive: Check for a Hivemined coinbase transaction
+                    // Neon: Hive: Check for a Hivemined coinbase transaction
                     if (wtx.IsHiveCoinBase())   // Hivemined
                         sub.type = TransactionRecord::HiveHoney;
                     else // Generated
@@ -126,7 +126,7 @@ QList<TransactionRecord> TransactionRecord::decomposeTransaction(const CWallet *
                 }
 
                 CTxDestination address;
-                // LitecoinCash: Hive: Check for a BCT
+                // Neon: Hive: Check for a BCT
                 if (CScript::IsBCTScript(txout.scriptPubKey, GetScriptForDestination(DecodeDestination(Params().GetConsensus().beeCreationAddress)))) {
                     sub.type = TransactionRecord::HiveBeeCreation;
                 }
@@ -136,7 +136,7 @@ QList<TransactionRecord> TransactionRecord::decomposeTransaction(const CWallet *
                     sub.type = TransactionRecord::SendToAddress;
                     sub.address = EncodeDestination(address);
 
-                    // LitecoinCash: Hive: Check for additional hive-related send types
+                    // Neon: Hive: Check for additional hive-related send types
                     if (sub.address == Params().GetConsensus().hiveCommunityAddress)
                         sub.type = TransactionRecord::HiveCommunityFund;
                 }
@@ -207,7 +207,7 @@ void TransactionRecord::updateStatus(const CWalletTx &wtx)
         }
     }
     // For generated transactions, determine maturity
-    // LitecoinCash: Hive: Do the same for hivemined transactions
+    // Neon: Hive: Do the same for hivemined transactions
     else if(type == TransactionRecord::Generated || type == TransactionRecord::HiveHoney)
     {
         if (wtx.GetBlocksToMaturity() > 0)

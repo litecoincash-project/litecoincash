@@ -523,7 +523,7 @@ void TorController::auth_cb(TorControlConnection& _conn, const TorControlReply& 
     if (reply.code == 250) {
         LogPrint(BCLog::TOR, "tor: Authentication successful\n");
 
-        // LitecoinCash: Now that we know Tor is running, setup the proxy for onion addresses
+        // Neon: Now that we know Tor is running, setup the proxy for onion addresses
         // if -onion and -proxy isn't set to something else.
         if (gArgs.GetArg("-onion", "") == "" && gArgs.GetArg("-proxy", "") == "") {
             CService resolved(LookupNumeric("127.0.0.1", 9050));

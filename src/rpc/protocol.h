@@ -86,7 +86,7 @@ enum RPCErrorCode
     RPC_WALLET_NOT_FOUND            = -18, //!< Invalid wallet specified
     RPC_WALLET_NOT_SPECIFIED        = -19, //!< No wallet specified (error when there are multiple wallets loaded)
 
-    // LitecoinCash: Hive: RPC errors
+    // Neon: Hive: RPC errors
     RPC_WALLET_BCT_FAIL             = -64,  // Wallet couldn't create a BCT (not enough funds, etc)
 };
 

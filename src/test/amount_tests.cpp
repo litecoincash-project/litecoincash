@@ -102,7 +102,7 @@ BOOST_AUTO_TEST_CASE(ToStringTest)
 {
     CFeeRate feeRate;
     feeRate = CFeeRate(1);
-    BOOST_CHECK_EQUAL(feeRate.ToString(), "0.0000001 LCC/kB");
+    BOOST_CHECK_EQUAL(feeRate.ToString(), "0.0000001 NEON/kB");
 }
 
 BOOST_AUTO_TEST_SUITE_END()

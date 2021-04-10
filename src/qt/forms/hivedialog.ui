@@ -158,7 +158,7 @@ background-color:white;}</string>
            </font>
           </property>
           <property name="text">
-           <string>0 LCC</string>
+           <string>0 NEON</string>
           </property>
          </widget>
         </item>
@@ -223,7 +223,7 @@ background-color:white;}</string>
            <enum>Qt::StrongFocus</enum>
           </property>
           <property name="toolTip">
-           <string>The community fund works by diverting a portion of the unspendable bee creation fee to the spendable community fund address. This enables us to keep developing Litecoin Cash.</string>
+           <string>The community fund works by diverting a portion of the unspendable bee creation fee to the spendable community fund address. This enables us to keep developing Neon.</string>
           </property>
           <property name="text">
            <string>Send 10% of bee fee to Community Fund (Bee price remains the same and you still get the same number of bees)</string>
@@ -269,7 +269,7 @@ background-color:white;}</string>
            </font>
           </property>
           <property name="text">
-           <string>0 LCC</string>
+           <string>0 NEON</string>
           </property>
          </widget>
         </item>
@@ -393,7 +393,7 @@ still fully unlock it to send funds.</string>
            </font>
           </property>
           <property name="text">
-           <string>0 LCC</string>
+           <string>0 NEON</string>
           </property>
          </widget>
         </item>

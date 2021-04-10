@@ -4,10 +4,10 @@
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 #include <chain.h>
-#include <chainparams.h>        // LitecoinCash: Hive
-#include <util.h>               // LitecoinCash: Hive
-#include <rpc/blockchain.h>     // LitecoinCash: Hive 1.1
-#include <validation.h>         // LitecoinCash: Hive 1.1
+#include <chainparams.h>        // Neon: Hive
+#include <util.h>               // Neon: Hive
+#include <rpc/blockchain.h>     // Neon: Hive 1.1
+#include <validation.h>         // Neon: Hive 1.1
 
 /**
  * CChain implementation
@@ -122,7 +122,7 @@ void CBlockIndex::BuildSkip()
         pskip = pprev->GetAncestor(GetSkipHeight(nHeight));
 }
 
-// LitecoinCash: Hive: Grant hive-mined blocks bonus work value - they get the work value of
+// Neon: Hive: Grant hive-mined blocks bonus work value - they get the work value of
 // their own block plus that of the PoW block behind them
 arith_uint256 GetBlockProof(const CBlockIndex& block)
 {
@@ -146,7 +146,7 @@ arith_uint256 GetBlockProof(const CBlockIndex& block)
     if (block.GetBlockHeader().IsHiveMined(consensusParams)) {
         assert(block.pprev);
 
-        // LitecoinCash: Hive 1.1: Set bnPreviousTarget from nBits in most recent pow block, not just assuming it's one back. Note this logic is still valid for Hive 1.0 so doesn't need to be gated.
+        // Neon: Hive 1.1: Set bnPreviousTarget from nBits in most recent pow block, not just assuming it's one back. Note this logic is still valid for Hive 1.0 so doesn't need to be gated.
         CBlockIndex* pindexTemp = block.pprev;
         while (pindexTemp->GetBlockHeader().IsHiveMined(consensusParams)) {
             assert(pindexTemp->pprev);
@@ -154,7 +154,7 @@ arith_uint256 GetBlockProof(const CBlockIndex& block)
         }
 
         arith_uint256 bnPreviousTarget;
-        bnPreviousTarget.SetCompact(pindexTemp->nBits, &fNegative, &fOverflow); // LitecoinCash: Hive 1.1: Set bnPreviousTarget from nBits in most recent pow block, not just assuming it's one back
+        bnPreviousTarget.SetCompact(pindexTemp->nBits, &fNegative, &fOverflow); // Neon: Hive 1.1: Set bnPreviousTarget from nBits in most recent pow block, not just assuming it's one back
         if (fNegative || fOverflow || bnPreviousTarget == 0)
             return 0;
         bnTargetScaled += (~bnPreviousTarget / (bnPreviousTarget + 1)) + 1;
@@ -222,7 +222,7 @@ arith_uint256 GetBlockProof(const CBlockIndex& block)
     return bnTargetScaled;
 }
 
-// LitecoinCash: Hive: Use this to compute estimated hashes for GetNetworkHashPS()
+// Neon: Hive: Use this to compute estimated hashes for GetNetworkHashPS()
 arith_uint256 GetNumHashes(const CBlockIndex& block)
 {
     arith_uint256 bnTarget;

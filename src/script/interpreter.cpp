@@ -190,14 +190,14 @@ bool static IsDefinedHashtypeSignature(const valtype &vchSig) {
     if (vchSig.size() == 0) {
         return false;
     }
-    unsigned char nHashType = vchSig[vchSig.size() - 1] & (~(SIGHASH_ANYONECANPAY | SIGHASH_FORKID));   // LitecoinCash: Use SIGHASH_FORKID
+    unsigned char nHashType = vchSig[vchSig.size() - 1] & (~(SIGHASH_ANYONECANPAY | SIGHASH_FORKID));   // Neon: Use SIGHASH_FORKID
     if (nHashType < SIGHASH_ALL || nHashType > SIGHASH_SINGLE)
         return false;
 
     return true;
 }
 
-// LitecoinCash: Drop the signature in scripts when SIGHASH_FORKID is not used
+// Neon: Drop the signature in scripts when SIGHASH_FORKID is not used
 static uint32_t GetHashType(const valtype &vchSig) {
     if (vchSig.size() == 0)
         return 0;
@@ -205,7 +205,7 @@ static uint32_t GetHashType(const valtype &vchSig) {
     return vchSig[vchSig.size() - 1];
 }
 
-// LitecoinCash: Check fork ID before calling FindAndDelete
+// Neon: Check fork ID before calling FindAndDelete
 static void CleanupScriptCode(CScript &scriptCode, const std::vector<uint8_t> &vchSig, uint32_t flags) {
     uint32_t nHashType = GetHashType(vchSig);
     if (!(flags & SCRIPT_ENABLE_SIGHASH_FORKID) || !(nHashType & SIGHASH_FORKID))
@@ -223,7 +223,7 @@ bool CheckSignatureEncoding(const std::vector<unsigned char> &vchSig, unsigned i
     } else if ((flags & SCRIPT_VERIFY_LOW_S) != 0 && !IsLowDERSignature(vchSig, serror)) {
         // serror is set
         return false;
-    } else if ((flags & SCRIPT_VERIFY_STRICTENC) != 0) {            // LitecoinCash: Enforce fork ID checking
+    } else if ((flags & SCRIPT_VERIFY_STRICTENC) != 0) {            // Neon: Enforce fork ID checking
         if (!IsDefinedHashtypeSignature(vchSig)) {
             return set_error(serror, SCRIPT_ERR_SIG_HASHTYPE);
         }
@@ -914,7 +914,7 @@ bool EvalScript(std::vector<std::vector<unsigned char> >& stack, const CScript& 
 
                     // Drop the signature in pre-segwit scripts but not segwit scripts
                     if (sigversion == SIGVERSION_BASE) {
-                        CleanupScriptCode(scriptCode, vchSig, flags);   // LitecoinCash: Check fork ID before calling FindAndDelete
+                        CleanupScriptCode(scriptCode, vchSig, flags);   // Neon: Check fork ID before calling FindAndDelete
                     }
 
                     if (!CheckSignatureEncoding(vchSig, flags, serror) || !CheckPubKeyEncoding(vchPubKey, flags, sigversion, serror)) {
@@ -978,7 +978,7 @@ bool EvalScript(std::vector<std::vector<unsigned char> >& stack, const CScript& 
                     {
                         valtype& vchSig = stacktop(-isig-k);
                         if (sigversion == SIGVERSION_BASE) {
-                            CleanupScriptCode(scriptCode, vchSig, flags);   // LitecoinCash: Check fork ID before calling FindAndDelete
+                            CleanupScriptCode(scriptCode, vchSig, flags);   // Neon: Check fork ID before calling FindAndDelete
                         }
                     }
 

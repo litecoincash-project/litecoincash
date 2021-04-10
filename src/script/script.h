@@ -181,7 +181,7 @@ enum opcodetype
     OP_NOP9 = 0xb8,
     OP_NOP10 = 0xb9,
 
-    // LitecoinCash: Hive
+    // Neon: Hive
     OP_BEE = 0xbe,
 
     // template matching params
@@ -670,7 +670,7 @@ public:
         shrink_to_fit();
     }
 
-    // LitecoinCash: Hive: Check if script is a Bee Creation script and optionally get the honey scriptPubKey in scriptPubKeyHoney
+    // Neon: Hive: Check if script is a Bee Creation script and optionally get the honey scriptPubKey in scriptPubKeyHoney
     static bool IsBCTScript(CScript scriptPubKey, CScript scriptPubKeyBCF, CScript* scriptPubKeyHoney = nullptr) {
         // Check for correct size
         if (scriptPubKey.size() != 52)

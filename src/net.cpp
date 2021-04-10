@@ -1507,7 +1507,7 @@ void ThreadMapPort()
             }
         }
 
-        std::string strDesc = "LitecoinCash " + FormatFullVersion();
+        std::string strDesc = "Neon " + FormatFullVersion();
 
         try {
             while (true) {

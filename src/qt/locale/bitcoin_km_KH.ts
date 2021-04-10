@@ -90,8 +90,8 @@
 <context>
     <name>BitcoinGUI</name>
     <message>
-        <source>Send coins to a LitecoinCash address</source>
-        <translation>ផ្ញើកាក់ទៅកាន់ អាសយដ្ឋាន LitecoinCash មួយ</translation>
+        <source>Send coins to a Neon address</source>
+        <translation>ផ្ញើកាក់ទៅកាន់ អាសយដ្ឋាន Neon មួយ</translation>
     </message>
     <message>
         <source>Wallet</source>

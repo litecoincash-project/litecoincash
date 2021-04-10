@@ -10,7 +10,7 @@
 
 #include <support/allocators/secure.h>
 
-#include <wallet/wallet.h>  // LitecoinCash: Hive
+#include <wallet/wallet.h>  // Neon: Hive
 
 #include <map>
 #include <vector>
@@ -23,7 +23,7 @@ class AddressTableModel;
 class OptionsModel;
 class PlatformStyle;
 class RecentRequestsTableModel;
-class HiveTableModel;               // LitecoinCash: Hive
+class HiveTableModel;               // Neon: Hive
 class TransactionTableModel;
 class WalletModelTransaction;
 
@@ -133,7 +133,7 @@ public:
     AddressTableModel *getAddressTableModel();
     TransactionTableModel *getTransactionTableModel();
     RecentRequestsTableModel *getRecentRequestsTableModel();
-    HiveTableModel *getHiveTableModel();    // LitecoinCash: Hive
+    HiveTableModel *getHiveTableModel();    // Neon: Hive
 
     CAmount getBalance(const CCoinControl *coinControl = nullptr) const;
     CAmount getUnconfirmedBalance() const;
@@ -193,7 +193,7 @@ public:
         void CopyFrom(const UnlockContext& rhs);
     };
 
-    // LitecoinCash: Hive: Locked wallet support
+    // Neon: Hive: Locked wallet support
     UnlockContext requestUnlock(bool hiveOnly=false);
 
     bool getPubKey(const CKeyID &address, CPubKey& vchPubKeyOut) const;
@@ -211,9 +211,9 @@ public:
     void loadReceiveRequests(std::vector<std::string>& vReceiveRequests);
     bool saveReceiveRequest(const std::string &sAddress, const int64_t nId, const std::string &sRequest);
 
-    void getBCTs(std::vector<CBeeCreationTransactionInfo>& vBeeCreationTransactions, bool includeDeadBees);     // LitecoinCash: Hive
-    bool createBees(int beeCount, bool communityContrib, QWidget *parent, double beePopIndex);                  // LitecoinCash: Hive
-    bool isHiveEnabled();                                                                                       // LitecoinCash: Hive
+    void getBCTs(std::vector<CBeeCreationTransactionInfo>& vBeeCreationTransactions, bool includeDeadBees);     // Neon: Hive
+    bool createBees(int beeCount, bool communityContrib, QWidget *parent, double beePopIndex);                  // Neon: Hive
+    bool isHiveEnabled();                                                                                       // Neon: Hive
 
     bool transactionCanBeAbandoned(uint256 hash) const;
     bool abandonTransaction(uint256 hash) const;
@@ -241,7 +241,7 @@ private:
     AddressTableModel *addressTableModel;
     TransactionTableModel *transactionTableModel;
     RecentRequestsTableModel *recentRequestsTableModel;
-    HiveTableModel *hiveTableModel; // LitecoinCash: Hive
+    HiveTableModel *hiveTableModel; // Neon: Hive
 
     // Cache some values to be able to detect changes
     CAmount cachedBalance;
@@ -272,7 +272,7 @@ Q_SIGNALS:
     // this means that the unlocking failed or was cancelled.
     void requireUnlock();
 
-	// LitecoinCash: Hive: Signal emitted when a wallet needs to be unlocked for hive only
+	// Neon: Hive: Signal emitted when a wallet needs to be unlocked for hive only
 	void requireUnlockHive();
 
     // Fired when a message should be reported to the user
@@ -287,7 +287,7 @@ Q_SIGNALS:
     // Watch-only address added
     void notifyWatchonlyChanged(bool fHaveWatchonly);
 
-    // LitecoinCash: Fired when new hive summary available
+    // Neon: Fired when new hive summary available
     void newHiveSummaryAvailable();
 
 public Q_SLOTS:

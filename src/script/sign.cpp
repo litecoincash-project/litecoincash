@@ -419,7 +419,7 @@ bool DummySignatureCreator::CreateSig(std::vector<unsigned char>& vchSig, const 
     vchSig[4 + 33] = 0x02;
     vchSig[5 + 33] = 32;
     vchSig[6 + 33] = 0x01;
-    vchSig[6 + 33 + 32] = SIGHASH_ALL | SIGHASH_FORKID;     // LitecoinCash: Include SIGHASH_FORKID
+    vchSig[6 + 33 + 32] = SIGHASH_ALL | SIGHASH_FORKID;     // Neon: Include SIGHASH_FORKID
     return true;
 }
 
