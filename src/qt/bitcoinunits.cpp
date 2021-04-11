@@ -71,10 +71,10 @@ qint64 BitcoinUnits::factor(int unit)
 {
     switch(unit)
     {
-    case BTC:  return 100000000 / COIN_SCALE;       // Neon: Updated factors
-    case mBTC: return 100000 / COIN_SCALE;
-    case uBTC: return 100 / COIN_SCALE;
-    default:   return 100000000 / COIN_SCALE;
+    case BTC:  return 100000000;  
+    case mBTC: return 100000;
+    case uBTC: return 100;
+    default:   return 100000000;
     }
 }
 

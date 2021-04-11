@@ -1138,14 +1138,14 @@ CAmount GetBlockSubsidy(int nHeight, const Consensus::Params& consensusParams)
 {
     // Neon: Issue premine on 1st post-fork block
     if (nHeight == consensusParams.lastScryptBlock + 1)
-        return consensusParams.premineAmount * COIN * COIN_SCALE;
+        return consensusParams.premineAmount * COIN;
 
     int halvings = nHeight / consensusParams.nSubsidyHalvingInterval;
     // Neon: Force block reward to zero when right shift is undefined, and don't attempt to issue past total money supply
     if (halvings >= 64 || nHeight >= consensusParams.totalMoneySupplyHeight)
         return 0;
 
-    CAmount nSubsidy = 50 * COIN * COIN_SCALE;
+    CAmount nSubsidy = 50 * COIN;
     // Subsidy is cut in half every 210,000 blocks which will occur approximately every 4 years.
     nSubsidy >>= halvings;
 
