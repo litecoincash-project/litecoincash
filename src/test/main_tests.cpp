@@ -40,8 +40,6 @@ static void TestBlockSubsidyHalvings(int nSubsidyHalvingInterval)
 	const Consensus::Params mainConsensusParams = chainParams->GetConsensus();	// Get Neon extra params
     Consensus::Params consensusParams;
     consensusParams.nSubsidyHalvingInterval = nSubsidyHalvingInterval;
-    consensusParams.lastScryptBlock = mainConsensusParams.lastScryptBlock;		// Set Neon extra params
-    consensusParams.slowStartBlocks = mainConsensusParams.slowStartBlocks;		// Set Neon extra params
     TestBlockSubsidyHalvings(consensusParams);
 }
 

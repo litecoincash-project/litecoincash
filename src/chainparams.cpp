@@ -123,16 +123,6 @@ public:
         consensus.vDeployments[Consensus::DEPLOYMENT_HIVE_1_1].nTimeout =
             Consensus::BIP9Deployment::NO_TIMEOUT;
 
-        // Neon fields
-        consensus.powForkTime = 1518982404;                 // Time of PoW hash method change
-        consensus.lastScryptBlock = 1371111;                // Height of last scrypt block
-        consensus.powLimitSHA = uint256S("00000000ffffffffffffffffffffffffffffffffffffffffffffffffffffffff");   // Initial hash target at fork
-        consensus.slowStartBlocks = 2000;                   // Scale post-fork block reward up over this many blocks
-        consensus.premineAmount = 550000;                   // Premine amount (less than 1% of issued currency at fork time)
-        std::vector<unsigned char> vch = ParseHex("76a914c9f3305556963e2976ccf3348b89a6cc736b6a4e88ac");
-        consensus.premineOutputScript = CScript(vch.begin(), vch.end());	// Output script for premine block (CashierDaZEsyBQkuvv4c2uPZFx6m2XTgT)
-        consensus.totalMoneySupplyHeight = 6215968;         // Height at which TMS is reached, do not issue rewards past this point
-
         // Neon: Hive: Consensus Fields
         consensus.minBeeCost = 10000;                       // Minimum cost of a bee, used when no more block rewards
         consensus.beeCostFactor = 2500;                     // Bee cost is block_reward/beeCostFactor
@@ -271,16 +261,6 @@ public:
         consensus.vDeployments[Consensus::DEPLOYMENT_HIVE_1_1].nTimeout =
             Consensus::BIP9Deployment::NO_TIMEOUT;
 
-        // Neon fields
-        consensus.powForkTime = 1565799588;                 // Time of PoW hash method change (block 100)
-        consensus.lastScryptBlock = 100;                    // Height of last scrypt block
-        consensus.powLimitSHA = uint256S("000000ffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");   // Initial hash target at fork
-        consensus.slowStartBlocks = 40;                     // Scale post-fork block reward up over this many blocks
-        consensus.premineAmount = 550000;                   // Premine amount (less than 1% of issued currency at fork time)
-        std::vector<unsigned char> vch = ParseHex("76a91424af51d38b740a6dc2868dfd70fc16d76901e1e088ac");
-        consensus.premineOutputScript = CScript(vch.begin(), vch.end());	// Output script for premine block (tAGaQ7rk3NE7etu3bU6yAJF3KSKeDhTHry)
-        consensus.totalMoneySupplyHeight = 6215968;         // Height at which TMS is reached, do not issue rewards past this point (Note, not accurate value for testnet)
-
         // Neon: Hive: Consensus Fields
         consensus.minBeeCost = 10000;                       // Minimum cost of a bee, used when no more block rewards
         consensus.beeCostFactor = 2500;                     // Bee cost is block_reward/beeCostFactor
@@ -388,15 +368,7 @@ public:
         consensus.vDeployments[Consensus::DEPLOYMENT_SEGWIT].nStartTime = Consensus::BIP9Deployment::ALWAYS_ACTIVE;
         consensus.vDeployments[Consensus::DEPLOYMENT_SEGWIT].nTimeout = Consensus::BIP9Deployment::NO_TIMEOUT;
 
-        // Neon fields
-        consensus.powForkTime = 1543765622;                 // Time of PoW hash method change (block 100)
-        consensus.lastScryptBlock = 200;                    // Height of last scrypt block
-        consensus.powLimitSHA = uint256S("000000ffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");   // Initial hash target at fork
-        consensus.slowStartBlocks = 40;                     // Scale post-fork block reward up over this many blocks
-        consensus.premineAmount = 550000;                   // Premine amount (less than 1% of issued currency at fork time)
-        std::vector<unsigned char> vch = ParseHex("76a91424af51d38b740a6dc2868dfd70fc16d76901e1e088ac");
-        consensus.premineOutputScript = CScript(vch.begin(), vch.end());	// Output script for premine block (tAGaQ7rk3NE7etu3bU6yAJF3KSKeDhTHry)
-        consensus.totalMoneySupplyHeight = 6215968;         // Height at which TMS is reached, do not issue rewards past this point (Note, not accurate value for testnet)
+        // Hive fields
         consensus.hiveNonceMarker = 192;                    // Nonce marker for hivemined blocks
 
         // The best chain should have at least this much work.

@@ -24,7 +24,6 @@ struct BeePopGraphPoint {
 unsigned int GetNextWorkRequired(const CBlockIndex* pindexLast, const CBlockHeader *pblock, const Consensus::Params&);
 unsigned int CalculateNextWorkRequired(const CBlockIndex* pindexLast, int64_t nFirstBlockTime, const Consensus::Params&);
 unsigned int DarkGravityWave(const CBlockIndex* pindexLast, const Consensus::Params& params);                               // Neon: NEON (DGW) diff adjust implementation
-unsigned int GetNextWorkRequiredLTC(const CBlockIndex* pindexLast, const CBlockHeader *pblock, const Consensus::Params&);   // Neon: LTC diff adjust implementation
 unsigned int GetNextHiveWorkRequired(const CBlockIndex* pindexLast, const Consensus::Params& params);                       // Neon: Hive: Get the current Bee Hash Target
 bool CheckHiveProof(const CBlock* pblock, const Consensus::Params& params);                                                 // Neon: Hive: Check the hive proof for given block
 bool GetNetworkHiveInfo(int& immatureBees, int& immatureBCTs, int& matureBees, int& matureBCTs, CAmount& potentialLifespanRewards, const Consensus::Params& consensusParams, bool recalcGraph = false); // Neon: Hive: Get count of all live and gestating BCTs on the network

@@ -81,15 +81,6 @@ struct Params {
     uint256 nMinimumChainWork;
     uint256 defaultAssumeValid;
 
-    // Neon: General consensus params
-    uint32_t powForkTime;               // Time of PoW hash method change
-    int lastScryptBlock;                // Height of last scrypt block
-    int slowStartBlocks;                // Scale post-fork block reward over this many blocks
-    int totalMoneySupplyHeight;         // Height at which TMS is reached, do not issue rewards past this point
-    uint256 powLimitSHA;                // Initial hash target at fork
-    CAmount premineAmount;              // Premine amount
-    CScript premineOutputScript;        // Premine output script
-
     // Neon: Hive-related consensus params
     CAmount minBeeCost;                 // Minimum cost of a bee, used when no more block rewards
     int beeCostFactor;                  // Bee cost is block_reward/beeCostFactor
