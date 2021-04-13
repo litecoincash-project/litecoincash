@@ -49,8 +49,8 @@ static CBlock CreateGenesisBlock(const char* pszTimestamp, const CScript& genesi
  */
 static CBlock CreateGenesisBlock(uint32_t nTime, uint32_t nNonce, uint32_t nBits, int32_t nVersion, const CAmount& genesisReward)
 {
-    const char* pszTimestamp = "NY Times 05/Oct/2011 Steve Jobs, Apple’s Visionary, Dies at 56";
-    const CScript genesisOutputScript = CScript() << ParseHex("040184710fa689ad5023690c80f3a49c8f13f8d45b8c857fbcbc8bc4a8e4d3eb4b10f4d4604fa08dce601aaf0f470216fe1b51850b4acf21b179c45070ac7b03a9") << OP_CHECKSIG;
+    const char* pszTimestamp = "this is only for a test, the tests are good, like";
+    const CScript genesisOutputScript = CScript() << ParseHex("04cc831f0e29171fb75e271691bfa7cbe8ac8e01fa5c0004fb345c5c591d174f1633484731f8e8952984fc38f082099ab85f7bec00ac0ae20cd3e9a4f6c02f83ce") << OP_CHECKSIG;
     return CreateGenesisBlock(pszTimestamp, genesisOutputScript, nTime, nNonce, nBits, nVersion, genesisReward);
 }
 
@@ -118,8 +118,11 @@ public:
 
         // Neon: Hive 1.1: Deployment
         consensus.vDeployments[Consensus::DEPLOYMENT_HIVE_1_1].bit = 9;
-        consensus.vDeployments[Consensus::DEPLOYMENT_HIVE_1_1].nStartTime =
-            Consensus::BIP9Deployment::ALWAYS_ACTIVE;
+        consensus.vDeployments[Consensus::DEPLOYMENT_HIVE_1_1].nStartTime = 1618257080; 
+        /*
+         * Is the genesis block time (start) to avoid the
+         * crash caused by the start time of Hive 1.0 and 1.1
+         */
         consensus.vDeployments[Consensus::DEPLOYMENT_HIVE_1_1].nTimeout =
             Consensus::BIP9Deployment::NO_TIMEOUT;
 
@@ -132,7 +135,7 @@ public:
         consensus.beeGestationBlocks = 48*24;               // The number of blocks for a new bee to mature
         consensus.beeLifespanBlocks = 48*24*14;             // The number of blocks a bee lives for after maturation
         consensus.powLimitHive = uint256S("0fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");  // Highest (easiest) bee hash target
-        consensus.minHiveCheckBlock = 1537566;              // Don't bother checking below this height for Hive blocks (not used for consensus/validation checks, just efficiency when looking for potential BCTs)
+        consensus.minHiveCheckBlock = 1;                    // Don't bother checking below this height for Hive blocks (not used for consensus/validation checks, just efficiency when looking for potential BCTs)
         consensus.hiveTargetAdjustAggression = 30;          // Snap speed for bee hash target adjustment EMA
         consensus.hiveBlockSpacingTarget = 2;               // Target Hive block frequency (1 out of this many blocks should be Hivemined)
         consensus.hiveBlockSpacingTargetTypical = 3;        // Observed Hive block frequency (1 out of this many blocks are observed to be Hive)
@@ -153,7 +156,7 @@ public:
         consensus.nMinimumChainWork = uint256S("0x00");  // Neon: [NEED UPDATE LATER]
 
         // By default assume that the signatures in ancestors of this block are valid.
-        consensus.defaultAssumeValid = uint256S("0x00000000000000238fc08340331e2735a64ac2baccdc3db0984ef65c08f658b2"); // Neon: 1695238
+        consensus.defaultAssumeValid = uint256S("0xd8ee19cd57348326c177134619778e82fee8b180180030158609f7d1b4285cb9"); // Neon: 1695238
 
         /**
          * The message start string is designed to be unlikely to occur in normal data.
@@ -167,10 +170,10 @@ public:
         nDefaultPort = 32458;
         nPruneAfterHeight = 100000;
 
-        genesis = CreateGenesisBlock(1317972665, 2084524493, 0x1e0ffff0, 1, 50 * COIN);
+        genesis = CreateGenesisBlock(1618257080, 2085618204, 0x1e0ffff0, 1, 50 * COIN);
         consensus.hashGenesisBlock = genesis.GetHash();
-        assert(consensus.hashGenesisBlock == uint256S("0x12a765e31ffd4059bada1e25190f6e98c99d9714d334efa41a195a7e7e04bfe2"));
-        assert(genesis.hashMerkleRoot == uint256S("0x97ddfbbae6be97fd6cdf3e7ca13232a3afff2353e29badfab7f73011edd4ced9"));
+        assert(consensus.hashGenesisBlock == uint256S("0xd8ee19cd57348326c177134619778e82fee8b180180030158609f7d1b4285cb9"));
+        assert(genesis.hashMerkleRoot == uint256S("0xf4fde5c1be3fcb865d79dfe45cd0ad00ca71c1bdcb27e088ba0025b0a85a4045"));
 
         // Note that of those with the service bits flag, most only support a subset of possible options
         //vSeeds.emplace_back("seeds.litecoinca.sh");
@@ -192,16 +195,16 @@ public:
 
         checkpointData = {
             {
-                //{  0, uint256S("0x")},
+                {  0, uint256S("0xd8ee19cd57348326c177134619778e82fee8b180180030158609f7d1b4285cb9")},
             }
         };
 
         chainTxData = ChainTxData{
             // Data as of block c3b156fd45db915f60b139f251cddc3f403686b0eb82a5edf57408599fda44b9 (height 1867668).
-            1578837330, // * UNIX timestamp of last known number of transactions
-            22680508,   // * total number of transactions between genesis and that timestamp
+            1618257080, // * UNIX timestamp of last known number of transactions
+            0,   // * total number of transactions between genesis and that timestamp
                         //   (the tx=... number in the SetBestChain debug.log lines)
-            0.0170      // * estimated number of transactions per second after that timestamp
+            0      // * estimated number of transactions per second after that timestamp
         };
     }
 };
@@ -256,8 +259,7 @@ public:
 
         // Neon: Hive 1.1: Deployment
         consensus.vDeployments[Consensus::DEPLOYMENT_HIVE_1_1].bit = 9;
-        consensus.vDeployments[Consensus::DEPLOYMENT_HIVE_1_1].nStartTime =
-            Consensus::BIP9Deployment::ALWAYS_ACTIVE;
+        consensus.vDeployments[Consensus::DEPLOYMENT_HIVE_1_1].nStartTime = 1618266252;
         consensus.vDeployments[Consensus::DEPLOYMENT_HIVE_1_1].nTimeout =
             Consensus::BIP9Deployment::NO_TIMEOUT;
 
@@ -270,7 +272,7 @@ public:
         consensus.beeGestationBlocks = 48*24;               // The number of blocks for a new bee to mature
         consensus.beeLifespanBlocks = 48*24*14;             // The number of blocks a bee lives for after maturation
         consensus.powLimitHive = uint256S("0fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");  // Highest (easiest) bee hash target
-        consensus.minHiveCheckBlock = 100;                  // Don't bother checking below this height for Hive blocks (not used for consensus/validation checks, just efficiency when looking for potential BCTs)
+        consensus.minHiveCheckBlock = 1;                    // Don't bother checking below this height for Hive blocks (not used for consensus/validation checks, just efficiency when looking for potential BCTs)
         consensus.hiveTargetAdjustAggression = 30;          // Snap speed for bee hash target adjustment EMA
         consensus.hiveBlockSpacingTarget = 2;               // Target Hive block frequency (1 out of this many blocks should be Hivemined)
         consensus.hiveBlockSpacingTargetTypical = 3;        // Observed Hive block frequency (1 out of this many blocks are observed to be Hive)
@@ -291,7 +293,7 @@ public:
         consensus.nMinimumChainWork = uint256S("0x00");  // Neon: [NEED UPDATE LATER]
 
         // By default assume that the signatures in ancestors of this block are valid.
-        consensus.defaultAssumeValid = uint256S("000000317630e88ba7eb1a03579c4102adb9d23dc8261ca4db27fa3ed1cad044"); // Neon: 166
+        consensus.defaultAssumeValid = uint256S("0x7643b9a24ebe144d88cff06a385523f186493a09f170bb162cc545b28e9e4245"); // Neon: 166
 
         pchMessageStart[0] = 0x76;
         pchMessageStart[1] = 0xc1;
@@ -300,10 +302,10 @@ public:
         nDefaultPort = 32456;
         nPruneAfterHeight = 1000;
 
-        genesis = CreateGenesisBlock(1486949366, 293345, 0x1e0ffff0, 1, 50 * COIN);
+        genesis = CreateGenesisBlock(1618266252, 1062264, 0x1e0ffff0, 1, 50 * COIN);
         consensus.hashGenesisBlock = genesis.GetHash();
-        assert(consensus.hashGenesisBlock == uint256S("0x4966625a4b2851d9fdee139e56211a0d88575f59ed816ff5e6a63deb4e3e29a0"));
-        assert(genesis.hashMerkleRoot == uint256S("0x97ddfbbae6be97fd6cdf3e7ca13232a3afff2353e29badfab7f73011edd4ced9"));
+        assert(consensus.hashGenesisBlock == uint256S("0x7643b9a24ebe144d88cff06a385523f186493a09f170bb162cc545b28e9e4245"));
+        assert(genesis.hashMerkleRoot == uint256S("0xf4fde5c1be3fcb865d79dfe45cd0ad00ca71c1bdcb27e088ba0025b0a85a4045"));
 
         vFixedSeeds.clear();
         //vSeeds.emplace_back("testseeds.litecoinca.sh");
@@ -325,14 +327,14 @@ public:
 
         checkpointData = (CCheckpointData) {
             {
-                //{0, uint256S("0x")},
+                {0, uint256S("0x7643b9a24ebe144d88cff06a385523f186493a09f170bb162cc545b28e9e4245")},
             }
         };
 
-        chainTxData = ChainTxData{  // As at 141
-            1565801161,
-            142,
-            0.05
+        chainTxData = ChainTxData{
+            1618266252,
+            0,
+            0
         };
     }
 };
@@ -361,9 +363,11 @@ public:
         consensus.vDeployments[Consensus::DEPLOYMENT_TESTDUMMY].bit = 28;
         consensus.vDeployments[Consensus::DEPLOYMENT_TESTDUMMY].nStartTime = 0;
         consensus.vDeployments[Consensus::DEPLOYMENT_TESTDUMMY].nTimeout = Consensus::BIP9Deployment::NO_TIMEOUT;
+
         consensus.vDeployments[Consensus::DEPLOYMENT_CSV].bit = 0;
         consensus.vDeployments[Consensus::DEPLOYMENT_CSV].nStartTime = 0;
         consensus.vDeployments[Consensus::DEPLOYMENT_CSV].nTimeout = Consensus::BIP9Deployment::NO_TIMEOUT;
+
         consensus.vDeployments[Consensus::DEPLOYMENT_SEGWIT].bit = 1;
         consensus.vDeployments[Consensus::DEPLOYMENT_SEGWIT].nStartTime = Consensus::BIP9Deployment::ALWAYS_ACTIVE;
         consensus.vDeployments[Consensus::DEPLOYMENT_SEGWIT].nTimeout = Consensus::BIP9Deployment::NO_TIMEOUT;
