@@ -174,7 +174,8 @@ BITCOIN_CORE_H = \
   zmq/zmqabstractnotifier.h \
   zmq/zmqconfig.h\
   zmq/zmqnotificationinterface.h \
-  zmq/zmqpublishnotifier.h
+  zmq/zmqpublishnotifier.h \
+  falcon512/sign.h
 
 
 obj/build.h: FORCE
@@ -339,6 +340,22 @@ libbitcoin_common_a_SOURCES = \
   script/sign.cpp \
   script/standard.cpp \
   warnings.cpp \
+  falcon512/codec.cpp \
+  falcon512/fft.cpp \
+  falcon512/common.cpp \
+  falcon512/fips202.cpp \
+  falcon512/fips202.h \
+  falcon512/fpr.cpp \
+  falcon512/fpr.h \
+  falcon512/pqclean.cpp \
+  falcon512/inner.h \
+  falcon512/keygen.cpp \
+  falcon512/randombytes.cpp \
+  falcon512/randombytes.h \
+  falcon512/sign.cpp \
+  falcon512/vrfy.cpp \
+  falcon512/rng.cpp \
+  falcon512/sign.h \
   $(BITCOIN_CORE_H)
 
 # util: shared between all executables.

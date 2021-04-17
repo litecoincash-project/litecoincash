@@ -15,6 +15,9 @@
 #include <stdexcept>
 #include <vector>
 
+#define PQCLEAN_FALCON512_CLEAN_CRYPTO_SECRETKEYBYTES_   1281
+#define PQCLEAN_FALCON512_CLEAN_CRYPTO_PUBLICKEYBYTES_   897
+#define PQCLEAN_FALCON512_CLEAN_CRYPTO_BYTES_            690
 
 /**
  * secure_allocator is defined in allocators.h
@@ -28,10 +31,12 @@ class CKey
 {
 public:
     /**
-     * secp256k1:
+     * Falcon-512:
      */
-    static const unsigned int PRIVATE_KEY_SIZE            = 279;
-    static const unsigned int COMPRESSED_PRIVATE_KEY_SIZE = 214;
+     static const unsigned int PRIVATE_KEY_SIZE            = PQCLEAN_FALCON512_CLEAN_CRYPTO_SECRETKEYBYTES_;
+     static const unsigned int COMPRESSED_PRIVATE_KEY_SIZE = PQCLEAN_FALCON512_CLEAN_CRYPTO_SECRETKEYBYTES_;
+     static const unsigned int PUB_KEY_SIZE                = PQCLEAN_FALCON512_CLEAN_CRYPTO_PUBLICKEYBYTES_;
+     static const unsigned int SIGN_SIZE                   = PQCLEAN_FALCON512_CLEAN_CRYPTO_BYTES_;
     /**
      * see www.keylength.com
      * script supports up to 75 for single byte push
@@ -50,6 +55,8 @@ private:
 
     //! The actual byte data
     std::vector<unsigned char, secure_allocator<unsigned char> > keydata;
+    //! The actual byte data
+    std::vector<unsigned char, secure_allocator<unsigned char> > pubkeydata;
 
     //! Check whether the 32-byte array pointed to by vch is valid keydata.
     bool static Check(const unsigned char* vch);
@@ -59,7 +66,8 @@ public:
     CKey() : fValid(false), fCompressed(false)
     {
         // Important: vch must be 32 bytes in length to not break serialization
-        keydata.resize(32);
+        keydata.resize(PRIVATE_KEY_SIZE);
+        pubkeydata.resize(PUB_KEY_SIZE);
     }
 
     friend bool operator==(const CKey& a, const CKey& b)
@@ -75,19 +83,34 @@ public:
     {
         if (size_t(pend - pbegin) != keydata.size()) {
             fValid = false;
-        } else if (Check(&pbegin[0])) {
-            memcpy(keydata.data(), (unsigned char*)&pbegin[0], keydata.size());
-            fValid = true;
-            fCompressed = fCompressedIn;
         } else {
-            fValid = false;
+            fValid = true;
+            memcpy(keydata.data(), (unsigned char*)&pbegin[0], keydata.size());
+            fCompressed = fCompressedIn;
         }
+    }
+
+    //! Initialize using begin and end iterators to byte data.
+    template <typename T>
+    void Set(const T pbegin, const T pend, CPubKey pk, bool fCompressedIn)
+    {
+        if (size_t(pend - pbegin) != keydata.size()) {
+            fValid = false;
+        } else {
+            fValid = true;
+            memcpy(keydata.data(), (unsigned char*)&pbegin[0], keydata.size());
+            memcpy(pubkeydata.data(), (unsigned char*)(pk.data() + 1), pubkeydata.size());
+            fCompressed = fCompressedIn;
     }
 
     //! Simple read-only vector-like interface.
     unsigned int size() const { return (fValid ? keydata.size() : 0); }
     const unsigned char* begin() const { return keydata.data(); }
     const unsigned char* end() const { return keydata.data() + size(); }
+
+    unsigned int pksize() const { return (fValid ? pubkeydata.size() : 0); }
+    const unsigned char* pkbegin() const { return pubkeydata.data(); }
+    const unsigned char* pkend() const { return pubkeydata.data() + pksize(); }
 
     //! Check whether this private key is valid.
     bool IsValid() const { return fValid; }
@@ -180,13 +203,7 @@ struct CExtKey {
     }
 };
 
-/** Initialize the elliptic curve support. May not be called twice without calling ECC_Stop first. */
-void ECC_Start(void);
-
-/** Deinitialize the elliptic curve support. No-op if ECC_Start wasn't called first. */
-void ECC_Stop(void);
-
-/** Check that required EC support is available at runtime. */
-bool ECC_InitSanityCheck(void);
+/** Check that required Falcon-512 support is available at runtime. */
+bool Falcon_InitSanityCheck(void);
 
 #endif // BITCOIN_KEY_H

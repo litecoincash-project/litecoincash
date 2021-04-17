@@ -278,7 +278,6 @@ void Shutdown()
     CloseWallets();
 #endif
     globalVerifyHandle.reset();
-    ECC_Stop();
     LogPrintf("%s: done\n", __func__);
 }
 
@@ -709,8 +708,8 @@ void ThreadImport(std::vector<fs::path> vImportFiles)
  */
 bool InitSanityCheck(void)
 {
-    if(!ECC_InitSanityCheck()) {
-        InitError("Elliptic curve cryptography sanity check failure. Aborting.");
+    if(!Falcon_InitSanityCheck()) {
+        InitError("Falcon-512 cryptography sanity check failure. Aborting.");
         return false;
     }
 
@@ -1185,7 +1184,6 @@ bool AppInitSanityChecks()
     std::string sha256_algo = SHA256AutoDetect();
     LogPrintf("Using the '%s' SHA256 implementation\n", sha256_algo);
     RandomInit();
-    ECC_Start();
     globalVerifyHandle.reset(new ECCVerifyHandle());
 
     // Sanity check

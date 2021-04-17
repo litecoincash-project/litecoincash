@@ -115,10 +115,8 @@ enum
 
     // Neon: Support SIGHASH_FORKID
     //
-    SCRIPT_ENABLE_SIGHASH_FORKID = (1U << 16),    
+    SCRIPT_ENABLE_SIGHASH_FORKID = (1U << 16),
 };
-
-bool CheckSignatureEncoding(const std::vector<unsigned char> &vchSig, unsigned int flags, ScriptError* serror);
 
 struct PrecomputedTransactionData
 {

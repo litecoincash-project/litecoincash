@@ -73,7 +73,7 @@ const std::map<unsigned char, std::string> mapSigHashTypes = {
     {static_cast<unsigned char>(SIGHASH_SINGLE|SIGHASH_FORKID), std::string("SINGLE|FORKID")},										// Neon: Replay attack protection
     {static_cast<unsigned char>(SIGHASH_ALL|SIGHASH_FORKID|SIGHASH_ANYONECANPAY), std::string("ALL|FORKID|ANYONECANPAY")},			// Neon: Replay attack protection
     {static_cast<unsigned char>(SIGHASH_NONE|SIGHASH_FORKID|SIGHASH_ANYONECANPAY), std::string("NONE|FORKID|ANYONECANPAY")},		// Neon: Replay attack protection
-    {static_cast<unsigned char>(SIGHASH_SINGLE|SIGHASH_FORKID|SIGHASH_ANYONECANPAY), std::string("SINGLE|FORKID|ANYONECANPAY")},	// Neon: Replay attack protection    
+    {static_cast<unsigned char>(SIGHASH_SINGLE|SIGHASH_FORKID|SIGHASH_ANYONECANPAY), std::string("SINGLE|FORKID|ANYONECANPAY")},	// Neon: Replay attack protection
 };
 
 /**
@@ -107,14 +107,10 @@ std::string ScriptToAsmStr(const CScript& script, const bool fAttemptSighashDeco
                     // goal: only attempt to decode a defined sighash type from data that looks like a signature within a scriptSig.
                     // this won't decode correctly formatted public keys in Pubkey or Multisig scripts due to
                     // the restrictions on the pubkey formats (see IsCompressedOrUncompressedPubKey) being incongruous with the
-                    // checks in CheckSignatureEncoding.
-                    auto flags = SCRIPT_VERIFY_STRICTENC | SCRIPT_ENABLE_SIGHASH_FORKID;    // Neon: use SCRIPT_ENABLE_SIGHASH_FORKID
-                    if (CheckSignatureEncoding(vch, flags, nullptr)) {
-                        const unsigned char chSigHashType = vch.back();
-                        if (mapSigHashTypes.count(chSigHashType)) {
-                            strSigHashDecode = "[" + mapSigHashTypes.find(chSigHashType)->second + "]";
-                            vch.pop_back(); // remove the sighash type byte. it will be replaced by the decode.
-                        }
+                    const unsigned char chSigHashType = vch.back();
+                    if (mapSigHashTypes.count(chSigHashType)) {
+                        strSigHashDecode = "[" + mapSigHashTypes.find(chSigHashType)->second + "]";
+                        vch.pop_back(); // remove the sighash type byte. it will be replaced by the decode.
                     }
                     str += HexStr(vch) + strSigHashDecode;
                 } else {

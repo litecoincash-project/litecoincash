@@ -13,6 +13,8 @@
 #include <secp256k1.h>
 #include <secp256k1_recovery.h>
 
+#include <sign.h>
+
 static secp256k1_context* secp256k1_context_sign = nullptr;
 
 /** These functions are taken from the libsecp256k1 distribution and are very ugly. */
@@ -156,58 +158,49 @@ bool CKey::Check(const unsigned char *vch) {
 }
 
 void CKey::MakeNewKey(bool fCompressedIn) {
-    do {
-        GetStrongRandBytes(keydata.data(), keydata.size());
-    } while (!Check(keydata.data()));
+    unsigned char sk[PRIVATE_KEY_SIZE];
+    unsigned char pk[PUB_KEY_SIZE];
+    int r = PQCLEAN_FALCON512_CLEAN_crypto_sign_keypair(pk,sk);
+    if(r != 0)
+        LogPrintf("---- Falcon-512 Key pair gen fail.\n");
+
+    memcpy(keydata.data(), sk, PRIVATE_KEY_SIZE);
+    memcpy(pubkeydata.data(), pk, PUB_KEY_SIZE);
     fValid = true;
-    fCompressed = fCompressedIn;
+    fCompressed = true;
 }
 
 CPrivKey CKey::GetPrivKey() const {
     assert(fValid);
     CPrivKey privkey;
-    int ret;
-    size_t privkeylen;
     privkey.resize(PRIVATE_KEY_SIZE);
-    privkeylen = PRIVATE_KEY_SIZE;
-    ret = ec_privkey_export_der(secp256k1_context_sign, (unsigned char*) privkey.data(), &privkeylen, begin(), fCompressed ? SECP256K1_EC_COMPRESSED : SECP256K1_EC_UNCOMPRESSED);
-    assert(ret);
-    privkey.resize(privkeylen);
+    memcpy(privkey.data(), keydata.data(), keydata.size());
     return privkey;
 }
 
 CPubKey CKey::GetPubKey() const {
     assert(fValid);
-    secp256k1_pubkey pubkey;
-    size_t clen = CPubKey::PUBLIC_KEY_SIZE;
-    CPubKey result;
-    int ret = secp256k1_ec_pubkey_create(secp256k1_context_sign, &pubkey, begin());
-    assert(ret);
-    secp256k1_ec_pubkey_serialize(secp256k1_context_sign, (unsigned char*)result.begin(), &clen, &pubkey, fCompressed ? SECP256K1_EC_COMPRESSED : SECP256K1_EC_UNCOMPRESSED);
-    assert(result.size() == clen);
-    assert(result.IsValid());
-    return result;
+    CPubKey pubkey;
+    unsigned char* pch = (unsigned char *)pubkey.begin();
+    memcpy(pch + 1, pubkeydata.data(), pubkeydata.size());
+    pch[0] = 7;
+    return pubkey;
 }
 
 bool CKey::Sign(const uint256 &hash, std::vector<unsigned char>& vchSig, uint32_t test_case) const {
-    if (!fValid)
-        return false;
-    vchSig.resize(CPubKey::SIGNATURE_SIZE);
-    size_t nSigLen = CPubKey::SIGNATURE_SIZE;
-    unsigned char extra_entropy[32] = {0};
-    WriteLE32(extra_entropy, test_case);
-    secp256k1_ecdsa_signature sig;
-    int ret = secp256k1_ecdsa_sign(secp256k1_context_sign, &sig, hash.begin(), begin(), secp256k1_nonce_function_rfc6979, test_case ? extra_entropy : nullptr);
-    assert(ret);
-    secp256k1_ecdsa_signature_serialize_der(secp256k1_context_sign, (unsigned char*)vchSig.data(), &nSigLen, &sig);
-    vchSig.resize(nSigLen);
+    if (!fValid) return false;
+
+    size_t sig_len;
+    vchSig.resize(PQCLEAN_FALCON512_CLEAN_CRYPTO_BYTES_);
+    int r = PQCLEAN_FALCON512_CLEAN_crypto_sign_signature(vchSig.data(), &sig_len, hash.begin(), 32, keydata.data());
+    vchSig.resize(sig_len);
+    if(r != 0)
+        LogPrintf("---- Falcon-512 Signature fail.\n");
+
     return true;
 }
 
 bool CKey::VerifyPubKey(const CPubKey& pubkey) const {
-    if (pubkey.IsCompressed() != fCompressed) {
-        return false;
-    }
     unsigned char rnd[8];
     std::string str = "Bitcoin key verification\n";
     GetRandBytes(rnd, sizeof(rnd));
@@ -219,28 +212,26 @@ bool CKey::VerifyPubKey(const CPubKey& pubkey) const {
 }
 
 bool CKey::SignCompact(const uint256 &hash, std::vector<unsigned char>& vchSig) const {
-    if (!fValid)
-        return false;
-    vchSig.resize(CPubKey::COMPACT_SIGNATURE_SIZE);
-    int rec = -1;
-    secp256k1_ecdsa_recoverable_signature sig;
-    int ret = secp256k1_ecdsa_sign_recoverable(secp256k1_context_sign, &sig, hash.begin(), begin(), secp256k1_nonce_function_rfc6979, nullptr);
-    assert(ret);
-    secp256k1_ecdsa_recoverable_signature_serialize_compact(secp256k1_context_sign, (unsigned char*)&vchSig[1], &rec, &sig);
-    assert(ret);
-    assert(rec != -1);
-    vchSig[0] = 27 + rec + (fCompressed ? 4 : 0);
+    if (!fValid) return false;
+
+    size_t sig_len;
+    vchSig.resize(PQCLEAN_FALCON512_CLEAN_CRYPTO_BYTES_ + pksize());
+    int r = PQCLEAN_FALCON512_CLEAN_crypto_sign_signature(vchSig.data(), &sig_len, hash.begin(), 32, keydata.data());
+    vchSig.resize(sig_len + pksize());
+    memcpy(vchSig.data() + sig_len,pubkeydata.data(),pksize());
+    if(r != 0)
+        LogPrintf("---- Falcon-512 Signature fail.\n");
+
     return true;
 }
 
-bool CKey::Load(const CPrivKey &privkey, const CPubKey &vchPubKey, bool fSkipCheck=false) {
-    if (!ec_privkey_import_der(secp256k1_context_sign, (unsigned char*)begin(), privkey.data(), privkey.size()))
-        return false;
-    fCompressed = vchPubKey.IsCompressed();
+bool CKey::Load(const CPrivKey &privkey, const CPubKey &vchPubKey, bool fSkipCheck = false) {
+    memcpy((unsigned char*)begin(), privkey.data(), privkey.size());
+    fCompressed = true;
     fValid = true;
+    memcpy((unsigned char*)pkbegin(), vchPubKey.data()+1, pksize());
 
-    if (fSkipCheck)
-        return true;
+    if (fSkipCheck) return true;
 
     return VerifyPubKey(vchPubKey);
 }
@@ -313,35 +304,9 @@ void CExtKey::Decode(const unsigned char code[BIP32_EXTKEY_SIZE]) {
     key.Set(code+42, code+BIP32_EXTKEY_SIZE, true);
 }
 
-bool ECC_InitSanityCheck() {
+bool Falcon_InitSanityCheck() {
     CKey key;
     key.MakeNewKey(true);
     CPubKey pubkey = key.GetPubKey();
     return key.VerifyPubKey(pubkey);
-}
-
-void ECC_Start() {
-    assert(secp256k1_context_sign == nullptr);
-
-    secp256k1_context *ctx = secp256k1_context_create(SECP256K1_CONTEXT_SIGN);
-    assert(ctx != nullptr);
-
-    {
-        // Pass in a random blinding seed to the secp256k1 context.
-        std::vector<unsigned char, secure_allocator<unsigned char>> vseed(32);
-        GetRandBytes(vseed.data(), 32);
-        bool ret = secp256k1_context_randomize(ctx, vseed.data());
-        assert(ret);
-    }
-
-    secp256k1_context_sign = ctx;
-}
-
-void ECC_Stop() {
-    secp256k1_context *ctx = secp256k1_context_sign;
-    secp256k1_context_sign = nullptr;
-
-    if (ctx) {
-        secp256k1_context_destroy(ctx);
-    }
 }

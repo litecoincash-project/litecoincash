@@ -61,17 +61,25 @@ static inline void popstack(std::vector<valtype>& stack)
 }
 
 bool static IsCompressedOrUncompressedPubKey(const valtype &vchPubKey) {
-    if (vchPubKey.size() < 33) {
+    if (vchPubKey.size() < CPubKey::COMPRESSED_PUBLIC_KEY_SIZE) {
         //  Non-canonical public key: too short
         return false;
     }
+    if(vchPubKey[0] == 0x07) {
+       if (vchPubKey.size() != CPubKey::PUBLIC_KEY_SIZE) {
+            //  Non-canonical public key: invalid length for uncompressed key
+            return false;
+        } else {
+            return true;
+        }
+    }
     if (vchPubKey[0] == 0x04) {
-        if (vchPubKey.size() != 65) {
+        if (vchPubKey.size() != CPubKey::PUBLIC_KEY_SIZE) {
             //  Non-canonical public key: invalid length for uncompressed key
             return false;
         }
     } else if (vchPubKey[0] == 0x02 || vchPubKey[0] == 0x03) {
-        if (vchPubKey.size() != 33) {
+        if (vchPubKey.size() != CPubKey::COMPRESSED_PUBLIC_KEY_SIZE) {
             //  Non-canonical public key: invalid length for compressed key
             return false;
         }
@@ -83,7 +91,7 @@ bool static IsCompressedOrUncompressedPubKey(const valtype &vchPubKey) {
 }
 
 bool static IsCompressedPubKey(const valtype &vchPubKey) {
-    if (vchPubKey.size() != 33) {
+    if (vchPubKey.size() != CPubKey::COMPRESSED_PUBLIC_KEY_SIZE) {
         //  Non-canonical public key: invalid length for compressed key
         return false;
     }
@@ -99,7 +107,7 @@ bool static IsCompressedPubKey(const valtype &vchPubKey) {
  * Where R and S are not negative (their first byte has its highest bit not set), and not
  * excessively padded (do not start with a 0 byte, unless an otherwise negative number follows,
  * in which case a single 0 byte is necessary and even required).
- * 
+ *
  * See https://bitcointalk.org/index.php?topic=8392.msg127623#msg127623
  *
  * This function is consensus-critical since BIP66.
@@ -139,7 +147,7 @@ bool static IsValidSignatureEncoding(const std::vector<unsigned char> &sig) {
     // Verify that the length of the signature matches the sum of the length
     // of the elements.
     if ((size_t)(lenR + lenS + 7) != sig.size()) return false;
- 
+
     // Check whether the R element is an integer.
     if (sig[2] != 0x02) return false;
 
@@ -210,33 +218,6 @@ static void CleanupScriptCode(CScript &scriptCode, const std::vector<uint8_t> &v
     uint32_t nHashType = GetHashType(vchSig);
     if (!(flags & SCRIPT_ENABLE_SIGHASH_FORKID) || !(nHashType & SIGHASH_FORKID))
         scriptCode.FindAndDelete(CScript(vchSig));
-}
-
-bool CheckSignatureEncoding(const std::vector<unsigned char> &vchSig, unsigned int flags, ScriptError* serror) {
-    // Empty signature. Not strictly DER encoded, but allowed to provide a
-    // compact way to provide an invalid signature for use with CHECK(MULTI)SIG
-    if (vchSig.size() == 0) {
-        return true;
-    }
-    if ((flags & (SCRIPT_VERIFY_DERSIG | SCRIPT_VERIFY_LOW_S | SCRIPT_VERIFY_STRICTENC)) != 0 && !IsValidSignatureEncoding(vchSig)) {
-        return set_error(serror, SCRIPT_ERR_SIG_DER);
-    } else if ((flags & SCRIPT_VERIFY_LOW_S) != 0 && !IsLowDERSignature(vchSig, serror)) {
-        // serror is set
-        return false;
-    } else if ((flags & SCRIPT_VERIFY_STRICTENC) != 0) {            // Neon: Enforce fork ID checking
-        if (!IsDefinedHashtypeSignature(vchSig)) {
-            return set_error(serror, SCRIPT_ERR_SIG_HASHTYPE);
-        }
-        bool usesForkId = GetHashType(vchSig) & SIGHASH_FORKID;
-        bool forkIdEnabled = flags & SCRIPT_ENABLE_SIGHASH_FORKID;
-        if (!forkIdEnabled && usesForkId) {
-            return set_error(serror, SCRIPT_ERR_ILLEGAL_FORKID);
-        }
-        if (forkIdEnabled && !usesForkId) {
-            return set_error(serror, SCRIPT_ERR_MUST_USE_FORKID);
-        }
-    }
-    return true;
 }
 
 bool static CheckPubKeyEncoding(const valtype &vchPubKey, unsigned int flags, const SigVersion &sigversion, ScriptError* serror) {
@@ -890,7 +871,7 @@ bool EvalScript(std::vector<std::vector<unsigned char> >& stack, const CScript& 
                     popstack(stack);
                     stack.push_back(vchHash);
                 }
-                break;                                   
+                break;
 
                 case OP_CODESEPARATOR:
                 {
@@ -917,10 +898,6 @@ bool EvalScript(std::vector<std::vector<unsigned char> >& stack, const CScript& 
                         CleanupScriptCode(scriptCode, vchSig, flags);   // Neon: Check fork ID before calling FindAndDelete
                     }
 
-                    if (!CheckSignatureEncoding(vchSig, flags, serror) || !CheckPubKeyEncoding(vchPubKey, flags, sigversion, serror)) {
-                        //serror is set
-                        return false;
-                    }
                     bool fSuccess = checker.CheckSig(vchSig, vchPubKey, scriptCode, sigversion);
 
                     if (!fSuccess && (flags & SCRIPT_VERIFY_NULLFAIL) && vchSig.size())
@@ -987,14 +964,6 @@ bool EvalScript(std::vector<std::vector<unsigned char> >& stack, const CScript& 
                     {
                         valtype& vchSig    = stacktop(-isig);
                         valtype& vchPubKey = stacktop(-ikey);
-
-                        // Note how this makes the exact order of pubkey/signature evaluation
-                        // distinguishable by CHECKMULTISIG NOT if the STRICTENC flag is set.
-                        // See the script_(in)valid tests for details.
-                        if (!CheckSignatureEncoding(vchSig, flags, serror) || !CheckPubKeyEncoding(vchPubKey, flags, sigversion, serror)) {
-                            // serror is set
-                            return false;
-                        }
 
                         // Check signature
                         bool fOk = checker.CheckSig(vchSig, vchPubKey, scriptCode, sigversion);
