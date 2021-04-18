@@ -99,54 +99,6 @@ CTranslationInterface translationInterface;
 /** Log categories bitfield. */
 std::atomic<uint32_t> logCategories(0);
 
-/** Init OpenSSL library multithreading support */
-static std::unique_ptr<CCriticalSection[]> ppmutexOpenSSL;
-void locking_callback(int mode, int i, const char* file, int line) NO_THREAD_SAFETY_ANALYSIS
-{
-    if (mode & CRYPTO_LOCK) {
-        ENTER_CRITICAL_SECTION(ppmutexOpenSSL[i]);
-    } else {
-        LEAVE_CRITICAL_SECTION(ppmutexOpenSSL[i]);
-    }
-}
-
-// Singleton for wrapping OpenSSL setup/teardown.
-class CInit
-{
-public:
-    CInit()
-    {
-        // Init OpenSSL library multithreading support
-        ppmutexOpenSSL.reset(new CCriticalSection[CRYPTO_num_locks()]);
-        CRYPTO_set_locking_callback(locking_callback);
-
-        // OpenSSL can optionally load a config file which lists optional loadable modules and engines.
-        // We don't use them so we don't require the config. However some of our libs may call functions
-        // which attempt to load the config file, possibly resulting in an exit() or crash if it is missing
-        // or corrupt. Explicitly tell OpenSSL not to try to load the file. The result for our libs will be
-        // that the config appears to have been loaded and there are no modules/engines available.
-        OPENSSL_no_config();
-
-#ifdef WIN32
-        // Seed OpenSSL PRNG with current contents of the screen
-        RAND_screen();
-#endif
-
-        // Seed OpenSSL PRNG with performance counter
-        RandAddSeed();
-    }
-    ~CInit()
-    {
-        // Securely erase the memory used by the PRNG
-        RAND_cleanup();
-        // Shutdown OpenSSL library multithreading support
-        CRYPTO_set_locking_callback(nullptr);
-        // Clear the set of locks now to maintain symmetry with the constructor.
-        ppmutexOpenSSL.reset();
-    }
-}
-instance_of_cinit;
-
 /**
  * LogPrintf() has been broken a couple of times now
  * by well-meaning people adding mutexes in the most straightforward way.
@@ -952,10 +904,10 @@ int GetNumCores()
 std::string CopyrightHolders(const std::string& strPrefix)
 {
     // Neon: Add a row
-    std::string strFirstPrefix = strPrefix;    
-    strFirstPrefix.replace(strFirstPrefix.find("2011-"), sizeof("2011-")-1, "2018-");        
+    std::string strFirstPrefix = strPrefix;
+    strFirstPrefix.replace(strFirstPrefix.find("2011-"), sizeof("2011-")-1, "2018-");
     std::string strCopyrightHolders = strFirstPrefix + strprintf(_(COPYRIGHT_HOLDERS), _(COPYRIGHT_HOLDERS_SUBSTITUTION));
-    
+
     // Neon: Check for untranslated substitution to make sure Litecion Core copyright is not removed by accident
     if (strprintf(COPYRIGHT_HOLDERS, COPYRIGHT_HOLDERS_SUBSTITUTION).find("Litecoin Core") == std::string::npos)
         strCopyrightHolders += "\n" + strPrefix + "The Litecoin Core developers";
