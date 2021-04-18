@@ -41,7 +41,6 @@ BasicTestingSetup::BasicTestingSetup(const std::string& chainName)
 {
         SHA256AutoDetect();
         RandomInit();
-        ECC_Start();
         SetupEnvironment();
         SetupNetworking();
         InitSignatureCache();
@@ -52,10 +51,7 @@ BasicTestingSetup::BasicTestingSetup(const std::string& chainName)
         noui_connect();
 }
 
-BasicTestingSetup::~BasicTestingSetup()
-{
-        ECC_Stop();
-}
+BasicTestingSetup::~BasicTestingSetup() { }
 
 TestingSetup::TestingSetup(const std::string& chainName) : BasicTestingSetup(chainName)
 {

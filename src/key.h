@@ -83,24 +83,28 @@ public:
     {
         if (size_t(pend - pbegin) != keydata.size()) {
             fValid = false;
-        } else {
-            fValid = true;
+        } else if (true){//(Check(&pbegin[0])) {
             memcpy(keydata.data(), (unsigned char*)&pbegin[0], keydata.size());
+            fValid = true;
             fCompressed = fCompressedIn;
+        } else {
+            fValid = false;
         }
     }
-
     //! Initialize using begin and end iterators to byte data.
     template <typename T>
     void Set(const T pbegin, const T pend, CPubKey pk, bool fCompressedIn)
     {
         if (size_t(pend - pbegin) != keydata.size()) {
             fValid = false;
-        } else {
+        } else if (true){//(Check(&pbegin[0])) {
             fValid = true;
             memcpy(keydata.data(), (unsigned char*)&pbegin[0], keydata.size());
             memcpy(pubkeydata.data(), (unsigned char*)(pk.data() + 1), pubkeydata.size());
             fCompressed = fCompressedIn;
+        } else {
+            fValid = false;
+        }
     }
 
     //! Simple read-only vector-like interface.

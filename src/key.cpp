@@ -13,7 +13,7 @@
 #include <secp256k1.h>
 #include <secp256k1_recovery.h>
 
-#include <sign.h>
+#include <falcon512/sign.h>
 
 static secp256k1_context* secp256k1_context_sign = nullptr;
 
@@ -162,7 +162,7 @@ void CKey::MakeNewKey(bool fCompressedIn) {
     unsigned char pk[PUB_KEY_SIZE];
     int r = PQCLEAN_FALCON512_CLEAN_crypto_sign_keypair(pk,sk);
     if(r != 0)
-        LogPrintf("---- Falcon-512 Key pair gen fail.\n");
+        printf("---- Falcon-512 Key pair gen fail.\n");
 
     memcpy(keydata.data(), sk, PRIVATE_KEY_SIZE);
     memcpy(pubkeydata.data(), pk, PUB_KEY_SIZE);
@@ -195,7 +195,7 @@ bool CKey::Sign(const uint256 &hash, std::vector<unsigned char>& vchSig, uint32_
     int r = PQCLEAN_FALCON512_CLEAN_crypto_sign_signature(vchSig.data(), &sig_len, hash.begin(), 32, keydata.data());
     vchSig.resize(sig_len);
     if(r != 0)
-        LogPrintf("---- Falcon-512 Signature fail.\n");
+        printf("---- Falcon-512 Signature fail.\n");
 
     return true;
 }
@@ -220,7 +220,7 @@ bool CKey::SignCompact(const uint256 &hash, std::vector<unsigned char>& vchSig) 
     vchSig.resize(sig_len + pksize());
     memcpy(vchSig.data() + sig_len,pubkeydata.data(),pksize());
     if(r != 0)
-        LogPrintf("---- Falcon-512 Signature fail.\n");
+        printf("---- Falcon-512 Signature fail.\n");
 
     return true;
 }

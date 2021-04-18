@@ -31,12 +31,12 @@ class CPubKey
 {
 public:
     /**
-     * secp256k1:
+     * Falcon-512:
      */
-    static const unsigned int PUBLIC_KEY_SIZE             = 65;
-    static const unsigned int COMPRESSED_PUBLIC_KEY_SIZE  = 33;
-    static const unsigned int SIGNATURE_SIZE              = 72;
-    static const unsigned int COMPACT_SIGNATURE_SIZE      = 65;
+    static constexpr unsigned int PUBLIC_KEY_SIZE             = 897 + 1;
+    static constexpr unsigned int COMPRESSED_PUBLIC_KEY_SIZE  = 897 + 1;
+    static constexpr unsigned int SIGNATURE_SIZE              = 690;
+    static constexpr unsigned int COMPACT_SIGNATURE_SIZE      = 690;
     /**
      * see www.keylength.com
      * script supports up to 75 for single byte push
@@ -54,13 +54,8 @@ private:
     unsigned char vch[PUBLIC_KEY_SIZE];
 
     //! Compute the length of a pubkey with a given first byte.
-    unsigned int static GetLen(unsigned char chHeader)
-    {
-        if (chHeader == 2 || chHeader == 3)
-            return COMPRESSED_PUBLIC_KEY_SIZE;
-        if (chHeader == 4 || chHeader == 6 || chHeader == 7)
-            return PUBLIC_KEY_SIZE;
-        return 0;
+    unsigned int static GetLen(unsigned char chHeader) {
+        return PUBLIC_KEY_SIZE;
     }
 
     //! Set this key data to be invalid
@@ -106,6 +101,7 @@ public:
 
     //! Simple read-only vector-like interface to the pubkey data.
     unsigned int size() const { return GetLen(vch[0]); }
+    const unsigned char* data() const { return vch; }
     const unsigned char* begin() const { return vch; }
     const unsigned char* end() const { return vch + size(); }
     const unsigned char& operator[](unsigned int pos) const { return vch[pos]; }

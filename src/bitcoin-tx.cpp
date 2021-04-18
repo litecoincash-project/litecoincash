@@ -670,12 +670,8 @@ class Secp256k1Init
     ECCVerifyHandle globalVerifyHandle;
 
 public:
-    Secp256k1Init() {
-        ECC_Start();
-    }
-    ~Secp256k1Init() {
-        ECC_Stop();
-    }
+    Secp256k1Init() { }
+    ~Secp256k1Init() { }
 };
 
 static void MutateTx(CMutableTransaction& tx, const std::string& command,
