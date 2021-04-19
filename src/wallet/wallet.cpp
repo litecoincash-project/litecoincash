@@ -148,7 +148,7 @@ const CWalletTx* CWallet::GetWalletTx(const uint256& hash) const
 CPubKey CWallet::GenerateNewKey(CWalletDB &walletdb, bool internal)
 {
     AssertLockHeld(cs_wallet); // mapKeyMetadata
-    bool fCompressed = CanSupportFeature(FEATURE_COMPRPUBKEY); // default to compressed public keys if we want 0.6.0 wallets
+    bool fCompressed = false;
 
     CKey secret;
 
@@ -156,17 +156,9 @@ CPubKey CWallet::GenerateNewKey(CWalletDB &walletdb, bool internal)
     int64_t nCreationTime = GetTime();
     CKeyMetadata metadata(nCreationTime);
 
-    // use HD key derivation if HD was enabled during wallet creation
-    if (IsHDEnabled()) {
-        DeriveNewChildKey(walletdb, metadata, secret, (CanSupportFeature(FEATURE_HD_SPLIT) ? internal : false));
-    } else {
+    assert(!IsHDEnabled());
+    if (!IsHDEnabled())
         secret.MakeNewKey(fCompressed);
-    }
-
-    // Compressed public keys were introduced in version 0.6.0
-    if (fCompressed) {
-        SetMinVersion(FEATURE_COMPRPUBKEY);
-    }
 
     CPubKey pubkey = secret.GetPubKey();
     assert(secret.VerifyPubKey(pubkey));
@@ -200,7 +192,7 @@ void CWallet::DeriveNewChildKey(CWalletDB &walletdb, CKeyMetadata& metadata, CKe
     masterKey.Derive(accountKey, BIP32_HARDENED_KEY_LIMIT);
 
     // derive m/0'/0' (external chain) OR m/0'/1' (internal chain)
-    assert(internal ? CanSupportFeature(FEATURE_HD_SPLIT) : true);
+    assert(internal ? false : true);
     accountKey.Derive(chainChildKey, BIP32_HARDENED_KEY_LIMIT+(internal ? 1 : 0));
 
     // derive child key at next index, skip keys already known to the wallet
@@ -679,7 +671,7 @@ bool CWallet::EncryptWallet(const SecureString& strWalletPassphrase)
         Lock();
         Unlock(strWalletPassphrase);
 
-        // if we are using HD, replace the HD master key (seed) with a new one
+        assert(!IsHDEnabled());
         if (IsHDEnabled()) {
             if (!SetHDMasterKey(GenerateNewHDMasterKey())) {
                 return false;
@@ -1478,7 +1470,6 @@ bool CWallet::SetHDMasterKey(const CPubKey& pubkey)
     // the child index counter in the database
     // as a hdchain object
     CHDChain newHdChain;
-    newHdChain.nVersion = CanSupportFeature(FEATURE_HD_SPLIT) ? CHDChain::VERSION_HD_CHAIN_SPLIT : CHDChain::VERSION_HD_BASE;
     newHdChain.masterKeyID = pubkey.GetID();
     SetHDChain(newHdChain, false);
 
@@ -2847,13 +2838,13 @@ bool CWallet::CreateBeeTransaction(int beeCount, CWalletTx& wtxNew, CReserveKey&
         strFailReason = "Error: The Hive has not yet been activated on the network";
         return false;
     }
-	
+
     // Sanity check beeCount
     if (beeCount < 1) {
         strFailReason = "Error: At least 1 bee must be created";
         return false;
     }
-	
+
     // Check available balance (note: can't check fee at this point because we don't know the tx size)
     CAmount beeCost = GetBeeCost(chainActive.Height(), consensusParams);
     CAmount curBalance = GetAvailableBalance();
@@ -2920,7 +2911,7 @@ bool CWallet::CreateBeeTransaction(int beeCount, CWalletTx& wtxNew, CReserveKey&
             return false;
         }
     }
-	
+
 	// Check the custom change address is valid and on-wallet
 	CTxDestination destinationChange;
 	if (!changeAddress.empty()) {
@@ -2929,7 +2920,7 @@ bool CWallet::CreateBeeTransaction(int beeCount, CWalletTx& wtxNew, CReserveKey&
             strFailReason = "Error: Invalid change address specified";
             return false;
         }
-		
+
         // Make sure it's a wallet address (otherwise the change won't make it back to us)
         isminetype isMine = ::IsMine((const CKeyStore&)*this, (const CTxDestination&)destinationChange, SIGVERSION_BASE);
         if (isMine != ISMINE_SPENDABLE) {
@@ -2965,7 +2956,7 @@ bool CWallet::CreateBeeTransaction(int beeCount, CWalletTx& wtxNew, CReserveKey&
     int changePos = communityContrib ? 2 : 1;      // Always put any change in the last output
     std::string strError;
     CCoinControl coinControl;
-	if (!changeAddress.empty()) 
+	if (!changeAddress.empty())
 		coinControl.destChange = destinationChange;
     if (!CreateTransaction(vecSend, wtxNew, reservekeyChange, feeRequired, changePos, strError, coinControl, true)) {
         if (totalBeeCost + feeRequired > curBalance)   // Now we know fee requirement, check balance fail again
@@ -3622,11 +3613,10 @@ bool CWallet::TopUpKeyPool(unsigned int kpSize)
         int64_t missingExternal = std::max(std::max((int64_t) nTargetSize, (int64_t) 1) - (int64_t)setExternalKeyPool.size(), (int64_t) 0);
         int64_t missingInternal = std::max(std::max((int64_t) nTargetSize, (int64_t) 1) - (int64_t)setInternalKeyPool.size(), (int64_t) 0);
 
-        if (!IsHDEnabled() || !CanSupportFeature(FEATURE_HD_SPLIT))
-        {
-            // don't create extra internal keys
-            missingInternal = 0;
-        }
+        // don't create extra internal keys
+        assert(!IsHDEnabled());
+        missingInternal = 0;
+
         bool internal = false;
         CWalletDB walletdb(*dbw);
         for (int64_t i = missingInternal + missingExternal; i--;)
@@ -3667,7 +3657,7 @@ void CWallet::ReserveKeyFromKeyPool(int64_t& nIndex, CKeyPool& keypool, bool fRe
         if (!IsLocked())
             TopUpKeyPool();
 
-        bool fReturningInternal = IsHDEnabled() && CanSupportFeature(FEATURE_HD_SPLIT) && fRequestedInternal;
+        bool fReturningInternal = false; //HD cant be enabled becouse Falcon-512
         std::set<int64_t>& setKeyPool = fReturningInternal ? setInternalKeyPool : setExternalKeyPool;
 
         // Get the oldest key
@@ -3760,10 +3750,6 @@ int64_t CWallet::GetOldestKeyPoolTime()
 
     // load oldest key from keypool, get time and return
     int64_t oldestKey = GetOldestKeyTimeInPool(setExternalKeyPool, walletdb);
-    if (IsHDEnabled() && CanSupportFeature(FEATURE_HD_SPLIT)) {
-        oldestKey = std::max(GetOldestKeyTimeInPool(setInternalKeyPool, walletdb), oldestKey);
-    }
-
     return oldestKey;
 }
 
@@ -4262,17 +4248,12 @@ CWallet* CWallet::CreateWalletFromFile(const std::string walletFile)
 
     if (fFirstRun)
     {
-        // ensure this wallet.dat can only be opened by clients supporting HD with chain split and expects no default key
-        if (!gArgs.GetBoolArg("-usehd", true)) {
-            InitError(strprintf(_("Error creating %s: You can't create non-HD wallets with this version."), walletFile));
-            return nullptr;
-        }
-        walletInstance->SetMinVersion(FEATURE_NO_DEFAULT_KEY);
+        walletInstance->SetMinVersion(FEATURE_LATEST);
 
         // generate a new master key
         CPubKey masterPubKey = walletInstance->GenerateNewHDMasterKey();
-        if (!walletInstance->SetHDMasterKey(masterPubKey))
-            throw std::runtime_error(std::string(__func__) + ": Storing master key failed");
+        //if (!walletInstance->SetHDMasterKey(masterPubKey)) // I need check this
+        //    throw std::runtime_error(std::string(__func__) + ": Storing master key failed");
 
         // Top up the keypool
         if (!walletInstance->TopUpKeyPool()) {
@@ -4281,17 +4262,6 @@ CWallet* CWallet::CreateWalletFromFile(const std::string walletFile)
         }
 
         walletInstance->SetBestChain(chainActive.GetLocator());
-    }
-    else if (gArgs.IsArgSet("-usehd")) {
-        bool useHD = gArgs.GetBoolArg("-usehd", true);
-        if (walletInstance->IsHDEnabled() && !useHD) {
-            InitError(strprintf(_("Error loading %s: You can't disable HD on an already existing HD wallet"), walletFile));
-            return nullptr;
-        }
-        if (!walletInstance->IsHDEnabled() && useHD) {
-            InitError(strprintf(_("Error loading %s: You can't enable HD on an already existing non-HD wallet"), walletFile));
-            return nullptr;
-        }
     }
 
     LogPrintf(" wallet      %15dms\n", GetTimeMillis() - nStart);

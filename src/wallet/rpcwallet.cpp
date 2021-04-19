@@ -633,9 +633,9 @@ UniValue createbees(const JSONRPCRequest& request)
 
     CWalletTx wtxNew;
     std::string strError;
-	
+
 	EnsureWalletIsUnlocked(pwallet);
-	
+
     CReserveKey reservekeyChange(pwallet);
     CReserveKey reservekeyHoney(pwallet);
     if (pwallet->CreateBeeTransaction(beeCount, wtxNew, reservekeyChange, reservekeyHoney, honeyAddress, changeAddress, communityContrib, strError, Params().GetConsensus())) {
@@ -732,7 +732,7 @@ UniValue getbeecreationtxid(const JSONRPCRequest& request)
             "\nExamples:\n"
             + HelpExampleCli("getbeecreationtxid", "bd76be6d12dfd072a605fd85a2aa956f6f5e0dee5dbbb0b4b5da5e72966b9dfd")
         );
-        
+
     ObserveSafeMode();
     pwallet->BlockUntilSyncedToCurrentChain();
 
@@ -741,7 +741,7 @@ UniValue getbeecreationtxid(const JSONRPCRequest& request)
     uint256 honeyTxHash;
     honeyTxHash.SetHex(request.params[0].get_str());
 
-    // Grab the tx    
+    // Grab the tx
     auto it = pwallet->mapWallet.find(honeyTxHash);
     if (it == pwallet->mapWallet.end())
         throw JSONRPCError(RPC_INVALID_PARAMETER, "Invalid or non-wallet transaction id");
@@ -760,10 +760,10 @@ UniValue getbeecreationtxid(const JSONRPCRequest& request)
         throw JSONRPCError(RPC_INVALID_PARAMETER, "Malformed honey transaction!");  // Should never hit; could probably be an assert.
     std::vector<unsigned char> bctTxId(&wtx.tx->vout[0].scriptPubKey[14], &wtx.tx->vout[0].scriptPubKey[14 + 64]);
     std::string bctTxIdStr = std::string(bctTxId.begin(), bctTxId.end());
-    
+
     return bctTxIdStr;
 }
-            
+
 // Neon: Hive: Return hive info for a single BCT
 UniValue getbctinfo(const JSONRPCRequest& request)
 {
@@ -956,7 +956,7 @@ UniValue gethiveinfo(const JSONRPCRequest& request)
     summary.push_back(Pair("rewards_paid", ValueFromAmount(totalRewards)));
     summary.push_back(Pair("profit", ValueFromAmount(totalRewards-totalBeeFee)));
     summary.push_back(Pair("warnings", pwallet->IsLocked()? "Wallet is locked and must be unlocked to mine" : ""));
-            
+
     UniValue jsonResults(UniValue::VOBJ);
     jsonResults.push_back(Pair("summary", summary));
     jsonResults.push_back(Pair("bees", bctList));
@@ -2081,7 +2081,7 @@ void ListTransactions(CWallet* const pwallet, const CWalletTx& wtx, const std::s
             }
             entry.push_back(Pair("account", strSentAccount));
             MaybePushAddress(entry, s.destination);
-            
+
             // Neon: Hive: Sent transactions are never honey
             entry.push_back(Pair("ishoney", false));
 
@@ -2119,7 +2119,7 @@ void ListTransactions(CWallet* const pwallet, const CWalletTx& wtx, const std::s
 
                 // Neon: Hive: Indicate whether this is honey (hive block coinbase tx)
                 entry.push_back(Pair("ishoney", wtx.IsHiveCoinBase()));
-                
+
                 if (wtx.IsCoinBase())
                 {
                     if (wtx.GetDepthInMainChain() < 1)
@@ -2819,7 +2819,7 @@ UniValue walletpassphrase(const JSONRPCRequest& request)
 		pwallet->Lock();
 		wasUnLockedHiveOnly = true;
 	}
-	
+
     if (strWalletPass.length() > 0)
     {
         if (!pwallet->Unlock(strWalletPass)) {
@@ -2832,9 +2832,9 @@ UniValue walletpassphrase(const JSONRPCRequest& request)
             "Stores the wallet decryption key in memory for <timeout> seconds.");
 
     pwallet->TopUpKeyPool();
-	
-	fWalletUnlockHiveMiningOnly = false;	
-	
+
+	fWalletUnlockHiveMiningOnly = false;
+
 	// Neon: Hive: Support locked wallets
 	if (!wasUnLockedHiveOnly) {
 		pwallet->nRelockTime = GetTime() + nSleepTime;
@@ -2842,7 +2842,7 @@ UniValue walletpassphrase(const JSONRPCRequest& request)
 	} else {
 		RPCRunLater(strprintf("sethiveonly(%s)", pwallet->GetName()), boost::bind(SetHiveOnly), nSleepTime);
 	}
-	
+
     return NullUniValue;
 }
 
@@ -2859,12 +2859,12 @@ UniValue walletpassphrasehiveonly(const JSONRPCRequest& request)
         throw std::runtime_error(
             "walletpassphrasehiveonly \"passphrase\"\n"
             "\nStores the wallet decryption key in memory indefinitely for hive mining use only.\n"
-            "This is needed to enable the hive mining thread to run. Performing other transactions related to\n" 
+            "This is needed to enable the hive mining thread to run. Performing other transactions related to\n"
 			"private keys such as sending neon, is not enabled and will require you to run\n"
 			"walletpassphrase separately.\n"
             "\nArguments:\n"
             "1. \"passphrase\"       (string, required) The wallet passphrase\n"
-            
+
             "\nExamples:\n"
             "\nUnlock the wallet for hive mining only\n"
             + HelpExampleCli("walletpassphrasehiveonly", "\"my pass phrase\"") +
@@ -3318,9 +3318,6 @@ UniValue getwalletinfo(const JSONRPCRequest& request)
     obj.push_back(Pair("keypoololdest", pwallet->GetOldestKeyPoolTime()));
     obj.push_back(Pair("keypoolsize", (int64_t)kpExternalSize));
     CKeyID masterKeyID = pwallet->GetHDChain().masterKeyID;
-    if (!masterKeyID.IsNull() && pwallet->CanSupportFeature(FEATURE_HD_SPLIT)) {
-        obj.push_back(Pair("keypoolsize_hd_internal",   (int64_t)(pwallet->GetKeyPoolSize() - kpExternalSize)));
-    }
     if (pwallet->IsCrypted()) {
         obj.push_back(Pair("unlocked_until", pwallet->nRelockTime));
     }

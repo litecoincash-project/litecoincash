@@ -478,10 +478,10 @@ static void ProcRand(unsigned char* out, int num, RNGLevel level)
 
     // For anything but the 'fast' level, feed the resulting RNG output (after an additional hashing step) back into OpenSSL.
     if (level != RNGLevel::FAST) {
-        unsigned char buf[64];
+        unsigned char buf[32];
         CSHA512().Write(out, num).Finalize(buf);
         RAND_add(buf, sizeof(buf), num);
-        memory_cleanse(buf, 64);
+        memory_cleanse(buf, 32);
     }
 }
 
