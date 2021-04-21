@@ -55,7 +55,7 @@ public:
     bool handlePaymentRequest(const SendCoinsRecipient& recipient);
 
     void showOutOfSyncWarning(bool fShow);
-    
+
     static void doRescan(CWallet* pwallet, int64_t startTime);  // Neon: Key import helper
 
 private:
@@ -106,7 +106,7 @@ public Q_SLOTS:
     void changePassphrase();
     /** Ask for passphrase to unlock wallet temporarily */
     void unlockWallet();
-	
+
 	// Neon: Hive: Unlock wallet just for hive
 	void unlockWalletHive();
 
@@ -134,8 +134,6 @@ Q_SIGNALS:
     void message(const QString &title, const QString &message, unsigned int style);
     /** Encryption status of wallet changed */
     void encryptionStatusChanged(int status);
-    /** HD-Enabled status of wallet changed (only possible during startup) */
-    void hdEnabledStatusChanged(int hdEnabled);
     /** Notify that a new transaction appeared */
     void incomingTransaction(const QString& date, int unit, const CAmount& amount, const QString& type, const QString& address, const QString& label);
     /** Notify that the out of sync warning icon has been pressed */

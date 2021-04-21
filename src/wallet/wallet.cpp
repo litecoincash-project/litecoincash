@@ -172,52 +172,6 @@ CPubKey CWallet::GenerateNewKey(CWalletDB &walletdb, bool internal)
     return pubkey;
 }
 
-void CWallet::DeriveNewChildKey(CWalletDB &walletdb, CKeyMetadata& metadata, CKey& secret, bool internal)
-{
-    // for now we use a fixed keypath scheme of m/0'/0'/k
-    CKey key;                      //master key seed (256bit)
-    CExtKey masterKey;             //hd master key
-    CExtKey accountKey;            //key at m/0'
-    CExtKey chainChildKey;         //key at m/0'/0' (external) or m/0'/1' (internal)
-    CExtKey childKey;              //key at m/0'/0'/<n>'
-
-    // try to get the master key
-    if (!GetKey(hdChain.masterKeyID, key))
-        throw std::runtime_error(std::string(__func__) + ": Master key not found");
-
-    masterKey.SetMaster(key.begin(), key.size());
-
-    // derive m/0'
-    // use hardened derivation (child keys >= 0x80000000 are hardened after bip32)
-    masterKey.Derive(accountKey, BIP32_HARDENED_KEY_LIMIT);
-
-    // derive m/0'/0' (external chain) OR m/0'/1' (internal chain)
-    assert(internal ? false : true);
-    accountKey.Derive(chainChildKey, BIP32_HARDENED_KEY_LIMIT+(internal ? 1 : 0));
-
-    // derive child key at next index, skip keys already known to the wallet
-    do {
-        // always derive hardened keys
-        // childIndex | BIP32_HARDENED_KEY_LIMIT = derive childIndex in hardened child-index-range
-        // example: 1 | BIP32_HARDENED_KEY_LIMIT == 0x80000001 == 2147483649
-        if (internal) {
-            chainChildKey.Derive(childKey, hdChain.nInternalChainCounter | BIP32_HARDENED_KEY_LIMIT);
-            metadata.hdKeypath = "m/0'/1'/" + std::to_string(hdChain.nInternalChainCounter) + "'";
-            hdChain.nInternalChainCounter++;
-        }
-        else {
-            chainChildKey.Derive(childKey, hdChain.nExternalChainCounter | BIP32_HARDENED_KEY_LIMIT);
-            metadata.hdKeypath = "m/0'/0'/" + std::to_string(hdChain.nExternalChainCounter) + "'";
-            hdChain.nExternalChainCounter++;
-        }
-    } while (HaveKey(childKey.key.GetPubKey().GetID()));
-    secret = childKey.key;
-    metadata.hdMasterKeyID = hdChain.masterKeyID;
-    // update the chain model in the database
-    if (!walletdb.WriteHDChain(hdChain))
-        throw std::runtime_error(std::string(__func__) + ": Writing HD chain model failed");
-}
-
 bool CWallet::AddKeyPubKeyWithDB(CWalletDB &walletdb, const CKey& secret, const CPubKey &pubkey)
 {
     AssertLockHeld(cs_wallet); // mapKeyMetadata
@@ -4249,11 +4203,6 @@ CWallet* CWallet::CreateWalletFromFile(const std::string walletFile)
     if (fFirstRun)
     {
         walletInstance->SetMinVersion(FEATURE_LATEST);
-
-        // generate a new master key
-        CPubKey masterPubKey = walletInstance->GenerateNewHDMasterKey();
-        //if (!walletInstance->SetHDMasterKey(masterPubKey)) // I need check this
-        //    throw std::runtime_error(std::string(__func__) + ": Storing master key failed");
 
         // Top up the keypool
         if (!walletInstance->TopUpKeyPool()) {

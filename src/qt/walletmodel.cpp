@@ -830,11 +830,6 @@ bool WalletModel::isWalletEnabled()
    return !gArgs.GetBoolArg("-disablewallet", DEFAULT_DISABLE_WALLET);
 }
 
-bool WalletModel::hdEnabled() const
-{
-    return wallet->IsHDEnabled();
-}
-
 OutputType WalletModel::getDefaultAddressType() const
 {
     return g_address_type;

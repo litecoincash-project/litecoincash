@@ -34,8 +34,6 @@ static inline bool InsecureRandBool() { return insecure_rand_ctx.randbool(); }
  * This just configures logging and chain parameters.
  */
 struct BasicTestingSetup {
-    ECCVerifyHandle globalVerifyHandle;
-
     explicit BasicTestingSetup(const std::string& chainName = CBaseChainParams::MAIN);
     ~BasicTestingSetup();
 };

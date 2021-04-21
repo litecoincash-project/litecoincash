@@ -223,8 +223,6 @@ public:
 
     static bool isWalletEnabled();
 
-    bool hdEnabled() const;
-
     OutputType getDefaultAddressType() const;
 
     int getDefaultConfirmTarget() const;

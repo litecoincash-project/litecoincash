@@ -58,9 +58,6 @@ private:
     //! The actual byte data
     std::vector<unsigned char, secure_allocator<unsigned char> > pubkeydata;
 
-    //! Check whether the 32-byte array pointed to by vch is valid keydata.
-    bool static Check(const unsigned char* vch);
-
 public:
     //! Construct an invalid private key.
     CKey() : fValid(false), fCompressed(false)
@@ -148,9 +145,6 @@ public:
      *                  add 0x04 for compressed keys.
      */
     bool SignCompact(const uint256& hash, std::vector<unsigned char>& vchSig) const;
-
-    //! Derive BIP32 child key.
-    bool Derive(CKey& keyChild, ChainCode &ccChild, unsigned int nChild, const ChainCode& cc) const;
 
     /**
      * Verify thoroughly whether a private key and a public key match.

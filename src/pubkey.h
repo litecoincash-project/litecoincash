@@ -182,19 +182,8 @@ public:
      */
     bool Verify(const uint256& hash, const std::vector<unsigned char>& vchSig) const;
 
-    /**
-     * Check whether a signature is normalized (lower-S).
-     */
-    static bool CheckLowS(const std::vector<unsigned char>& vchSig);
-
     //! Recover a public key from a compact signature.
     bool RecoverCompact(const uint256& hash, const std::vector<unsigned char>& vchSig);
-
-    //! Turn this public key into an uncompressed public key.
-    bool Decompress();
-
-    //! Derive BIP32 child pubkey.
-    bool Derive(CPubKey& pubkeyChild, ChainCode &ccChild, unsigned int nChild, const ChainCode& cc) const;
 };
 
 struct CExtPubKey {
@@ -215,7 +204,6 @@ struct CExtPubKey {
 
     void Encode(unsigned char code[BIP32_EXTKEY_SIZE]) const;
     void Decode(const unsigned char code[BIP32_EXTKEY_SIZE]);
-    bool Derive(CExtPubKey& out, unsigned int nChild) const;
 
     void Serialize(CSizeComputer& s) const
     {
@@ -241,17 +229,6 @@ struct CExtPubKey {
         s.read((char *)&code[0], len);
         Decode(code);
     }
-};
-
-/** Users of this module must hold an ECCVerifyHandle. The constructor and
- *  destructor of these are not allowed to run in parallel, though. */
-class ECCVerifyHandle
-{
-    static int refcount;
-
-public:
-    ECCVerifyHandle();
-    ~ECCVerifyHandle();
 };
 
 #endif // BITCOIN_PUBKEY_H

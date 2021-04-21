@@ -157,7 +157,6 @@ public:
 };
 
 static std::unique_ptr<CCoinsViewErrorCatcher> pcoinscatcher;
-static std::unique_ptr<ECCVerifyHandle> globalVerifyHandle;
 
 static boost::thread_group threadGroup;
 static CScheduler scheduler;
@@ -277,7 +276,6 @@ void Shutdown()
 #ifdef ENABLE_WALLET
     CloseWallets();
 #endif
-    globalVerifyHandle.reset();
     LogPrintf("%s: done\n", __func__);
 }
 
@@ -1184,7 +1182,6 @@ bool AppInitSanityChecks()
     std::string sha256_algo = SHA256AutoDetect();
     LogPrintf("Using the '%s' SHA256 implementation\n", sha256_algo);
     RandomInit();
-    globalVerifyHandle.reset(new ECCVerifyHandle());
 
     // Sanity check
     if (!InitSanityCheck())

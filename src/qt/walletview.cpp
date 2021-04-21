@@ -111,9 +111,6 @@ void WalletView::setBitcoinGUI(BitcoinGUI *gui)
         // Pass through transaction notifications
         connect(this, SIGNAL(incomingTransaction(QString,int,CAmount,QString,QString,QString)), gui, SLOT(incomingTransaction(QString,int,CAmount,QString,QString,QString)));
 
-        // Connect HD enabled state signal 
-        connect(this, SIGNAL(hdEnabledStatusChanged(int)), gui, SLOT(setHDStatus(int)));
-
         // Neon: Hive: Connect hive status update signal
         connect(hivePage, SIGNAL(hiveStatusIconChanged(QString, QString)), gui, SLOT(updateHiveStatusIcon(QString, QString)));
     }
@@ -150,16 +147,13 @@ void WalletView::setWalletModel(WalletModel *_walletModel)
         connect(_walletModel, SIGNAL(encryptionStatusChanged(int)), this, SIGNAL(encryptionStatusChanged(int)));
         updateEncryptionStatus();
 
-        // update HD status
-        Q_EMIT hdEnabledStatusChanged(_walletModel->hdEnabled());
-
         // Balloon pop-up for new transaction
         connect(_walletModel->getTransactionTableModel(), SIGNAL(rowsInserted(QModelIndex,int,int)),
                 this, SLOT(processNewTransaction(QModelIndex,int,int)));
 
         // Ask for passphrase if needed
         connect(_walletModel, SIGNAL(requireUnlock()), this, SLOT(unlockWallet()));
-		
+
 		// Neon: Hive: Ask for passphrase if needed hive only
         connect(_walletModel, SIGNAL(requireUnlockHive()), this, SLOT(unlockWalletHive()));
 
@@ -405,15 +399,9 @@ void WalletView::importPrivateKey()
         if(!ctx.isValid())  // Unlock wallet was cancelled
             return;
 
-        CBitcoinSecret vchSecret;
-        if (!vchSecret.SetString(privKey.toStdString())) {
-            QMessageBox::critical(0, tr(PACKAGE_NAME), tr("This doesn't appear to be a Litecoin/Neon private key."));
-            return;
-        }
-
-        CKey key = vchSecret.GetKey();
+        CKey key = DecodeSecret(privKey.toStdString());
         if (!key.IsValid()) {
-            QMessageBox::critical(0, tr(PACKAGE_NAME), tr("Private key outside allowed range."));
+            QMessageBox::critical(0, tr(PACKAGE_NAME), tr("The entered private key is invalid."));
             return;
         }
 
@@ -437,15 +425,15 @@ void WalletView::importPrivateKey()
             }
 
             pwallet->UpdateTimeFirstKey(1); // Mark as rescan needed, even if we don't do it now (it'll happen next restart if not before)
-            
+
             QMessageBox msgBox;
             msgBox.setText(tr("Key successfully added to wallet."));
             msgBox.setInformativeText(tr("Rescan now? (Select No if you have more keys to import)"));
             msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
             msgBox.setDefaultButton(QMessageBox::No);
-            
+
             if (msgBox.exec() == QMessageBox::Yes)
-                boost::thread t{WalletView::doRescan, pwallet, TIMESTAMP_MIN};                
+                boost::thread t{WalletView::doRescan, pwallet, TIMESTAMP_MIN};
         }
         return;
     }
