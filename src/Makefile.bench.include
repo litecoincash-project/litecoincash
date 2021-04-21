@@ -42,7 +42,6 @@ bench_bench_neon_LDADD = \
   $(LIBLEVELDB) \
   $(LIBLEVELDB_SSE42) \
   $(LIBMEMENV) \
-  $(LIBSECP256K1) \
   $(LIBUNIVALUE)
 
 if ENABLE_ZMQ

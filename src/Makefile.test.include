@@ -2,7 +2,7 @@
 # Distributed under the MIT software license, see the accompanying
 # file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-TESTS += test/test_neon # ?
+TESTS += test/test_neon
 bin_PROGRAMS += test/test_neon
 
 FUZZ_TARGETS = \
@@ -136,7 +136,7 @@ if ENABLE_WALLET
 test_test_neon_LDADD += $(LIBBITCOIN_WALLET)
 endif
 test_test_neon_LDADD += $(LIBBITCOIN_SERVER) $(LIBBITCOIN_CLI) $(LIBBITCOIN_COMMON) $(LIBBITCOIN_UTIL) $(LIBBITCOIN_CONSENSUS) $(LIBBITCOIN_CRYPTO) $(LIBUNIVALUE) \
-  $(LIBLEVELDB) $(LIBLEVELDB_SSE42) $(LIBMEMENV) $(BOOST_LIBS) $(BOOST_UNIT_TEST_FRAMEWORK_LIB) $(LIBSECP256K1) $(EVENT_LIBS) $(EVENT_PTHREADS_LIBS)
+  $(LIBLEVELDB) $(LIBLEVELDB_SSE42) $(LIBMEMENV) $(BOOST_LIBS) $(BOOST_UNIT_TEST_FRAMEWORK_LIB) $(EVENT_LIBS) $(EVENT_PTHREADS_LIBS)
 test_test_neon_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
 
 test_test_neon_LDADD += $(LIBBITCOIN_CONSENSUS) $(BDB_LIBS) $(SSL_LIBS) $(CRYPTO_LIBS) $(MINIUPNPC_LIBS)
@@ -157,8 +157,8 @@ test_fuzz_block_deserialize_LDADD = \
  $(LIBBITCOIN_COMMON) \
  $(LIBBITCOIN_UTIL) \
  $(LIBBITCOIN_CONSENSUS) \
- $(LIBBITCOIN_CRYPTO) \
- $(LIBSECP256K1)
+ $(LIBBITCOIN_CRYPTO)
+
 test_fuzz_block_deserialize_LDADD += $(BOOST_LIBS) $(CRYPTO_LIBS)
 
 test_fuzz_transaction_deserialize_SOURCES = $(FUZZ_SUITE) test/test_bitcoin_fuzzy.cpp
@@ -171,8 +171,8 @@ test_fuzz_transaction_deserialize_LDADD = \
  $(LIBBITCOIN_COMMON) \
  $(LIBBITCOIN_UTIL) \
  $(LIBBITCOIN_CONSENSUS) \
- $(LIBBITCOIN_CRYPTO) \
- $(LIBSECP256K1)
+ $(LIBBITCOIN_CRYPTO)
+
 test_fuzz_transaction_deserialize_LDADD += $(BOOST_LIBS) $(CRYPTO_LIBS)
 
 test_fuzz_blocklocator_deserialize_SOURCES = $(FUZZ_SUITE) test/test_bitcoin_fuzzy.cpp
@@ -185,8 +185,8 @@ test_fuzz_blocklocator_deserialize_LDADD = \
  $(LIBBITCOIN_COMMON) \
  $(LIBBITCOIN_UTIL) \
  $(LIBBITCOIN_CONSENSUS) \
- $(LIBBITCOIN_CRYPTO) \
- $(LIBSECP256K1)
+ $(LIBBITCOIN_CRYPTO)
+
 test_fuzz_blocklocator_deserialize_LDADD += $(BOOST_LIBS) $(CRYPTO_LIBS)
 
 test_fuzz_blockmerkleroot_SOURCES = $(FUZZ_SUITE) test/test_bitcoin_fuzzy.cpp
@@ -199,8 +199,8 @@ test_fuzz_blockmerkleroot_LDADD = \
  $(LIBBITCOIN_COMMON) \
  $(LIBBITCOIN_UTIL) \
  $(LIBBITCOIN_CONSENSUS) \
- $(LIBBITCOIN_CRYPTO) \
- $(LIBSECP256K1)
+ $(LIBBITCOIN_CRYPTO)
+
 test_fuzz_blockmerkleroot_LDADD += $(BOOST_LIBS) $(CRYPTO_LIBS)
 
 test_fuzz_addrman_deserialize_SOURCES = $(FUZZ_SUITE) test/test_bitcoin_fuzzy.cpp
@@ -213,8 +213,8 @@ test_fuzz_addrman_deserialize_LDADD = \
  $(LIBBITCOIN_COMMON) \
  $(LIBBITCOIN_UTIL) \
  $(LIBBITCOIN_CONSENSUS) \
- $(LIBBITCOIN_CRYPTO) \
- $(LIBSECP256K1)
+ $(LIBBITCOIN_CRYPTO)
+
 test_fuzz_addrman_deserialize_LDADD += $(BOOST_LIBS) $(CRYPTO_LIBS)
 
 test_fuzz_blockheader_deserialize_SOURCES = $(FUZZ_SUITE) test/test_bitcoin_fuzzy.cpp
@@ -227,8 +227,8 @@ test_fuzz_blockheader_deserialize_LDADD = \
  $(LIBBITCOIN_COMMON) \
  $(LIBBITCOIN_UTIL) \
  $(LIBBITCOIN_CONSENSUS) \
- $(LIBBITCOIN_CRYPTO) \
- $(LIBSECP256K1)
+ $(LIBBITCOIN_CRYPTO)
+
 test_fuzz_blockheader_deserialize_LDADD += $(BOOST_LIBS) $(CRYPTO_LIBS)
 
 test_fuzz_banentry_deserialize_SOURCES = $(FUZZ_SUITE) test/test_bitcoin_fuzzy.cpp
@@ -241,8 +241,8 @@ test_fuzz_banentry_deserialize_LDADD = \
  $(LIBBITCOIN_COMMON) \
  $(LIBBITCOIN_UTIL) \
  $(LIBBITCOIN_CONSENSUS) \
- $(LIBBITCOIN_CRYPTO) \
- $(LIBSECP256K1)
+ $(LIBBITCOIN_CRYPTO)
+
 test_fuzz_banentry_deserialize_LDADD += $(BOOST_LIBS) $(CRYPTO_LIBS)
 
 test_fuzz_txundo_deserialize_SOURCES = $(FUZZ_SUITE) test/test_bitcoin_fuzzy.cpp
@@ -255,8 +255,8 @@ test_fuzz_txundo_deserialize_LDADD = \
  $(LIBBITCOIN_COMMON) \
  $(LIBBITCOIN_UTIL) \
  $(LIBBITCOIN_CONSENSUS) \
- $(LIBBITCOIN_CRYPTO) \
- $(LIBSECP256K1)
+ $(LIBBITCOIN_CRYPTO)
+
 test_fuzz_txundo_deserialize_LDADD += $(BOOST_LIBS) $(CRYPTO_LIBS)
 
 test_fuzz_blockundo_deserialize_SOURCES = $(FUZZ_SUITE) test/test_bitcoin_fuzzy.cpp
@@ -269,8 +269,8 @@ test_fuzz_blockundo_deserialize_LDADD = \
  $(LIBBITCOIN_COMMON) \
  $(LIBBITCOIN_UTIL) \
  $(LIBBITCOIN_CONSENSUS) \
- $(LIBBITCOIN_CRYPTO) \
- $(LIBSECP256K1)
+ $(LIBBITCOIN_CRYPTO)
+
 test_fuzz_blockundo_deserialize_LDADD += $(BOOST_LIBS) $(CRYPTO_LIBS)
 
 test_fuzz_coins_deserialize_SOURCES = $(FUZZ_SUITE) test/test_bitcoin_fuzzy.cpp
@@ -283,8 +283,8 @@ test_fuzz_coins_deserialize_LDADD = \
  $(LIBBITCOIN_COMMON) \
  $(LIBBITCOIN_UTIL) \
  $(LIBBITCOIN_CONSENSUS) \
- $(LIBBITCOIN_CRYPTO) \
- $(LIBSECP256K1)
+ $(LIBBITCOIN_CRYPTO)
+
 test_fuzz_coins_deserialize_LDADD += $(BOOST_LIBS) $(CRYPTO_LIBS)
 
 test_fuzz_netaddr_deserialize_SOURCES = $(FUZZ_SUITE) test/test_bitcoin_fuzzy.cpp
@@ -297,8 +297,8 @@ test_fuzz_netaddr_deserialize_LDADD = \
  $(LIBBITCOIN_COMMON) \
  $(LIBBITCOIN_UTIL) \
  $(LIBBITCOIN_CONSENSUS) \
- $(LIBBITCOIN_CRYPTO) \
- $(LIBSECP256K1)
+ $(LIBBITCOIN_CRYPTO)
+
 test_fuzz_netaddr_deserialize_LDADD += $(BOOST_LIBS) $(CRYPTO_LIBS)
 
 test_fuzz_service_deserialize_SOURCES = $(FUZZ_SUITE) test/test_bitcoin_fuzzy.cpp
@@ -311,8 +311,8 @@ test_fuzz_service_deserialize_LDADD = \
  $(LIBBITCOIN_COMMON) \
  $(LIBBITCOIN_UTIL) \
  $(LIBBITCOIN_CONSENSUS) \
- $(LIBBITCOIN_CRYPTO) \
- $(LIBSECP256K1)
+ $(LIBBITCOIN_CRYPTO)
+
 test_fuzz_service_deserialize_LDADD += $(BOOST_LIBS) $(CRYPTO_LIBS)
 
 test_fuzz_messageheader_deserialize_SOURCES = $(FUZZ_SUITE) test/test_bitcoin_fuzzy.cpp
@@ -325,8 +325,8 @@ test_fuzz_messageheader_deserialize_LDADD = \
  $(LIBBITCOIN_COMMON) \
  $(LIBBITCOIN_UTIL) \
  $(LIBBITCOIN_CONSENSUS) \
- $(LIBBITCOIN_CRYPTO) \
- $(LIBSECP256K1)
+ $(LIBBITCOIN_CRYPTO)
+
 test_fuzz_messageheader_deserialize_LDADD += $(BOOST_LIBS) $(CRYPTO_LIBS)
 
 test_fuzz_address_deserialize_SOURCES = $(FUZZ_SUITE) test/test_bitcoin_fuzzy.cpp
@@ -339,8 +339,8 @@ test_fuzz_address_deserialize_LDADD = \
  $(LIBBITCOIN_COMMON) \
  $(LIBBITCOIN_UTIL) \
  $(LIBBITCOIN_CONSENSUS) \
- $(LIBBITCOIN_CRYPTO) \
- $(LIBSECP256K1)
+ $(LIBBITCOIN_CRYPTO)
+
 test_fuzz_address_deserialize_LDADD += $(BOOST_LIBS) $(CRYPTO_LIBS)
 
 test_fuzz_inv_deserialize_SOURCES = $(FUZZ_SUITE) test/test_bitcoin_fuzzy.cpp
@@ -353,8 +353,8 @@ test_fuzz_inv_deserialize_LDADD = \
  $(LIBBITCOIN_COMMON) \
  $(LIBBITCOIN_UTIL) \
  $(LIBBITCOIN_CONSENSUS) \
- $(LIBBITCOIN_CRYPTO) \
- $(LIBSECP256K1)
+ $(LIBBITCOIN_CRYPTO)
+
 test_fuzz_inv_deserialize_LDADD += $(BOOST_LIBS) $(CRYPTO_LIBS)
 
 test_fuzz_bloomfilter_deserialize_SOURCES = $(FUZZ_SUITE) test/test_bitcoin_fuzzy.cpp
@@ -367,8 +367,8 @@ test_fuzz_bloomfilter_deserialize_LDADD = \
  $(LIBBITCOIN_COMMON) \
  $(LIBBITCOIN_UTIL) \
  $(LIBBITCOIN_CONSENSUS) \
- $(LIBBITCOIN_CRYPTO) \
- $(LIBSECP256K1)
+ $(LIBBITCOIN_CRYPTO)
+
 test_fuzz_bloomfilter_deserialize_LDADD += $(BOOST_LIBS) $(CRYPTO_LIBS)
 
 test_fuzz_diskblockindex_deserialize_SOURCES = $(FUZZ_SUITE) test/test_bitcoin_fuzzy.cpp
@@ -381,8 +381,8 @@ test_fuzz_diskblockindex_deserialize_LDADD = \
  $(LIBBITCOIN_COMMON) \
  $(LIBBITCOIN_UTIL) \
  $(LIBBITCOIN_CONSENSUS) \
- $(LIBBITCOIN_CRYPTO) \
- $(LIBSECP256K1)
+ $(LIBBITCOIN_CRYPTO)
+
 test_fuzz_diskblockindex_deserialize_LDADD += $(BOOST_LIBS) $(CRYPTO_LIBS)
 
 test_fuzz_txoutcompressor_deserialize_SOURCES = $(FUZZ_SUITE) test/test_bitcoin_fuzzy.cpp
@@ -395,8 +395,8 @@ test_fuzz_txoutcompressor_deserialize_LDADD = \
  $(LIBBITCOIN_COMMON) \
  $(LIBBITCOIN_UTIL) \
  $(LIBBITCOIN_CONSENSUS) \
- $(LIBBITCOIN_CRYPTO) \
- $(LIBSECP256K1)
+ $(LIBBITCOIN_CRYPTO)
+
 test_fuzz_txoutcompressor_deserialize_LDADD += $(BOOST_LIBS) $(CRYPTO_LIBS)
 
 test_fuzz_blocktransactions_deserialize_SOURCES = $(FUZZ_SUITE) test/test_bitcoin_fuzzy.cpp
@@ -409,8 +409,8 @@ test_fuzz_blocktransactions_deserialize_LDADD = \
  $(LIBBITCOIN_COMMON) \
  $(LIBBITCOIN_UTIL) \
  $(LIBBITCOIN_CONSENSUS) \
- $(LIBBITCOIN_CRYPTO) \
- $(LIBSECP256K1)
+ $(LIBBITCOIN_CRYPTO)
+
 test_fuzz_blocktransactions_deserialize_LDADD += $(BOOST_LIBS) $(CRYPTO_LIBS)
 
 test_fuzz_blocktransactionsrequest_deserialize_SOURCES = $(FUZZ_SUITE) test/test_bitcoin_fuzzy.cpp
@@ -423,8 +423,8 @@ test_fuzz_blocktransactionsrequest_deserialize_LDADD = \
  $(LIBBITCOIN_COMMON) \
  $(LIBBITCOIN_UTIL) \
  $(LIBBITCOIN_CONSENSUS) \
- $(LIBBITCOIN_CRYPTO) \
- $(LIBSECP256K1)
+ $(LIBBITCOIN_CRYPTO)
+
 test_fuzz_blocktransactionsrequest_deserialize_LDADD += $(BOOST_LIBS) $(CRYPTO_LIBS)
 endif # ENABLE_FUZZ
 
@@ -446,7 +446,6 @@ bitcoin_test_clean : FORCE
 
 check-local:
 	@echo "Skipping test/util/bitcoin-util-test.py as util not distributed..."
-	$(AM_V_at)$(MAKE) $(AM_MAKEFLAGS) -C secp256k1 check
 if EMBEDDED_UNIVALUE
 	$(AM_V_at)$(MAKE) $(AM_MAKEFLAGS) -C univalue check
 endif

@@ -82,7 +82,6 @@ private:
 
     UnitDisplayStatusBarControl *unitDisplayControl;
     QLabel *labelWalletEncryptionIcon;
-    QLabel *labelWalletHDStatusIcon;
     QLabel *connectionsControl;
     QLabel *hiveStatusIcon;             // Neon: Hive status icon
     QLabel *labelBlocksIcon;
@@ -175,19 +174,13 @@ public Q_SLOTS:
 
     // Neon: Hive: Update hive status icon
     void updateHiveStatusIcon(QString icon, QString tooltip);
-    
+
 #ifdef ENABLE_WALLET
     /** Set the encryption status as shown in the UI.
        @param[in] status            current encryption status
        @see WalletModel::EncryptionStatus
     */
     void setEncryptionStatus(int status);
-
-    /** Set the hd-enabled status as shown in the UI.
-     @param[in] status            current hd enabled status
-     @see WalletModel::EncryptionStatus
-     */
-    void setHDStatus(int hdEnabled);
 
     bool handlePaymentRequest(const SendCoinsRecipient& recipient);
 
@@ -242,7 +235,7 @@ private Q_SLOTS:
 
     /** Show progress dialog e.g. for verifychain */
     void showProgress(const QString &title, int nProgress);
-    
+
     /** When hideTrayIcon setting is changed in OptionsModel hide or show the icon accordingly. */
     void setTrayIconVisible(bool);
 
