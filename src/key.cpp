@@ -12,7 +12,7 @@
 
 #include <falcon512/sign.h>
 
-void CKey::MakeNewKey(bool fCompressedIn) {
+void CKey::MakeNewKey() {
     unsigned char sk[PRIVATE_KEY_SIZE];
     unsigned char pk[PUB_KEY_SIZE];
     int r = PQCLEAN_FALCON512_CLEAN_crypto_sign_keypair(pk,sk);
@@ -91,30 +91,9 @@ bool CKey::Load(const CPrivKey &privkey, const CPubKey &vchPubKey, bool fSkipChe
     return VerifyPubKey(vchPubKey);
 }
 
-void CExtKey::SetMaster(const unsigned char *seed, unsigned int nSeedLen) {
-    static const unsigned char hashkey[] = {'B','i','t','c','o','i','n',' ','s','e','e','d'};
-    std::vector<unsigned char, secure_allocator<unsigned char>> vout(64);
-    CHMAC_SHA512(hashkey, sizeof(hashkey)).Write(seed, nSeedLen).Finalize(vout.data());
-    key.Set(vout.data(), vout.data() + 32, true);
-    memcpy(chaincode.begin(), vout.data() + 32, 32);
-    nDepth = 0;
-    nChild = 0;
-    memset(vchFingerprint, 0, sizeof(vchFingerprint));
-}
-
-CExtPubKey CExtKey::Neuter() const {
-    CExtPubKey ret;
-    ret.nDepth = nDepth;
-    memcpy(&ret.vchFingerprint[0], &vchFingerprint[0], 4);
-    ret.nChild = nChild;
-    ret.pubkey = key.GetPubKey();
-    ret.chaincode = chaincode;
-    return ret;
-}
-
 bool Falcon_InitSanityCheck() {
     CKey key;
-    key.MakeNewKey(true);
+    key.MakeNewKey();
     CPubKey pubkey = key.GetPubKey();
     return key.VerifyPubKey(pubkey);
 }

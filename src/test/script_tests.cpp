@@ -1064,9 +1064,9 @@ BOOST_AUTO_TEST_CASE(script_CHECKMULTISIG12)
 {
     ScriptError err;
     CKey key1, key2, key3;
-    key1.MakeNewKey(true);
-    key2.MakeNewKey(false);
-    key3.MakeNewKey(true);
+    key1.MakeNewKey();
+    key2.MakeNewKey();
+    key3.MakeNewKey();
 
     CScript scriptPubKey12;
     scriptPubKey12 << OP_1 << ToByteVector(key1.GetPubKey()) << ToByteVector(key2.GetPubKey()) << OP_2 << OP_CHECKMULTISIG;
@@ -1094,10 +1094,10 @@ BOOST_AUTO_TEST_CASE(script_CHECKMULTISIG23)
 {
     ScriptError err;
     CKey key1, key2, key3, key4;
-    key1.MakeNewKey(true);
-    key2.MakeNewKey(false);
-    key3.MakeNewKey(true);
-    key4.MakeNewKey(false);
+    key1.MakeNewKey();
+    key2.MakeNewKey();
+    key3.MakeNewKey();
+    key4.MakeNewKey();
 
     CScript scriptPubKey23;
     scriptPubKey23 << OP_2 << ToByteVector(key1.GetPubKey()) << ToByteVector(key2.GetPubKey()) << ToByteVector(key3.GetPubKey()) << OP_3 << OP_CHECKMULTISIG;
@@ -1169,7 +1169,7 @@ BOOST_AUTO_TEST_CASE(script_combineSigs)
     for (int i = 0; i < 3; i++)
     {
         CKey key;
-        key.MakeNewKey(i%2 == 1);
+        key.MakeNewKey();
         keys.push_back(key);
         pubkeys.push_back(key.GetPubKey());
         keystore.AddKey(key);

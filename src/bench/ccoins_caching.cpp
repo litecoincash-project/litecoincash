@@ -25,7 +25,7 @@ SetupDummyInputs(CBasicKeyStore& keystoreRet, CCoinsViewCache& coinsRet)
     // Add some keys to the keystore:
     CKey key[4];
     for (int i = 0; i < 4; i++) {
-        key[i].MakeNewKey(i % 2);
+        key[i].MakeNewKey();
         keystoreRet.AddKey(key[i]);
     }
 

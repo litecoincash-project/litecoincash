@@ -304,7 +304,7 @@ CTransactionRef RandomOrphan()
 BOOST_AUTO_TEST_CASE(DoS_mapOrphans)
 {
     CKey key;
-    key.MakeNewKey(true);
+    key.MakeNewKey();
     CBasicKeyStore keystore;
     keystore.AddKey(key);
 

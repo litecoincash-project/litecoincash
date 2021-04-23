@@ -148,7 +148,6 @@ const CWalletTx* CWallet::GetWalletTx(const uint256& hash) const
 CPubKey CWallet::GenerateNewKey(CWalletDB &walletdb, bool internal)
 {
     AssertLockHeld(cs_wallet); // mapKeyMetadata
-    bool fCompressed = false;
 
     CKey secret;
 
@@ -156,7 +155,7 @@ CPubKey CWallet::GenerateNewKey(CWalletDB &walletdb, bool internal)
     int64_t nCreationTime = GetTime();
     CKeyMetadata metadata(nCreationTime);
 
-    secret.MakeNewKey(fCompressed);
+    secret.MakeNewKey();
 
     CPubKey pubkey = secret.GetPubKey();
     assert(secret.VerifyPubKey(pubkey));

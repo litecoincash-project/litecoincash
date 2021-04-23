@@ -117,7 +117,7 @@ public:
     bool IsCompressed() const { return fCompressed; }
 
     //! Generate a new private key using a cryptographic PRNG.
-    void MakeNewKey(bool fCompressed);
+    void MakeNewKey();
 
     /**
      * Convert the private key to a CPrivKey (serialized OpenSSL private key data).
@@ -154,26 +154,6 @@ public:
 
     //! Load private key and check that public key matches.
     bool Load(const CPrivKey& privkey, const CPubKey& vchPubKey, bool fSkipCheck);
-};
-
-struct CExtKey {
-    unsigned char nDepth;
-    unsigned char vchFingerprint[4];
-    unsigned int nChild;
-    ChainCode chaincode;
-    CKey key;
-
-    friend bool operator==(const CExtKey& a, const CExtKey& b)
-    {
-        return a.nDepth == b.nDepth &&
-            memcmp(&a.vchFingerprint[0], &b.vchFingerprint[0], sizeof(vchFingerprint)) == 0 &&
-            a.nChild == b.nChild &&
-            a.chaincode == b.chaincode &&
-            a.key == b.key;
-    }
-
-    CExtPubKey Neuter() const;
-    void SetMaster(const unsigned char* seed, unsigned int nSeedLen);
 };
 
 /** Check that required Falcon-512 support is available at runtime. */

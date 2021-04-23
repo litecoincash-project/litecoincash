@@ -14,8 +14,6 @@
 #include <stdexcept>
 #include <vector>
 
-const unsigned int BIP32_EXTKEY_SIZE = 74;
-
 /** A reference to a CKey: the Hash160 of its serialized public key */
 class CKeyID : public uint160
 {
@@ -184,23 +182,6 @@ public:
 
     //! Recover a public key from a compact signature.
     bool RecoverCompact(const uint256& hash, const std::vector<unsigned char>& vchSig);
-};
-
-struct CExtPubKey {
-    unsigned char nDepth;
-    unsigned char vchFingerprint[4];
-    unsigned int nChild;
-    ChainCode chaincode;
-    CPubKey pubkey;
-
-    friend bool operator==(const CExtPubKey &a, const CExtPubKey &b)
-    {
-        return a.nDepth == b.nDepth &&
-            memcmp(&a.vchFingerprint[0], &b.vchFingerprint[0], sizeof(vchFingerprint)) == 0 &&
-            a.nChild == b.nChild &&
-            a.chaincode == b.chaincode &&
-            a.pubkey == b.pubkey;
-    }
 };
 
 #endif // BITCOIN_PUBKEY_H
