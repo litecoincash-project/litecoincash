@@ -1,15 +1,9 @@
 Fuzz-testing Neon Core
 ==========================
 
-<<<<<<< HEAD
-A special test harness `test_neon_fuzzy` is provided to provide an easy
-entry point for fuzzers and the like. In this document we'll describe how to
-use it with AFL.
-=======
 A special test harness in `src/test/fuzz/` is provided for each fuzz target to
 provide an easy entry point for fuzzers and the like. In this document we'll
 describe how to use it with AFL and libFuzzer.
->>>>>>> 2ca632e5b... test: Build fuzz targets into seperate executables
 
 Building AFL
 -------------
@@ -72,17 +66,11 @@ Fuzzing
 
 To start the actual fuzzing use:
 ```
-<<<<<<< HEAD
-$AFLPATH/afl-fuzz -i ${AFLIN} -o ${AFLOUT} -m52 -- test/test_neon_fuzzy
-=======
 $AFLPATH/afl-fuzz -i ${AFLIN} -o ${AFLOUT} -m52 -- test/fuzz/fuzz_target_foo
->>>>>>> 2ca632e5b... test: Build fuzz targets into seperate executables
 ```
 
 You may have to change a few kernel parameters to test optimally - `afl-fuzz`
 will print an error and suggestion if so.
-<<<<<<< HEAD
-=======
 
 ## libFuzzer
 

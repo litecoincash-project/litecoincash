@@ -46,7 +46,7 @@ bool CKey::Sign(const uint256 &hash, std::vector<unsigned char>& vchSig, uint32_
     if (!fValid) return false;
 
     size_t sig_len;
-    vchSig.resize(PQCLEAN_FALCON512_CLEAN_CRYPTO_BYTES_);
+    vchSig.resize(SIGN_SIZE);
     int r = PQCLEAN_FALCON512_CLEAN_crypto_sign_signature(vchSig.data(), &sig_len, hash.begin(), 32, keydata.data());
     vchSig.resize(sig_len);
     if(r != 0)
@@ -70,7 +70,7 @@ bool CKey::SignCompact(const uint256 &hash, std::vector<unsigned char>& vchSig) 
     if (!fValid) return false;
 
     size_t sig_len;
-    vchSig.resize(PQCLEAN_FALCON512_CLEAN_CRYPTO_BYTES_ + pksize());
+    vchSig.resize(SIGN_SIZE + pksize());
     int r = PQCLEAN_FALCON512_CLEAN_crypto_sign_signature(vchSig.data(), &sig_len, hash.begin(), 32, keydata.data());
     vchSig.resize(sig_len + pksize());
     memcpy(vchSig.data() + sig_len,pubkeydata.data(),pksize());

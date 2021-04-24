@@ -34,16 +34,8 @@ public:
      * Falcon-512:
      */
      static const unsigned int PRIVATE_KEY_SIZE            = PQCLEAN_FALCON512_CLEAN_CRYPTO_SECRETKEYBYTES_;
-     static const unsigned int COMPRESSED_PRIVATE_KEY_SIZE = PQCLEAN_FALCON512_CLEAN_CRYPTO_SECRETKEYBYTES_;
      static const unsigned int PUB_KEY_SIZE                = PQCLEAN_FALCON512_CLEAN_CRYPTO_PUBLICKEYBYTES_;
      static const unsigned int SIGN_SIZE                   = PQCLEAN_FALCON512_CLEAN_CRYPTO_BYTES_;
-    /**
-     * see www.keylength.com
-     * script supports up to 75 for single byte push
-     */
-    static_assert(
-        PRIVATE_KEY_SIZE >= COMPRESSED_PRIVATE_KEY_SIZE,
-        "COMPRESSED_PRIVATE_KEY_SIZE is larger than PRIVATE_KEY_SIZE");
 
 private:
     //! Whether this private key is valid. We check for correctness when modifying the key

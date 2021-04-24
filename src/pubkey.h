@@ -32,16 +32,7 @@ public:
      * Falcon-512:
      */
     static constexpr unsigned int PUBLIC_KEY_SIZE             = 897 + 1;
-    static constexpr unsigned int COMPRESSED_PUBLIC_KEY_SIZE  = 897 + 1;
     static constexpr unsigned int SIGNATURE_SIZE              = 690;
-    static constexpr unsigned int COMPACT_SIGNATURE_SIZE      = 690;
-    /**
-     * see www.keylength.com
-     * script supports up to 75 for single byte push
-     */
-    static_assert(
-        PUBLIC_KEY_SIZE >= COMPRESSED_PUBLIC_KEY_SIZE,
-        "COMPRESSED_PUBLIC_KEY_SIZE is larger than PUBLIC_KEY_SIZE");
 
 private:
 
@@ -169,10 +160,7 @@ public:
     bool IsFullyValid() const;
 
     //! Check whether this is a compressed public key.
-    bool IsCompressed() const
-    {
-        return size() == COMPRESSED_PUBLIC_KEY_SIZE;
-    }
+    bool IsCompressed() const { return true; } // compressed and uncompressed sizes are the same (==)
 
     /**
      * Verify a DER signature (~72 bytes).
