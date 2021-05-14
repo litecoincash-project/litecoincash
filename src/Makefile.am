@@ -255,6 +255,7 @@ libbitcoin_wallet_a_SOURCES = \
   $(BITCOIN_CORE_H)
 
 # crypto primitives library
+# LitecoinCash: MinotaurX: Added crypto/minotaurx/
 crypto_libbitcoin_crypto_a_CPPFLAGS = $(AM_CPPFLAGS) $(SSL_CFLAGS)
 crypto_libbitcoin_crypto_a_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
 crypto_libbitcoin_crypto_a_SOURCES = \
@@ -277,7 +278,63 @@ crypto_libbitcoin_crypto_a_SOURCES = \
   crypto/sha256.cpp \
   crypto/sha256.h \
   crypto/sha512.cpp \
-  crypto/sha512.h
+  crypto/sha512.h \
+  crypto/minotaurx/sph_blake.h \
+  crypto/minotaurx/sph_cubehash.h \
+  crypto/minotaurx/sph_echo.h \
+  crypto/minotaurx/sph_fugue.h \
+  crypto/minotaurx/sph_groestl.h \
+  crypto/minotaurx/sph_hamsi.h \
+  crypto/minotaurx/sph_haval.h \
+  crypto/minotaurx/sph_jh.h \
+  crypto/minotaurx/sph_keccak.h \
+  crypto/minotaurx/sph_luffa.h \
+  crypto/minotaurx/sph_sha2.h \
+  crypto/minotaurx/sph_sha2big.c \
+  crypto/minotaurx/sph_shabal.h \
+  crypto/minotaurx/sph_shavite.h \
+  crypto/minotaurx/sph_simd.h \
+  crypto/minotaurx/sph_skein.h \
+  crypto/minotaurx/sph_types.h \
+  crypto/minotaurx/sph_whirlpool.h \
+  crypto/minotaurx/bmw.c \
+  crypto/minotaurx/whirlpool.c \
+  crypto/minotaurx/Sponge.h \
+  crypto/minotaurx/blake.c \
+  crypto/minotaurx/blake2.h \
+  crypto/minotaurx/blake2-impl.h \
+  crypto/minotaurx/blake2s-ref.c \
+  crypto/minotaurx/cubehash.c \
+  crypto/minotaurx/echo.c \
+  crypto/minotaurx/fugue.c \
+  crypto/minotaurx/groestl.c \
+  crypto/minotaurx/hamsi.c \
+  crypto/minotaurx/hashblake.h \
+  crypto/minotaurx/hashgroestl.h \
+  crypto/minotaurx/hashquark.h \
+  crypto/minotaurx/hashqubit.h \
+  crypto/minotaurx/hashskein.h \
+  crypto/minotaurx/hashx11.h \
+  crypto/minotaurx/hashx13.h \
+  crypto/minotaurx/hashx15.h \
+  crypto/minotaurx/hashx17.h \
+  crypto/minotaurx/haval.c \
+  crypto/minotaurx/jh.c \
+  crypto/minotaurx/keccak.c \
+  crypto/minotaurx/luffa.c \
+  crypto/minotaurx/Lyra2.c \
+  crypto/minotaurx/Lyra2.h \
+  crypto/minotaurx/Lyra2RE.c \
+  crypto/minotaurx/Lyra2RE.h \
+  crypto/minotaurx/shabal.c \
+  crypto/minotaurx/shavite.c \
+  crypto/minotaurx/simd.c \
+  crypto/minotaurx/skein.c \
+  crypto/minotaurx/Sponge.c \
+  crypto/minotaurx/sph_bmw.h \
+  crypto/minotaurx/minotaur.h \
+  crypto/minotaurx/yespower/yespower.c \
+  crypto/minotaurx/yespower/crypto/sha256.c
 
 if USE_ASM
 crypto_libbitcoin_crypto_a_SOURCES += crypto/sha256_sse4.cpp

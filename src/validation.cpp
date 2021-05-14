@@ -1710,6 +1710,10 @@ int32_t ComputeBlockVersion(const CBlockIndex* pindexPrev, const Consensus::Para
     LOCK(cs_main);
     int32_t nVersion = VERSIONBITS_TOP_BITS;
 
+    // LitecoinCash: MinotaurX: Set bit 29 to 0
+    if (IsMinotaurXEnabled(pindexPrev, params))
+        nVersion = 0;
+
     for (int i = 0; i < (int)Consensus::MAX_VERSION_BITS_DEPLOYMENTS; i++) {
         ThresholdState state = VersionBitsState(pindexPrev, params, (Consensus::DeploymentPos)i, versionbitscache);
         if (state == THRESHOLD_LOCKED_IN || state == THRESHOLD_STARTED) {
@@ -1738,9 +1742,15 @@ public:
 
     bool Condition(const CBlockIndex* pindex, const Consensus::Params& params) const override
     {
-        return ((pindex->nVersion & VERSIONBITS_TOP_MASK) == VERSIONBITS_TOP_BITS) &&
-               ((pindex->nVersion >> bit) & 1) != 0 &&
-               ((ComputeBlockVersion(pindex->pprev, params) >> bit) & 1) == 0;
+        // LitecoinCash: MinotaurX: Versionbits always active since powforktime and high bits repurposed at minotaurx UASF activation;
+        // So, don't use VERSIONBITS_TOP_MASK any time past powforktime
+        if (pindex->nTime > params.powForkTime)
+            return ((pindex->nVersion >> bit) & 1) != 0 &&
+                ((ComputeBlockVersion(pindex->pprev, params) >> bit) & 1) == 0;
+        else
+            return ((pindex->nVersion & VERSIONBITS_TOP_MASK) == VERSIONBITS_TOP_BITS) &&
+                ((pindex->nVersion >> bit) & 1) != 0 &&
+                ((ComputeBlockVersion(pindex->pprev, params) >> bit) & 1) == 0;
     }
 };
 
@@ -2209,9 +2219,15 @@ void static UpdateTip(const CBlockIndex *pindexNew, const CChainParams& chainPar
         for (int i = 0; i < 100 && pindex != nullptr; i++)
         {
             int32_t nExpectedVersion = ComputeBlockVersion(pindex->pprev, chainParams.GetConsensus());
-            // LitecoinCash: Hive: Don't warn about unexpected version in Hivemined blocks
-            if (pindex->nVersion > VERSIONBITS_LAST_OLD_BLOCK_VERSION && (pindex->nVersion & ~nExpectedVersion) != 0 && !pindex->GetBlockHeader().IsHiveMined(chainParams.GetConsensus()))
-                ++nUpgraded;
+            // LitecoinCash: MinotaurX: Mask out blocktype before checking for possible unknown upgrade
+            if (IsMinotaurXEnabled(pindex, chainParams.GetConsensus())) {
+                if (pindex->nVersion & 0xFF00FFFF != nExpectedVersion && !pindex->GetBlockHeader().IsHiveMined(chainParams.GetConsensus()))
+                    ++nUpgraded;
+            } else {
+                // LitecoinCash: Hive: Don't warn about unexpected version in Hivemined blocks
+                if (pindex->nVersion > VERSIONBITS_LAST_OLD_BLOCK_VERSION && (pindex->nVersion & ~nExpectedVersion) != 0 && !pindex->GetBlockHeader().IsHiveMined(chainParams.GetConsensus()))
+                    ++nUpgraded;
+            }
             pindex = pindex->pprev;
         }
         if (nUpgraded > 0)
@@ -3091,6 +3107,13 @@ bool IsHive11Enabled(const CBlockIndex* pindexPrev, const Consensus::Params& par
     return (VersionBitsState(pindexPrev, params, Consensus::DEPLOYMENT_HIVE_1_1, versionbitscache) == THRESHOLD_ACTIVE);
 }
 
+// LitecoinCash: MinotaurX: Check if MinotaurX is activated at given point
+bool IsMinotaurXEnabled(const CBlockIndex* pindexPrev, const Consensus::Params& params)
+{
+    LOCK(cs_main);
+    return (VersionBitsState(pindexPrev, params, Consensus::DEPLOYMENT_MINOTAURX, versionbitscache) == THRESHOLD_ACTIVE);
+}
+
 // LitecoinCash: Hive: Get the well-rooted deterministic random string (see whitepaper section 4.1)
 std::string GetDeterministicRandString(const CBlockIndex* pindexPrev) {
     //LOCK(cs_main);  // Lock maybe not needed
@@ -3225,7 +3248,17 @@ static bool ContextualCheckBlockHeader(const CBlockHeader& block, CValidationSta
         if (block.nBits != GetNextHiveWorkRequired(pindexPrev, consensusParams))
             return state.DoS(100, false, REJECT_INVALID, "bad-hive-diffbits", false, "incorrect hive difficulty in block");
     } else {
-        if (block.nBits != GetNextWorkRequired(pindexPrev, &block, consensusParams))
+        // LitecoinCash: MinotaurX: Handle pow type
+        if (IsMinotaurXEnabled(pindexPrev, consensusParams)) {
+            POW_TYPE powType = block.GetPoWType();
+
+            if (powType >= NUM_BLOCK_TYPES)
+                return state.DoS(100, false, REJECT_INVALID, "bad-algo-id", false, "unrecognised pow type in block version");
+
+            if (block.nBits != GetNextWorkRequiredLWMA(pindexPrev, &block, consensusParams, powType))
+                return state.DoS(100, false, REJECT_INVALID, "bad-diff", false, "incorrect pow difficulty in for block type");
+
+        } else if (block.nBits != GetNextWorkRequired(pindexPrev, &block, consensusParams))
             return state.DoS(100, false, REJECT_INVALID, "bad-diffbits", false, "incorrect pow difficulty in block");
     }
 
@@ -3244,21 +3277,34 @@ static bool ContextualCheckBlockHeader(const CBlockHeader& block, CValidationSta
         return state.Invalid(false, REJECT_INVALID, "time-too-old", "block's timestamp is too early");
 
     // Check timestamp
-    if (block.GetBlockTime() > nAdjustedTime + MAX_FUTURE_BLOCK_TIME)
+    // LitecoinCash: MinotaurX: Use alternative MAX_FUTURE_BLOCK_TIME after fork
+    int64_t max_future_block_time = IsMinotaurXEnabled(pindexPrev, consensusParams) ? MAX_FUTURE_BLOCK_TIME_MINOTAURX : MAX_FUTURE_BLOCK_TIME;
+    if (block.GetBlockTime() > nAdjustedTime + max_future_block_time)
         return state.Invalid(false, REJECT_INVALID, "time-too-new", "block timestamp too far in the future");
+    
+    // LitecoinCash: MinotaurX: Handle nVersion differently after activation
+    if (!IsMinotaurXEnabled(pindexPrev,consensusParams)) {
+        // Reject outdated version blocks when 95% (75% on testnet) of the network has upgraded:
+        // check for version 2, 3 and 4 upgrades
+        if((block.nVersion < 2 && nHeight >= consensusParams.BIP34Height) ||
+        (block.nVersion < 3 && nHeight >= consensusParams.BIP66Height) ||
+        (block.nVersion < 4 && nHeight >= consensusParams.BIP65Height))
+                return state.Invalid(false, REJECT_OBSOLETE, strprintf("bad-version(0x%08x)", block.nVersion),
+                                    strprintf("rejected nVersion=0x%08x block", block.nVersion));
 
-    // Reject outdated version blocks when 95% (75% on testnet) of the network has upgraded:
-    // check for version 2, 3 and 4 upgrades
-    if((block.nVersion < 2 && nHeight >= consensusParams.BIP34Height) ||
-       (block.nVersion < 3 && nHeight >= consensusParams.BIP66Height) ||
-       (block.nVersion < 4 && nHeight >= consensusParams.BIP65Height))
+        if (block.nVersion < VERSIONBITS_TOP_BITS && IsWitnessEnabled(pindexPrev, consensusParams))
             return state.Invalid(false, REJECT_OBSOLETE, strprintf("bad-version(0x%08x)", block.nVersion),
-                                 strprintf("rejected nVersion=0x%08x block", block.nVersion));
+                                    strprintf("rejected nVersion=0x%08x block", block.nVersion));
+    } else {
+        // Top 8 bits must be zero
+        if (block.nVersion & 0xFF000000)
+            return state.Invalid(false, REJECT_OBSOLETE, strprintf("old-versionbits(0x%08x)", block.nVersion), strprintf("rejected nVersion=0x%08x block (old versionbits)", block.nVersion));
 
-    if (block.nVersion < VERSIONBITS_TOP_BITS && IsWitnessEnabled(pindexPrev, consensusParams))
-        return state.Invalid(false, REJECT_OBSOLETE, strprintf("bad-version(0x%08x)", block.nVersion),
-                                 strprintf("rejected nVersion=0x%08x block", block.nVersion));
-
+        // Blocktype must be valid
+        uint8_t blockType = (block.nVersion >> 16) & 0xFF;
+        if (blockType >= NUM_BLOCK_TYPES)
+            return state.Invalid(false, REJECT_INVALID, "bad-blocktype", strprintf("unrecognised blocktype of =0x%08x", blockType));
+    }
     return true;
 }
 

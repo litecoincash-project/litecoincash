@@ -10,6 +10,26 @@
 #include <serialize.h>
 #include <uint256.h>
 
+// LitecoinCash: MinotaurX: An impossible pow hash (can't meet any target)
+const uint256 HIGH_HASH = uint256S("0x0fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
+
+// LitecoinCash: MinotaurX: Default value for -powalgo argument
+const std::string DEFAULT_POW_TYPE = "sha256d";
+
+// LitecoinCash: MinotaurX: Pow type names
+const std::string POW_TYPE_NAMES[] = {
+    "sha256d",
+    "minotaurx"
+};
+
+// LitecoinCash: MinotaurX: Pow type IDs
+enum POW_TYPE {
+    POW_TYPE_SHA256,
+    POW_TYPE_MINOTAURX,
+    //
+    NUM_BLOCK_TYPES
+};
+
 /** Nodes collect new transactions into a block, hash them into a hash tree,
  * and scan through nonce values to make the block's hash satisfy proof-of-work
  * requirements.  When they solve the proof-of-work, they broadcast the block
@@ -64,6 +84,9 @@ public:
 
     uint256 GetPoWHash() const;
 
+    // LitecoinCash: MinotaurX
+    static uint256 MinotaurXHashArbitrary(const char* data);
+
     int64_t GetBlockTime() const
     {
         return (int64_t)nTime;
@@ -72,6 +95,22 @@ public:
     // LitecoinCash: Hive: Check if this block is hivemined
     bool IsHiveMined(const Consensus::Params& consensusParams) const {
         return (nNonce == consensusParams.hiveNonceMarker);
+    }
+
+    // LitecoinCash: MinotaurX: Get pow type from version bits
+    POW_TYPE GetPoWType() const {
+        return (POW_TYPE)((nVersion >> 16) & 0xFF);
+    }
+
+    // LitecoinCash: MinotaurX: Get pow type name
+    std::string GetPoWTypeName() const {
+        if (nVersion >= 0x20000000)
+            return POW_TYPE_NAMES[0];
+
+        POW_TYPE pt = GetPoWType();
+        if (pt >= NUM_BLOCK_TYPES)
+            return "unrecognised";
+        return POW_TYPE_NAMES[pt];
     }
 };
 

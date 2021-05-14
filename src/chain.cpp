@@ -223,7 +223,8 @@ arith_uint256 GetBlockProof(const CBlockIndex& block)
 }
 
 // LitecoinCash: Hive: Use this to compute estimated hashes for GetNetworkHashPS()
-arith_uint256 GetNumHashes(const CBlockIndex& block)
+// LitecoinCash: MinotaurX: Only consider the requested powType
+arith_uint256 GetNumHashes(const CBlockIndex& block, POW_TYPE powType)
 {
     arith_uint256 bnTarget;
     bool fNegative;
@@ -233,6 +234,13 @@ arith_uint256 GetNumHashes(const CBlockIndex& block)
     if (fNegative || fOverflow || bnTarget == 0 || block.GetBlockHeader().IsHiveMined(Params().GetConsensus()))
         return 0;
 
+    // LitecoinCash: MinotaurX: skip the wrong pow type
+    if (IsMinotaurXEnabled(&block, Params().GetConsensus()) && block.GetBlockHeader().GetPoWType() != powType)
+        return 0;
+    // LitecoinCash: MinotaurX: if you ask for minotaurx hashes before it's enabled, there aren't any!
+    if (!IsMinotaurXEnabled(&block, Params().GetConsensus()) && powType == POW_TYPE_MINOTAURX) 
+        return 0;
+ 
     // We need to compute 2**256 / (bnTarget+1), but we can't represent 2**256
     // as it's too large for an arith_uint256. However, as 2**256 is at least as large
     // as bnTarget+1, it is equal to ((2**256 - bnTarget - 1) / (bnTarget+1)) + 1,

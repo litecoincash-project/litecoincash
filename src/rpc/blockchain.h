@@ -18,7 +18,8 @@ class UniValue;
  */
 // LitecoinCash: Hive: If optional argument getHiveDifficulty is true, will return Hive difficulty as close to blockindex or tip as possible.
 // If getHiveDifficulty is false, will return PoW difficulty as close to blockindex or tip as possible.
-double GetDifficulty(const CBlockIndex* blockindex = nullptr, bool getHiveDifficulty = false);
+// LitecoinCash: MinotaurX: Add additional POW_TYPE arg
+double GetDifficulty(const CBlockIndex* blockindex = nullptr, bool getHiveDifficulty = false, POW_TYPE powType = POW_TYPE_SHA256);
 
 /** Callback for when block tip changed. */
 void RPCNotifyBlockChange(bool ibd, const CBlockIndex *);

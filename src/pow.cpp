@@ -21,8 +21,117 @@
 
 BeePopGraphPoint beePopGraph[1024*40];       // LitecoinCash: Hive
 
+// LitecoinCash: MinotaurX: Diff adjustment for pow algos (post-MinotaurX activation)
+// Modified LWMA-3
+// Copyright (c) 2017-2021 The Bitcoin Gold developers, Zawy, iamstenman (Microbitcoin), The Litecoin Cash developers
+// MIT License
+// Algorithm by Zawy, a modification of WT-144 by Tom Harding
+// For updates see
+// https://github.com/zawy12/difficulty-algorithms/issues/3#issuecomment-442129791
+
+unsigned int GetNextWorkRequiredLWMA(const CBlockIndex* pindexLast, const CBlockHeader *pblock, const Consensus::Params& params, const POW_TYPE powType) {
+    const bool verbose = LogAcceptCategory(BCLog::MINOTAURX);
+    const arith_uint256 powLimit = UintToArith256(params.powTypeLimits[powType]);   // Max target limit (easiest diff)
+    const int64_t T = params.nPowTargetSpacing * 2;                                 // Target freq
+    const int64_t N = params.lwmaAveragingWindow;                                   // Window size
+    const int64_t k = N * (N + 1) * T / 2;                                          // Constant for proper averaging after weighting solvetimes
+    const int64_t height = pindexLast->nHeight;                                     // Block height
+    
+    // TESTNET ONLY: Allow minimum difficulty blocks if we haven't seen a block for ostensibly 10 blocks worth of time.
+    // Reading this code because you're porting LCC features? Considering doing this on your mainnet?
+    // ***** THIS IS NOT SAFE TO DO ON YOUR MAINNET! *****
+    if (params.fPowAllowMinDifficultyBlocks && pblock->GetBlockTime() > pindexLast->GetBlockTime() + T * 10) {
+        if (verbose) LogPrintf("* GetNextWorkRequiredLWMA: Allowing %s pow limit (apparent testnet stall)\n", POW_TYPE_NAMES[powType]);
+        return powLimit.GetCompact();
+    }
+
+    // Not enough blocks on chain? Return limit
+    if (height < N) {
+        if (verbose) LogPrintf("* GetNextWorkRequiredLWMA: Allowing %s pow limit (short chain)\n", POW_TYPE_NAMES[powType]);
+        return powLimit.GetCompact();
+    }
+
+    arith_uint256 avgTarget, nextTarget;
+    int64_t thisTimestamp, previousTimestamp;
+    int64_t sumWeightedSolvetimes = 0, j = 0, blocksFound = 0;
+
+    // Find previousTimestamp (N blocks of this blocktype back) 
+    const CBlockIndex* blockPreviousTimestamp = pindexLast;
+    while (blocksFound < N) {
+        // Reached forkpoint before finding N blocks of correct powtype? Return min
+        if (blockPreviousTimestamp->GetBlockHeader().nVersion >= 0x20000000) {
+            if (verbose) LogPrintf("* GetNextWorkRequiredLWMA: Allowing %s pow limit (previousTime calc reached forkpoint at height %i)\n", POW_TYPE_NAMES[powType], blockPreviousTimestamp->nHeight);
+            return powLimit.GetCompact();
+        }
+
+        // Wrong block type? Skip
+        if (blockPreviousTimestamp->GetBlockHeader().IsHiveMined(params) || blockPreviousTimestamp->GetBlockHeader().GetPoWType() != powType) {
+            assert (blockPreviousTimestamp->pprev);
+            blockPreviousTimestamp = blockPreviousTimestamp->pprev;
+            continue;
+        }
+    
+        blocksFound++;
+        if (blocksFound == N)   // Don't step to next one if we're at the one we want
+            break;
+
+        assert (blockPreviousTimestamp->pprev);
+        blockPreviousTimestamp = blockPreviousTimestamp->pprev;
+    }
+    previousTimestamp = blockPreviousTimestamp->GetBlockTime();
+    if (verbose) LogPrintf("* GetNextWorkRequiredLWMA: previousTime: First in period is %s at height %i\n", blockPreviousTimestamp->GetBlockHeader().GetHash().ToString().c_str(), blockPreviousTimestamp->nHeight);
+
+    // Find N most recent blocks of wanted type
+    blocksFound = 0;
+    while (blocksFound < N) {
+        // Wrong block type? Skip
+        if (pindexLast->GetBlockHeader().IsHiveMined(params) || pindexLast->GetBlockHeader().GetPoWType() != powType) {
+            //if (verbose) LogPrintf("* GetNextWorkRequiredLWMA: Height %i: Skipping %s (wrong blocktype)\n", pindexLast->nHeight, pindexLast->GetBlockHeader().GetHash().ToString().c_str());
+            assert (pindexLast->pprev);
+            pindexLast = pindexLast->pprev;
+            continue;
+        }
+
+        const CBlockIndex* block = pindexLast;
+        blocksFound++;
+        //if (verbose) LogPrintf("* GetNextWorkRequiredLWMA: Height %i: Counting %s. Total %s blocks found now: %i.\n", pindexLast->nHeight, pindexLast->GetBlockHeader().GetHash().ToString().c_str(), POW_TYPE_NAMES[powType], blocksFound);
+
+        // Prevent solvetimes from being negative in a safe way. It must be done like this. 
+        // Do not attempt anything like  if (solvetime < 1) {solvetime=1;}
+        // The +1 ensures short chains do not calculate nextTarget = 0.
+        thisTimestamp = (block->GetBlockTime() > previousTimestamp) ? block->GetBlockTime() : previousTimestamp + 1;
+
+        // 6*T limit prevents large drops in diff from long solvetimes which would cause oscillations.
+        int64_t solvetime = std::min(6 * T, thisTimestamp - previousTimestamp);
+
+        // The following is part of "preventing negative solvetimes". 
+        previousTimestamp = thisTimestamp;
+       
+        // Give linearly higher weight to more recent solvetimes.
+        j++;
+        sumWeightedSolvetimes += solvetime * j; 
+
+        arith_uint256 target;
+        target.SetCompact(block->nBits);
+        avgTarget += target / N / k; // Dividing by k here prevents an overflow below.
+
+        // Now step!
+        assert (pindexLast->pprev);
+        pindexLast = pindexLast->pprev;            
+    }
+    nextTarget = avgTarget * sumWeightedSolvetimes; 
+
+    if (nextTarget > powLimit) {
+        if (verbose) LogPrintf("* GetNextWorkRequiredLWMA: Allowing %s pow limit (target too high)\n", POW_TYPE_NAMES[powType]);
+        return powLimit.GetCompact();
+    }
+
+    return nextTarget.GetCompact();
+}
+
 // LitecoinCash: DarkGravity V3 (https://github.com/dashpay/dash/blob/master/src/pow.cpp#L82)
 // By Evan Duffield <evan@dash.org>
+// Used for sha256 from LCC fork point till MinotaurX activation
 unsigned int DarkGravityWave(const CBlockIndex* pindexLast, const CBlockHeader *pblock, const Consensus::Params& params)
 {
     const arith_uint256 bnPowLimit = UintToArith256(params.powLimitSHA);
@@ -92,6 +201,7 @@ unsigned int DarkGravityWave(const CBlockIndex* pindexLast, const CBlockHeader *
     return bnNew.GetCompact();
 }
 
+// Call correct diff adjust for Scrypt and sha256 blocks prior to MinotaurX
 unsigned int GetNextWorkRequired(const CBlockIndex* pindexLast, const CBlockHeader *pblock, const Consensus::Params& params)
 {
     assert(pindexLast != nullptr);
@@ -103,6 +213,7 @@ unsigned int GetNextWorkRequired(const CBlockIndex* pindexLast, const CBlockHead
         return GetNextWorkRequiredLTC(pindexLast, pblock, params);
 }
 
+// LTC's diff adjust
 unsigned int GetNextWorkRequiredLTC(const CBlockIndex* pindexLast, const CBlockHeader *pblock, const Consensus::Params& params)
 {
     assert(pindexLast != nullptr);
@@ -147,6 +258,7 @@ unsigned int GetNextWorkRequiredLTC(const CBlockIndex* pindexLast, const CBlockH
     return CalculateNextWorkRequired(pindexLast, pindexFirst->GetBlockTime(), params);
 }
 
+// Used by LTC's diff adjust
 unsigned int CalculateNextWorkRequired(const CBlockIndex* pindexLast, int64_t nFirstBlockTime, const Consensus::Params& params)
 {
     if (params.fPowNoRetargeting)
@@ -188,8 +300,14 @@ bool CheckProofOfWork(uint256 hash, unsigned int nBits, const Consensus::Params&
 
     bnTarget.SetCompact(nBits, &fNegative, &fOverflow);
 
+    // LitecoinCash: MinotaurX: Use highest pow limit for limit check
+    arith_uint256 powLimit = 0;
+    for (int i = 0; i < NUM_BLOCK_TYPES; i++)
+        if (UintToArith256(params.powTypeLimits[i]) > powLimit)
+            powLimit = UintToArith256(params.powTypeLimits[i]);
+
     // Check range
-    if (fNegative || bnTarget == 0 || fOverflow || bnTarget > UintToArith256(params.powLimit))
+    if (fNegative || bnTarget == 0 || fOverflow || bnTarget > powLimit)
         return false;
 
     // Check proof of work matches claimed amount
@@ -235,8 +353,47 @@ unsigned int GetNextHive11WorkRequired(const CBlockIndex* pindexLast, const Cons
     return beeHashTarget.GetCompact();
 }
 
-// LitecoinCash: Hive: Get the current Bee Hash Target
+// LitecoinCash: MinotaurX: Reset Hive difficulty after MinotaurX enable
+unsigned int GetNextHive12WorkRequired(const CBlockIndex* pindexLast, const Consensus::Params& params) {
+    const arith_uint256 bnPowLimit = UintToArith256(params.powLimitHive);
+
+    arith_uint256 beeHashTarget = 0;
+    int hiveBlockCount = 0;
+    int totalBlockCount = 0;
+
+    // Step back till we have found 24 hive blocks, or we ran out...
+    while (hiveBlockCount < params.hiveDifficultyWindow && pindexLast->pprev && IsMinotaurXEnabled(pindexLast, params)) {        
+        if (pindexLast->GetBlockHeader().IsHiveMined(params)) {
+            beeHashTarget += arith_uint256().SetCompact(pindexLast->nBits);
+            hiveBlockCount++;
+        }
+        totalBlockCount++;
+        pindexLast = pindexLast->pprev;
+    }
+
+    if (hiveBlockCount < params.hiveDifficultyWindow) {          // Should only happen when chain is starting
+        LogPrintf("GetNextHive12WorkRequired: Insufficient hive blocks.\n");
+        return bnPowLimit.GetCompact();
+    }
+
+    beeHashTarget /= hiveBlockCount;    // Average the bee hash targets in window
+
+    // Retarget based on totalBlockCount
+    int targetTotalBlockCount = hiveBlockCount * params.hiveBlockSpacingTarget;
+    beeHashTarget *= totalBlockCount;
+    beeHashTarget /= targetTotalBlockCount;
+
+    if (beeHashTarget > bnPowLimit)
+        beeHashTarget = bnPowLimit;
+
+    return beeHashTarget.GetCompact();
+}
+
+// LitecoinCash: Hive: Get the current Bee Hash Target (Hive 1.0)
 unsigned int GetNextHiveWorkRequired(const CBlockIndex* pindexLast, const Consensus::Params& params) {
+    // LitecoinCash: MinotaurX
+    if (IsMinotaurXEnabled(pindexLast, params))
+        return GetNextHive12WorkRequired(pindexLast, params);
     // LitecoinCash: Hive 1.1: Use SMA diff adjust
     if (IsHive11Enabled(pindexLast, params))
         return GetNextHive11WorkRequired(pindexLast, params);
@@ -503,15 +660,27 @@ bool CheckHiveProof(const CBlock* pblock, const Consensus::Params& consensusPara
     beeHashTarget.SetCompact(GetNextHiveWorkRequired(pindexPrev, consensusParams));
     if (verbose)
         LogPrintf("CheckHiveProof: beeHashTarget       = %s\n", beeHashTarget.ToString());
-    std::string hashHex = (CHashWriter(SER_GETHASH, 0) << deterministicRandString << txidStr << beeNonce).GetHash().GetHex();
-    arith_uint256 beeHash = arith_uint256(hashHex);
-    if (verbose)
-        LogPrintf("CheckHiveProof: beeHash             = %s\n", hashHex);
-    if (beeHash >= beeHashTarget) {
-        LogPrintf("CheckHiveProof: Bee does not meet hash target!\n");
-        return false;
+    
+    // LitecoinCash: MinotaurX: Use the correct inner Hive hash
+    if (!IsMinotaurXEnabled(pindexPrev, consensusParams)) {
+        std::string hashHex = (CHashWriter(SER_GETHASH, 0) << deterministicRandString << txidStr << beeNonce).GetHash().GetHex();
+        arith_uint256 beeHash = arith_uint256(hashHex);
+        if (verbose)
+            LogPrintf("CheckHiveProof: beeHash             = %s\n", beeHash.GetHex());
+        if (beeHash >= beeHashTarget) {
+            LogPrintf("CheckHiveProof: Bee does not meet hash target!\n");
+            return false;
+        }
+    } else {
+        arith_uint256 beeHash(CBlockHeader::MinotaurXHashArbitrary(std::string(deterministicRandString + txidStr + std::to_string(beeNonce)).c_str()).ToString());
+        if (verbose)
+            LogPrintf("CheckHive12Proof: beeHash           = %s\n", beeHash.GetHex());
+        if (beeHash >= beeHashTarget) {
+            LogPrintf("CheckHive12Proof: Bee does not meet hash target!\n");
+            return false;
+        }
     }
-
+    
     // Grab the message sig (bytes 79-end; byte 78 is size)
     std::vector<unsigned char> messageSig(&txCoinbase->vout[0].scriptPubKey[79], &txCoinbase->vout[0].scriptPubKey[79 + 65]);
     if (verbose)

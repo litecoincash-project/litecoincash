@@ -114,6 +114,17 @@ public:
     explicit uint160(const std::vector<unsigned char>& vch) : base_blob<160>(vch) {}
 };
 
+// LitecoinCash: MinotaurX: 512-bit opaque blob
+class uint512 : public base_blob<512> {
+public:
+    uint512() {}
+    explicit uint512(const std::vector<unsigned char>& vch) : base_blob<512>(vch) {}
+
+    unsigned char ByteAt(unsigned int n) {
+        return data[n];
+    }
+};
+
 /** 256-bit opaque blob.
  * @note This type is called uint256 for historical reasons only. It is an
  * opaque blob of 256 bits and has no integer operations. Use arith_uint256 if
@@ -123,6 +134,11 @@ class uint256 : public base_blob<256> {
 public:
     uint256() {}
     explicit uint256(const std::vector<unsigned char>& vch) : base_blob<256>(vch) {}
+
+    // LitecoinCash: MinotaurX: Truncate a uint512 to a uint256
+    uint256(uint512& dat){
+        memcpy(begin(), dat.begin(), size());
+    }
 
     /** A cheap hash function that just returns 64 bits from the result, it can be
      * used when the contents are considered uniformly random. It is not appropriate

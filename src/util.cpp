@@ -253,6 +253,7 @@ const CLogCategoryDesc LogCategories[] =
     {BCLog::QT, "qt"},
     {BCLog::LEVELDB, "leveldb"},
     {BCLog::HIVE, "hive"},  // LitecoinCash: Hive
+    {BCLog::MINOTAURX, "minotaurx"},  // LitecoinCash: MinotaurX
     {BCLog::ALL, "1"},
     {BCLog::ALL, "all"},
 };

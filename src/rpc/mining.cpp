@@ -45,7 +45,8 @@ unsigned int ParseConfirmTarget(const UniValue& value)
  * If 'height' is nonnegative, compute the estimate at the time when a given block was found.
  */
 // LitecoinCash: Hive: count hashes with dedicated function, dont use chainwork. GetNumHashes is Hive Aware.
-UniValue GetNetworkHashPS(int lookup, int height) {
+// LitecoinCash: MinotaurX: Only consider the correct powType when counting hashes
+UniValue GetNetworkHashPS(int lookup, int height, POW_TYPE powType) {
     CBlockIndex *pb = chainActive.Tip();
 
     if (height >= 0 && height < chainActive.Height())
@@ -62,17 +63,45 @@ UniValue GetNetworkHashPS(int lookup, int height) {
     if (lookup > pb->nHeight)
         lookup = pb->nHeight;
 
+    // LitecoinCash: MinotaurX: Skip incorrect powType
+    while(IsMinotaurXEnabled(pb, Params().GetConsensus()) && pb->GetBlockHeader().GetPoWType() != powType) {
+        assert (pb->pprev);
+        pb = pb->pprev;
+    }
+    // We have either stepped back to before minotaurx fork, or the requested powType block
+    // If we have stepped back to (or started looking up from) pre minotaur, but requested minotaurx pow type, then there are no hashes
+    if (!IsMinotaurXEnabled(pb, Params().GetConsensus()) && powType == POW_TYPE_MINOTAURX) {
+        return 0;
+    }
+    // We are either post-fork and with correct powType, or pre-fork and with correct powType!
+
     int64_t minTime = pb->GetBlockTime();
     int64_t maxTime = minTime;
 	
-	arith_uint256 workDiff = GetNumHashes(*pb);
+	arith_uint256 workDiff = GetNumHashes(*pb, powType);    // LitecoinCash: MinotaurX: add powType param
 	
     for (int i = 0; i < lookup; i++) {
         pb = pb->pprev;
+
+        // LitecoinCash: MinotaurX: Skip incorrect powType
+
+        // TODO: Strictly speaking we may also went to step over hive blocks in here!
+        // However, it is not a major problem as GetNumHashes is Hive aware, and since
+        // hive blocks almost immediately follow pow blocks, the contribution to timing
+        // inaccuracies are most likely fairly insignificant.
+
+        while(IsMinotaurXEnabled(pb, Params().GetConsensus()) && pb->GetBlockHeader().GetPoWType() != powType) {
+            assert (pb->pprev);
+            pb = pb->pprev;
+        }
+        if(!IsMinotaurXEnabled(pb, Params().GetConsensus()) && powType == POW_TYPE_MINOTAURX) {
+            break;
+        }
+
         int64_t time = pb->GetBlockTime();
         minTime = std::min(time, minTime);
         maxTime = std::max(time, maxTime);
-        workDiff += GetNumHashes(*pb);
+        workDiff += GetNumHashes(*pb, powType);              // LitecoinCash: MinotaurX: add powType param
     }
 
     // In case there's a situation where minTime == maxTime, we don't want a divide by zero exception.
@@ -135,15 +164,17 @@ UniValue gethiveparams(const JSONRPCRequest& request)
 
 UniValue getnetworkhashps(const JSONRPCRequest& request)
 {
-    if (request.fHelp || request.params.size() > 2)
+    if (request.fHelp || request.params.size() > 3)
         throw std::runtime_error(
-            "getnetworkhashps ( nblocks height )\n"
+            "getnetworkhashps ( nblocks height powalgo )\n"     // LitecoinCash: MinotaurX
             "\nReturns the estimated network hashes per second based on the last n blocks.\n"
             "Pass in [blocks] to override # of blocks, -1 specifies since last difficulty change.\n"
             "Pass in [height] to estimate the network speed at the time when a certain block was found.\n"
+            
             "\nArguments:\n"
             "1. nblocks     (numeric, optional, default=120) The number of blocks, or -1 for blocks since last difficulty change.\n"
             "2. height      (numeric, optional, default=-1) To estimate at the time of the given height.\n"
+            "3. powalgo     (string, optional) This can be set to \"sha256d\" or \"minotaurx\". If omitted, wallet's default is assumed (-powalgo conf option)\n" // LitecoinCash: MinotaurX
             "\nResult:\n"
             "x             (numeric) Hashes per second estimated\n"
             "\nExamples:\n"
@@ -151,8 +182,25 @@ UniValue getnetworkhashps(const JSONRPCRequest& request)
             + HelpExampleRpc("getnetworkhashps", "")
        );
 
+    // LitecoinCash: MinotaurX
+    std::string strAlgo = gArgs.GetArg("-powalgo", DEFAULT_POW_TYPE);
+    if (!request.params[2].isNull())
+        strAlgo = request.params[2].get_str();
+
+    bool algoFound = false;
+    POW_TYPE powType;
+    for (unsigned int i = 0; i < NUM_BLOCK_TYPES; i++) {
+        if (strAlgo == POW_TYPE_NAMES[i]) {
+            powType = (POW_TYPE)i;
+            algoFound = true;
+            break;
+        }
+    }
+    if (!algoFound)
+        throw JSONRPCError(RPC_INVALID_PARAMETER, "Invalid pow algorithm requested");
+
     LOCK(cs_main);
-    return GetNetworkHashPS(!request.params[0].isNull() ? request.params[0].get_int() : 120, !request.params[1].isNull() ? request.params[1].get_int() : -1);
+    return GetNetworkHashPS(!request.params[0].isNull() ? request.params[0].get_int() : 120, !request.params[1].isNull() ? request.params[1].get_int() : -1, powType);
 }
 
 UniValue generateBlocks(std::shared_ptr<CReserveScript> coinbaseScript, int nGenerate, uint64_t nMaxTries, bool keepScript)
@@ -248,7 +296,8 @@ UniValue getmininginfo(const JSONRPCRequest& request)
             "  \"blocks\": nnn,             (numeric) The current block\n"
             "  \"currentblockweight\": nnn, (numeric) The last block weight\n"
             "  \"currentblocktx\": nnn,     (numeric) The last block transaction\n"
-            "  \"difficulty\": xxx.xxxxx    (numeric) The current difficulty\n"
+            "  \"difficulty\": xxx.xxxxx    (numeric) The current difficulty for sha256d\n"
+            "  \"minotaurxdifficulty\": x.x (numeric) the current difficulty for minotaurx once activated\n"  // LitecoinCash: MinotaurX
             "  \"networkhashps\": nnn,      (numeric) The network hashes per second\n"
             "  \"pooledtx\": n              (numeric) The size of the mempool\n"
             "  \"chain\": \"xxxx\",           (string) current network name as defined in BIP70 (main, test, regtest)\n"
@@ -268,6 +317,8 @@ UniValue getmininginfo(const JSONRPCRequest& request)
     obj.push_back(Pair("currentblockweight", (uint64_t)nLastBlockWeight));
     obj.push_back(Pair("currentblocktx",   (uint64_t)nLastBlockTx));
     obj.push_back(Pair("difficulty",       (double)GetDifficulty()));
+    if (IsMinotaurXEnabled(chainActive.Tip(), Params().GetConsensus()))
+        obj.push_back(Pair("minotaurxdifficulty", GetDifficulty(nullptr, false, POW_TYPE_MINOTAURX)));    // LitecoinCash: MinotaurX
     obj.push_back(Pair("networkhashps",    getnetworkhashps(request)));
     obj.push_back(Pair("pooledtx",         (uint64_t)mempool.size()));
     obj.push_back(Pair("chain",            Params().NetworkIDString()));
@@ -346,6 +397,7 @@ std::string gbt_vb_name(const Consensus::DeploymentPos pos) {
 UniValue getblocktemplate(const JSONRPCRequest& request)
 {
     if (request.fHelp || request.params.size() > 1)
+        // LitecoinCash: MinotaurX: Include help note about algo field in template_request
         throw std::runtime_error(
             "getblocktemplate ( TemplateRequest )\n"
             "\nIf the request parameters include a 'mode' key, that is used to explicitly select between the default 'template' request or a 'proposal'.\n"
@@ -359,6 +411,7 @@ UniValue getblocktemplate(const JSONRPCRequest& request)
             "\nArguments:\n"
             "1. template_request         (json object, optional) A json object in the following spec\n"
             "     {\n"
+            "       \"powalgo\":\"xxxx\"     (string, optional) This can be set to \"sha256d\" or \"minotaurx\". If omitted, wallet's default is assumed (-powalgo conf option)\n"
             "       \"mode\":\"template\"    (string, optional) This must be set to \"template\", \"proposal\" (see BIP 23), or omitted\n"
             "       \"capabilities\":[     (array, optional) A list of strings\n"
             "           \"support\"          (string) client side supported feature, 'longpoll', 'coinbasetxn', 'coinbasevalue', 'proposal', 'serverlist', 'workid'\n"
@@ -428,6 +481,7 @@ UniValue getblocktemplate(const JSONRPCRequest& request)
     UniValue lpval = NullUniValue;
     std::set<std::string> setClientRules;
     int64_t nMaxVersionPreVB = -1;
+    std::string strAlgo = gArgs.GetArg("-powalgo", DEFAULT_POW_TYPE);   // LitecoinCash: MinotaurX: Pow type (as string)
     if (!request.params[0].isNull())
     {
         const UniValue& oparam = request.params[0].get_obj();
@@ -472,6 +526,11 @@ UniValue getblocktemplate(const JSONRPCRequest& request)
             return BIP22ValidationResult(state);
         }
 
+        // LitecoinCash: MinotaurX: Override default pow type
+        const UniValue& algoval = find_value(oparam, "powalgo");
+        if (algoval.isStr())
+            strAlgo = algoval.get_str();
+
         const UniValue& aClientRules = find_value(oparam, "rules");
         if (aClientRules.isArray()) {
             for (unsigned int i = 0; i < aClientRules.size(); ++i) {
@@ -486,6 +545,19 @@ UniValue getblocktemplate(const JSONRPCRequest& request)
             }
         }
     }
+
+    // LitecoinCash: MinotaurX: Check for a valid pow type
+    bool algoFound = false;
+    POW_TYPE powType;
+    for (unsigned int i = 0; i < NUM_BLOCK_TYPES; i++) {
+        if (strAlgo == POW_TYPE_NAMES[i]) {
+            powType = (POW_TYPE)i;
+            algoFound = true;
+            break;
+        }
+    }
+    if (!algoFound)
+        throw JSONRPCError(RPC_INVALID_PARAMETER, "Invalid pow algorithm requested");
 
     if (strMode != "template")
         throw JSONRPCError(RPC_INVALID_PARAMETER, "Invalid mode");
@@ -560,9 +632,11 @@ UniValue getblocktemplate(const JSONRPCRequest& request)
     // Cache whether the last invocation was with segwit support, to avoid returning
     // a segwit-block to a non-segwit caller.
     static bool fLastTemplateSupportsSegwit = true;
+    static POW_TYPE lastPowType = NUM_BLOCK_TYPES;  // LitecoinCash: MinotaurX
     if (pindexPrev != chainActive.Tip() ||
         (mempool.GetTransactionsUpdated() != nTransactionsUpdatedLast && GetTime() - nStart > 5) ||
-        fLastTemplateSupportsSegwit != fSupportsSegwit)
+        fLastTemplateSupportsSegwit != fSupportsSegwit ||
+        lastPowType != powType) // LitecoinCash: MinotaurX: Include powType check in cache refresh condition
     {
         // Clear pindexPrev so future calls make a new block, despite any failures from here on
         pindexPrev = nullptr;
@@ -575,7 +649,8 @@ UniValue getblocktemplate(const JSONRPCRequest& request)
 
         // Create new block
         CScript scriptDummy = CScript() << OP_TRUE;
-        pblocktemplate = BlockAssembler(Params()).CreateNewBlock(scriptDummy, fSupportsSegwit);
+        pblocktemplate = BlockAssembler(Params()).CreateNewBlock(scriptDummy, fSupportsSegwit, nullptr, powType);   // LitecoinCash: MinotaurX: Include powType
+        lastPowType = powType;   // LitecoinCash: MinotaurX: Cache pow type just requested
         if (!pblocktemplate)
             throw JSONRPCError(RPC_OUT_OF_MEMORY, "Out of memory");
 
