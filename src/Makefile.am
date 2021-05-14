@@ -334,6 +334,7 @@ crypto_libbitcoin_crypto_a_SOURCES = \
   crypto/minotaurx/sph_bmw.h \
   crypto/minotaurx/minotaur.h \
   crypto/minotaurx/yespower/yespower.c \
+  crypto/minotaurx/yespower/yespower.h \
   crypto/minotaurx/yespower/crypto/sha256.c
 
 if USE_ASM
