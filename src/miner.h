@@ -166,7 +166,8 @@ public:
 
     /** Construct a new block template with coinbase to scriptPubKeyIn */
     // LitecoinCash: Hive: If hiveProofScript is passed, create a Hive block instead of a PoW block
-    std::unique_ptr<CBlockTemplate> CreateNewBlock(const CScript& scriptPubKeyIn, bool fMineWitnessTx=true, const CScript* hiveProofScript=nullptr);
+    // LitecoinCash: MinotaurX: Accept POW_TYPE arg
+    std::unique_ptr<CBlockTemplate> CreateNewBlock(const CScript& scriptPubKeyIn, bool fMineWitnessTx=true, const CScript* hiveProofScript=nullptr, const POW_TYPE powType=POW_TYPE_SHA256);
 
 private:
     // utility functions
@@ -209,6 +210,7 @@ int64_t UpdateTime(CBlockHeader* pblock, const Consensus::Params& consensusParam
 void BeeKeeper(const CChainParams& chainparams);                        // LitecoinCash: Hive: Bee management thread
 bool BusyBees(const Consensus::Params& consensusParams, int height);    // LitecoinCash: Hive: Attempt to mint the next block
 void CheckBin(int threadID, std::vector<CBeeRange> bin, std::string deterministicRandString, arith_uint256 beeHashTarget); // LitecoinCash: Hive: Mining optimisations: Thread to process a bin of beeranges
+void CheckBinMinotaurX(int threadID, std::vector<CBeeRange> bin, std::string deterministicRandString, arith_uint256 beeHashTarget); // LitecoinCash: MinotaurX: Use minotaur inner hash for hive
 void AbortWatchThread(int height);                                      // LitecoinCash: Hive: Mining optimisations: Thread to watch for abort conditions
 
 #endif // BITCOIN_MINER_H

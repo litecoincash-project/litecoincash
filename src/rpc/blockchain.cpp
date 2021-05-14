@@ -3,6 +3,7 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
+#include <primitives/block.h>       // LitecoinCash: MinotaurX: for POW_TYPE
 #include <rpc/blockchain.h>
 
 #include <amount.h>
@@ -52,7 +53,8 @@ extern void TxToJSON(const CTransaction& tx, const uint256 hashBlock, UniValue& 
  * or the block index of the given chain.
  */
 // LitecoinCash: Hive: Optional getHiveDifficulty param
-double GetDifficulty(const CChain& chain, const CBlockIndex* blockindex, bool getHiveDifficulty = false)
+// LitecoinCash: MinotaurX: Add powType param
+double GetDifficulty(const CChain& chain, const CBlockIndex* blockindex, bool getHiveDifficulty = false, POW_TYPE powType = POW_TYPE_SHA256)
 {
     if (blockindex == nullptr)
     {
@@ -62,17 +64,10 @@ double GetDifficulty(const CChain& chain, const CBlockIndex* blockindex, bool ge
             blockindex = chain.Tip();
     }
 
-    // LitecoinCash: Hive: If tip is hivemined and we want PoW, step back one (Hive blocks always follow a PoW block)
     const Consensus::Params& consensusParams = Params().GetConsensus();
-    if (!getHiveDifficulty) {
-        // LitecoinCash: Hive 1.1: Allow there to be multiple hive blocks in the way
-        while (blockindex->GetBlockHeader().IsHiveMined(consensusParams)) {
-            assert (blockindex->pprev);
-            blockindex = blockindex->pprev;
-        }
-    }
 
     // LitecoinCash: Hive: If tip is PoW and we want hivemined, step back until we find a Hive block
+    // LitecoinCash: Hive 1.1: Allow there to be multiple hive blocks in the way
     if (getHiveDifficulty) {
         while (!blockindex->GetBlockHeader().IsHiveMined(consensusParams)) {
             if (!blockindex->pprev || blockindex->nHeight < consensusParams.minHiveCheckBlock) {   // Ran out of blocks without finding a Hive block? Return min target
@@ -82,7 +77,24 @@ double GetDifficulty(const CChain& chain, const CBlockIndex* blockindex, bool ge
 
             blockindex = blockindex->pprev;
         }
+    } else {
+        // LitecoinCash: MinotaurX: Skip over incorrect powTypes
+        if (IsMinotaurXEnabled(blockindex, consensusParams)) {
+            while (blockindex->GetBlockHeader().IsHiveMined(consensusParams) || blockindex->GetBlockHeader().GetPoWType() != powType) {
+                assert (blockindex->pprev);
+                blockindex = blockindex->pprev;
+                if (!IsMinotaurXEnabled(blockindex, consensusParams)) {
+                    return 0;
+                }
+            }
+        } else {
+            while (blockindex->GetBlockHeader().IsHiveMined(consensusParams)) {
+                assert (blockindex->pprev);
+                blockindex = blockindex->pprev;
+            }
+        }
     }
+    
 
     int nShift = (blockindex->nBits >> 24) & 0xff;
     double dDiff =
@@ -103,9 +115,10 @@ double GetDifficulty(const CChain& chain, const CBlockIndex* blockindex, bool ge
 }
 
 // LitecoinCash: Hive: Pass through optional getHiveDifficulty param
-double GetDifficulty(const CBlockIndex* blockindex, bool getHiveDifficulty)
+// LitecoinCash: MinotaurX: Add additional POW_TYPE arg
+double GetDifficulty(const CBlockIndex* blockindex, bool getHiveDifficulty, POW_TYPE powType)
 {
-    return GetDifficulty(chainActive, blockindex, getHiveDifficulty);
+    return GetDifficulty(chainActive, blockindex, getHiveDifficulty, powType);
 }
 
 UniValue blockheaderToJSON(const CBlockIndex* blockindex)
@@ -114,10 +127,16 @@ UniValue blockheaderToJSON(const CBlockIndex* blockindex)
     UniValue result(UniValue::VOBJ);
     result.push_back(Pair("hash", blockindex->GetBlockHash().GetHex()));
     int confirmations = -1;
+    auto consensusParams = Params().GetConsensus();     // LitecoinCash: MinotaurX
+
     // Only report confirmations if the block is on the main chain
     if (chainActive.Contains(blockindex))
         confirmations = chainActive.Height() - blockindex->nHeight + 1;
-    result.push_back(Pair("type", blockindex->GetBlockHeader().IsHiveMined(Params().GetConsensus()) ? "hive" : "pow")); // LitecoinCash: Hive 1.1: Show block type in JSON
+    bool isHive = blockindex->GetBlockHeader().IsHiveMined(consensusParams);    // LitecoinCash: MinotaurX
+    result.push_back(Pair("type", isHive ? "hive" : "pow")); // LitecoinCash: Hive 1.1: Show block type in JSON
+    // LitecoinCash: MinotaurX: Only report powtype for pow blocks
+    if (!isHive)
+        result.push_back(Pair("powtype", blockindex->GetBlockHeader().GetPoWTypeName()));
     result.push_back(Pair("confirmations", confirmations));
     result.push_back(Pair("height", blockindex->nHeight));
     result.push_back(Pair("version", blockindex->nVersion));
@@ -128,6 +147,8 @@ UniValue blockheaderToJSON(const CBlockIndex* blockindex)
     result.push_back(Pair("nonce", (uint64_t)blockindex->nNonce));
     result.push_back(Pair("bits", strprintf("%08x", blockindex->nBits)));
     result.push_back(Pair("difficulty", GetDifficulty(blockindex)));
+    if (IsMinotaurXEnabled(blockindex, consensusParams))
+        result.push_back(Pair("minotaurxdifficulty", GetDifficulty(blockindex, false, POW_TYPE_MINOTAURX)));    // LitecoinCash: MinotaurX
     result.push_back(Pair("hivedifficulty", GetDifficulty(blockindex, true)));  // LitecoinCash: Hive
     result.push_back(Pair("chainwork", blockindex->nChainWork.GetHex()));
 
@@ -145,10 +166,16 @@ UniValue blockToJSON(const CBlock& block, const CBlockIndex* blockindex, bool tx
     UniValue result(UniValue::VOBJ);
     result.push_back(Pair("hash", blockindex->GetBlockHash().GetHex()));
     int confirmations = -1;
+    auto consensusParams = Params().GetConsensus();     // LitecoinCash: MinotaurX
+
     // Only report confirmations if the block is on the main chain
     if (chainActive.Contains(blockindex))
         confirmations = chainActive.Height() - blockindex->nHeight + 1;
-    result.push_back(Pair("type", block.GetBlockHeader().IsHiveMined(Params().GetConsensus()) ? "hive" : "pow")); // LitecoinCash: Hive 1.1: Show block type in JSON
+    bool isHive = blockindex->GetBlockHeader().IsHiveMined(consensusParams);    // LitecoinCash: MinotaurX
+    result.push_back(Pair("type", isHive ? "hive" : "pow")); // LitecoinCash: Hive 1.1: Show block type in JSON
+    // LitecoinCash: MinotaurX: Only report powtype for pow blocks
+    if (!isHive)
+        result.push_back(Pair("powtype", blockindex->GetBlockHeader().GetPoWTypeName()));
     result.push_back(Pair("confirmations", confirmations));
     result.push_back(Pair("strippedsize", (int)::GetSerializeSize(block, SER_NETWORK, PROTOCOL_VERSION | SERIALIZE_TRANSACTION_NO_WITNESS)));
     result.push_back(Pair("size", (int)::GetSerializeSize(block, SER_NETWORK, PROTOCOL_VERSION)));
@@ -175,6 +202,9 @@ UniValue blockToJSON(const CBlock& block, const CBlockIndex* blockindex, bool tx
     result.push_back(Pair("nonce", (uint64_t)block.nNonce));
     result.push_back(Pair("bits", strprintf("%08x", block.nBits)));
     result.push_back(Pair("difficulty", GetDifficulty(blockindex)));
+    if (IsMinotaurXEnabled(blockindex, consensusParams)) {
+        result.push_back(Pair("minotaurxdifficulty", GetDifficulty(blockindex, false, POW_TYPE_MINOTAURX)));    // LitecoinCash: MinotaurX
+    }
     result.push_back(Pair("hivedifficulty", GetDifficulty(blockindex, true)));  // LitecoinCash: Hive
     result.push_back(Pair("chainwork", blockindex->nChainWork.GetHex()));
 
@@ -367,12 +397,15 @@ UniValue syncwithvalidationinterfacequeue(const JSONRPCRequest& request)
     return NullUniValue;
 }
 
+// LitecoinCash: MinotaurX: Allow additional powalgo arg
 UniValue getdifficulty(const JSONRPCRequest& request)
 {
-    if (request.fHelp || request.params.size() != 0)
+    if (request.fHelp || request.params.size() > 1)
         throw std::runtime_error(
-            "getdifficulty\n"
+            "getdifficulty ( powalgo )\n"
             "\nReturns the proof-of-work difficulty as a multiple of the minimum difficulty.\n"
+            "\nArguments:\n"
+            "1. \"powalgo\":\"xxxx\"     (string, optional) This can be set to \"sha256d\" or \"minotaurx\". If omitted, wallet's default is assumed (-powalgo conf option)\n"  // LitecoinCash: MinotaurX
             "\nResult:\n"
             "n.nnn       (numeric) the proof-of-work difficulty as a multiple of the minimum difficulty.\n"
             "\nExamples:\n"
@@ -380,8 +413,27 @@ UniValue getdifficulty(const JSONRPCRequest& request)
             + HelpExampleRpc("getdifficulty", "")
         );
 
+    std::string strAlgo = gArgs.GetArg("-powalgo", DEFAULT_POW_TYPE);
+    if (!request.params[0].isNull())
+        strAlgo = request.params[0].get_str();
+
+    bool algoFound = false;
+    POW_TYPE powType;
+    for (unsigned int i = 0; i < NUM_BLOCK_TYPES; i++) {
+        if (strAlgo == POW_TYPE_NAMES[i]) {
+            powType = (POW_TYPE)i;
+            algoFound = true;
+            break;
+        }
+    }
+    if (!algoFound)
+        throw JSONRPCError(RPC_INVALID_PARAMETER, "Invalid pow algorithm requested");
+
+    if (!IsMinotaurXEnabled(chainActive.Tip(), Params().GetConsensus()) && powType != POW_TYPE_SHA256)
+        throw JSONRPCError(RPC_INVALID_PARAMETER, "Non sha256d algo requested but minotaurx not enabled");
+
     LOCK(cs_main);
-    return GetDifficulty();
+    return GetDifficulty(nullptr, false, powType);
 }
 
 // LitecoinCash: Hive: Get hive difficulty
@@ -722,6 +774,7 @@ UniValue getblockheader(const JSONRPCRequest& request)
             "{\n"
             "  \"hash\" : \"hash\",     (string) the block hash (same as provided)\n"
             "  \"type\" : \"hive\"|\"pow\", (string) Indicates whether this block is hive or pow mined\n"   // LitecoinCash: Hive 1.1: Include block type            
+            "  \"powtype\" : \"sha256d\"|\"minotaurx\"|\"unrecognised\", (string) Indicates the pow mining type of the block\n"   // LitecoinCash: MinotaurX: Include pow type
             "  \"confirmations\" : n,   (numeric) The number of confirmations, or -1 if the block is not on the main chain\n"
             "  \"height\" : n,          (numeric) The block height or index\n"
             "  \"version\" : n,         (numeric) The block version\n"
@@ -731,7 +784,8 @@ UniValue getblockheader(const JSONRPCRequest& request)
             "  \"mediantime\" : ttt,    (numeric) The median block time in seconds since epoch (Jan 1 1970 GMT)\n"
             "  \"nonce\" : n,           (numeric) The nonce\n"
             "  \"bits\" : \"1d00ffff\", (string) The bits\n"
-            "  \"difficulty\" : x.xxx,  (numeric) The pow difficulty\n"
+            "  \"difficulty\" : x.xxx,  (numeric) The pow difficulty for sha256d\n"
+            "  \"minotaurxdifficulty\" : x.xxx,  (numeric) The pow difficulty for minotaurx (once activated)\n" // LitecoinCash: MinotaurX
             "  \"hivedifficulty\" : x.xxx,  (numeric) The hive difficulty\n"    // LitecoinCash: Hive 1.1: Include hive diff
             "  \"chainwork\" : \"0000...1f3\"     (string) Expected number of hashes required to produce the current chain (in hex)\n"
             "  \"previousblockhash\" : \"hash\",  (string) The hash of the previous block\n"
@@ -786,6 +840,7 @@ UniValue getblock(const JSONRPCRequest& request)
             "{\n"
             "  \"hash\" : \"hash\",     (string) the block hash (same as provided)\n"
             "  \"type\" : \"hive\"|\"pow\", (string) Indicates whether this block is hive or pow mined\n"   // LitecoinCash: Hive 1.1: Include block type
+            "  \"powtype\" : \"sha256d\"|\"minotaurx\"|\"unrecognised\", (string) Indicates the pow mining type of the block\n"   // LitecoinCash: MinotaurX: Include pow type
             "  \"confirmations\" : n,   (numeric) The number of confirmations, or -1 if the block is not on the main chain\n"
             "  \"size\" : n,            (numeric) The block size\n"
             "  \"strippedsize\" : n,    (numeric) The block size excluding witness data\n"
@@ -802,8 +857,9 @@ UniValue getblock(const JSONRPCRequest& request)
             "  \"mediantime\" : ttt,    (numeric) The median block time in seconds since epoch (Jan 1 1970 GMT)\n"
             "  \"nonce\" : n,           (numeric) The nonce\n"
             "  \"bits\" : \"1d00ffff\", (string) The bits\n"
-            "  \"difficulty\" : x.xxx,  (numeric) The pow difficulty\n"
-            "  \"hivedifficulty\" : x.xxx,  (numeric) The hive difficulty\n"    // LitecoinCash: Hive 1.1: Include hive diff
+            "  \"difficulty\" : x.xxx,          (numeric) The pow difficulty for sha256d\n"
+            "  \"minotaurxdifficulty\" : x.xxx, (numeric) The pow difficulty for minotaurx (once activated)\n" // LitecoinCash: MinotaurX
+            "  \"hivedifficulty\" : x.xxx,      (numeric) The hive difficulty\n"    // LitecoinCash: Hive 1.1: Include hive diff
             "  \"chainwork\" : \"xxxx\",  (string) Expected number of hashes required to produce the chain up to this block (in hex)\n"
             "  \"previousblockhash\" : \"hash\",  (string) The hash of the previous block\n"
             "  \"nextblockhash\" : \"hash\"       (string) The hash of the next block\n"
@@ -1215,7 +1271,8 @@ UniValue getblockchaininfo(const JSONRPCRequest& request)
             "  \"blocks\": xxxxxx,             (numeric) the current number of blocks processed in the server\n"
             "  \"headers\": xxxxxx,            (numeric) the current number of headers we have validated\n"
             "  \"bestblockhash\": \"...\",       (string) the hash of the currently best block\n"
-            "  \"difficulty\": xxxxxx,         (numeric) the current difficulty\n"
+            "  \"difficulty\": xxxxxx,         (numeric) the current difficulty for sha256d\n"
+            "  \"minotaurxdifficulty\": xxxxx, (numeric) the current difficulty for minotaurx once activated\n"  // LitecoinCash: MinotaurX
             "  \"mediantime\": xxxxxx,         (numeric) median time for the current best block\n"
             "  \"verificationprogress\": xxxx, (numeric) estimate of verification progress [0..1]\n"
             "  \"initialblockdownload\": xxxx, (bool) (debug information) estimate of whether this node is in Initial Block Download mode.\n"
@@ -1265,6 +1322,8 @@ UniValue getblockchaininfo(const JSONRPCRequest& request)
     obj.push_back(Pair("headers",               pindexBestHeader ? pindexBestHeader->nHeight : -1));
     obj.push_back(Pair("bestblockhash",         chainActive.Tip()->GetBlockHash().GetHex()));
     obj.push_back(Pair("difficulty",            (double)GetDifficulty()));
+    if (IsMinotaurXEnabled(chainActive.Tip(), Params().GetConsensus()))
+        obj.push_back(Pair("minotaurxdifficulty", GetDifficulty(nullptr, false, POW_TYPE_MINOTAURX)));    // LitecoinCash: MinotaurX
     obj.push_back(Pair("mediantime",            (int64_t)chainActive.Tip()->GetMedianTimePast()));
     obj.push_back(Pair("verificationprogress",  GuessVerificationProgress(Params().TxData(), chainActive.Tip())));
     obj.push_back(Pair("initialblockdownload",  IsInitialBlockDownload()));
