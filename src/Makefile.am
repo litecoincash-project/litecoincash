@@ -335,7 +335,10 @@ crypto_libbitcoin_crypto_a_SOURCES = \
   crypto/minotaurx/minotaur.h \
   crypto/minotaurx/yespower/yespower.c \
   crypto/minotaurx/yespower/yespower.h \
-  crypto/minotaurx/yespower/crypto/sha256.c
+  crypto/minotaurx/yespower/crypto/sha256.c \
+  crypto/minotaurx/yespower/crypto/sha256.h \
+  crypto/minotaurx/yespower/util/insecure_memzero.h \
+  crypto/minotaurx/yespower/util/sysendian.h
 
 if USE_ASM
 crypto_libbitcoin_crypto_a_SOURCES += crypto/sha256_sse4.cpp
