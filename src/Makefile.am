@@ -528,11 +528,11 @@ CTAES_DIST += crypto/ctaes/README.md
 CTAES_DIST += crypto/ctaes/test.c
 
 # LitecoinCash: MinotaurX
-CRYPTO_HELPER_DIST =  crypto/pow/aes_helper.c
-CRYPTO_HELPER_DIST += crypto/pow/hamsi_helper.c
-CRYPTO_HELPER_DIST += crypto/pow/haval_helper.c
-CRYPTO_HELPER_DIST += crypto/pow/md_helper.c
-CRYPTO_HELPER_DIST += crypto/pow/sph_md_helper.c
+CRYPTO_HELPER_DIST =  crypto/minotaurx/aes_helper.c
+CRYPTO_HELPER_DIST += crypto/minotaurx/hamsi_helper.c
+CRYPTO_HELPER_DIST += crypto/minotaurx/haval_helper.c
+CRYPTO_HELPER_DIST += crypto/minotaurx/md_helper.c
+CRYPTO_HELPER_DIST += crypto/minotaurx/sph_md_helper.c
 
 CLEANFILES = $(EXTRA_LIBRARIES)
 
