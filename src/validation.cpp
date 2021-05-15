@@ -2221,7 +2221,7 @@ void static UpdateTip(const CBlockIndex *pindexNew, const CChainParams& chainPar
             int32_t nExpectedVersion = ComputeBlockVersion(pindex->pprev, chainParams.GetConsensus());
             // LitecoinCash: MinotaurX: Mask out blocktype before checking for possible unknown upgrade
             if (IsMinotaurXEnabled(pindex, chainParams.GetConsensus())) {
-                if (pindex->nVersion & 0xFF00FFFF != nExpectedVersion && !pindex->GetBlockHeader().IsHiveMined(chainParams.GetConsensus()))
+                if ((pindex->nVersion & 0xFF00FFFF) != nExpectedVersion && !pindex->GetBlockHeader().IsHiveMined(chainParams.GetConsensus()))
                     ++nUpgraded;
             } else {
                 // LitecoinCash: Hive: Don't warn about unexpected version in Hivemined blocks
