@@ -527,6 +527,13 @@ CTAES_DIST += crypto/ctaes/ctaes.h
 CTAES_DIST += crypto/ctaes/README.md
 CTAES_DIST += crypto/ctaes/test.c
 
+# LitecoinCash: MinotaurX
+CRYPTO_HELPER_DIST =  crypto/pow/aes_helper.c
+CRYPTO_HELPER_DIST += crypto/pow/hamsi_helper.c
+CRYPTO_HELPER_DIST += crypto/pow/haval_helper.c
+CRYPTO_HELPER_DIST += crypto/pow/md_helper.c
+CRYPTO_HELPER_DIST += crypto/pow/sph_md_helper.c
+
 CLEANFILES = $(EXTRA_LIBRARIES)
 
 CLEANFILES += *.gcda *.gcno
@@ -543,7 +550,8 @@ CLEANFILES += wallet/test/*.gcda wallet/test/*.gcno
 CLEANFILES += zmq/*.gcda zmq/*.gcno
 CLEANFILES += obj/build.h
 
-EXTRA_DIST = $(CTAES_DIST)
+# LitecoinCash: MinotaurX
+EXTRA_DIST = $(CTAES_DIST) $(CRYPTO_HELPER_DIST)
 
 
 config/bitcoin-config.h: config/stamp-h1
