@@ -293,16 +293,17 @@ UniValue getmininginfo(const JSONRPCRequest& request)
             "\nReturns a json object containing mining-related information."
             "\nResult:\n"
             "{\n"
-            "  \"blocks\": nnn,             (numeric) The current block\n"
-            "  \"currentblockweight\": nnn, (numeric) The last block weight\n"
-            "  \"currentblocktx\": nnn,     (numeric) The last block transaction\n"
-            "  \"difficulty\": xxx.xxxxx    (numeric) The current difficulty for sha256d\n"
-            "  \"minotaurxdifficulty\": x.x (numeric) the current difficulty for minotaurx once activated\n"  // LitecoinCash: MinotaurX
-            "  \"networkhashps\": nnn,      (numeric) The network hashes per second\n"
-            "  \"pooledtx\": n              (numeric) The size of the mempool\n"
-            "  \"chain\": \"xxxx\",           (string) current network name as defined in BIP70 (main, test, regtest)\n"
-            "  \"warnings\": \"...\"          (string) any network and blockchain warnings\n"
-            "  \"errors\": \"...\"            (string) DEPRECATED. Same as warnings. Only shown when litecoincashd is started with -deprecatedrpc=getmininginfo\n"
+            "  \"blocks\": nnn,                 (numeric) The current block\n"
+            "  \"currentblockweight\": nnn,     (numeric) The last block weight\n"
+            "  \"currentblocktx\": nnn,         (numeric) The last block transaction\n"
+            "  \"difficulty\": xxx.xxxxx,       (numeric) The current difficulty for sha256d\n"
+            "  \"minotaurxdifficulty\": x.x,    (numeric) The current difficulty for minotaurx once activated\n"  // LitecoinCash: MinotaurX
+            "  \"networkhashps\": nnn,          (numeric) The network hashes per second for sha256d\n"
+            "  \"minotaurxnetworkhashps\": nnn, (numeric) The network hashes per second for minotaurx once activated\n"  // LitecoinCash: MinotaurX
+            "  \"pooledtx\": n,                 (numeric) The size of the mempool\n"
+            "  \"chain\": \"xxxx\",               (string) current network name as defined in BIP70 (main, test, regtest)\n"
+            "  \"warnings\": \"...\"              (string) any network and blockchain warnings\n"
+            "  \"errors\": \"...\"                (string) DEPRECATED. Same as warnings. Only shown when litecoincashd is started with -deprecatedrpc=getmininginfo\n"
             "}\n"
             "\nExamples:\n"
             + HelpExampleCli("getmininginfo", "")
@@ -320,6 +321,8 @@ UniValue getmininginfo(const JSONRPCRequest& request)
     if (IsMinotaurXEnabled(chainActive.Tip(), Params().GetConsensus()))
         obj.push_back(Pair("minotaurxdifficulty", GetDifficulty(nullptr, false, POW_TYPE_MINOTAURX)));    // LitecoinCash: MinotaurX
     obj.push_back(Pair("networkhashps",    getnetworkhashps(request)));
+    if (IsMinotaurXEnabled(chainActive.Tip(), Params().GetConsensus()))
+        obj.push_back(Pair("minotaurxnetworkhashps",    GetNetworkHashPS(120, -1, POW_TYPE_MINOTAURX)));    // LitecoinCash: MinotaurX
     obj.push_back(Pair("pooledtx",         (uint64_t)mempool.size()));
     obj.push_back(Pair("chain",            Params().NetworkIDString()));
     if (IsDeprecatedRPCEnabled("getmininginfo")) {
