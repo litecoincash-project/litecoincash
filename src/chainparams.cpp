@@ -112,7 +112,7 @@ public:
         consensus.vDeployments[Consensus::DEPLOYMENT_HIVE_1_1].nStartTime = 1568937600;  // Sept 20, 2019
         consensus.vDeployments[Consensus::DEPLOYMENT_HIVE_1_1].nTimeout = 1600560000;    // Sept 20, 2020
 
-        // LitecoinCash: MinotaurX: Deployment
+        // LitecoinCash: MinotaurX / Hive 1.2: Deployment
         consensus.vDeployments[Consensus::DEPLOYMENT_MINOTAURX].bit = 7;
         consensus.vDeployments[Consensus::DEPLOYMENT_MINOTAURX].nStartTime = 2208988800;  // Jan 1, 2040
         consensus.vDeployments[Consensus::DEPLOYMENT_MINOTAURX].nTimeout = 2208988800 + 31536000;  // Start + 1 year
@@ -243,7 +243,7 @@ public:
         consensus.nSubsidyHalvingInterval = 840000;
         consensus.BIP16Height = 0; // always enforce BIP16
         consensus.BIP34Height = 125;
-        consensus.BIP34Hash = uint256S("0x000000019636e23695c5e988165c749bde7d24251e34d4f1a0088c887137d298"); // Block hash at block 125
+        consensus.BIP34Hash = uint256S("0x00000048f3a775a771193f269d16e63260af3754be38d0dfe0f5c970d3a83048"); // Block hash at block 125
         consensus.BIP65Height = 125;
         consensus.BIP66Height = 125;
         consensus.powLimit = uint256S("00000fffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
@@ -274,16 +274,16 @@ public:
 
         // LitecoinCash: Hive 1.1: Deployment
         consensus.vDeployments[Consensus::DEPLOYMENT_HIVE_1_1].bit = 9;
-        consensus.vDeployments[Consensus::DEPLOYMENT_HIVE_1_1].nStartTime = 1620401848;  // May 7, 2021 (but later than above ones)
-        consensus.vDeployments[Consensus::DEPLOYMENT_HIVE_1_1].nTimeout = 1620401848 + 31536000;  // Start + 1 year
+        consensus.vDeployments[Consensus::DEPLOYMENT_HIVE_1_1].nStartTime = 1624800581;  // June 27, 2021
+        consensus.vDeployments[Consensus::DEPLOYMENT_HIVE_1_1].nTimeout = 1624800581 + 31536000;  // Start + 1 year
 
-        // LitecoinCash: MinotaurX: Deployment
+        // LitecoinCash: MinotaurX / Hive 1.2: Deployment
         consensus.vDeployments[Consensus::DEPLOYMENT_MINOTAURX].bit = 7;
-        consensus.vDeployments[Consensus::DEPLOYMENT_MINOTAURX].nStartTime = 1620472557;  // May 8, 2021
-        consensus.vDeployments[Consensus::DEPLOYMENT_MINOTAURX].nTimeout = 1620472557 + 31536000;  // Start + 1 year
+        consensus.vDeployments[Consensus::DEPLOYMENT_MINOTAURX].nStartTime = 1624803331;  // Just 27, 2021 (later than above)
+        consensus.vDeployments[Consensus::DEPLOYMENT_MINOTAURX].nTimeout = 1624803331 + 31536000;  // Start + 1 year
 
         // LitecoinCash fields
-        consensus.powForkTime = 1620401249;                 // Time of PoW hash method change (block 100)
+        consensus.powForkTime = 1624800218;                 // Time of PoW hash method change (block 100)
         consensus.lastScryptBlock = 100;                    // Height of last scrypt block
         consensus.powLimitSHA = uint256S("000000ffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");   // Initial hash target at fork
         consensus.slowStartBlocks = 40;                     // Scale post-fork block reward up over this many blocks
@@ -324,10 +324,10 @@ public:
         consensus.powTypeLimits.emplace_back(uint256S("0x000fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"));   // MinotaurX limit
 
         // The best chain should have at least this much work.
-        consensus.nMinimumChainWork = uint256S("0x000000000000000000000000000000000000000000000000000000250e301823");  // LitecoinCash: 907
+        consensus.nMinimumChainWork = uint256S("0x0000000000000000000000000000000000000000000000000000003a4bf5c679");  // Block 250
 
         // By default assume that the signatures in ancestors of this block are valid.
-        consensus.defaultAssumeValid = uint256S("0xa93cb08130810488c6b60943f8a3af6a4f1674994ce4a364daa16571724b1558"); // LitecoinCash: 907
+        consensus.defaultAssumeValid = uint256S("0x000000006cc68f8e548b06e5ad3a65048ea142931b308c2a1abbc26c4e7d6e37"); // Block 250
 
         pchMessageStart[0] = 0xb6;
         pchMessageStart[1] = 0xf5;
@@ -362,16 +362,14 @@ public:
         checkpointData = (CCheckpointData) {
             {
                 {0, uint256S("4966625a4b2851d9fdee139e56211a0d88575f59ed816ff5e6a63deb4e3e29a0")},      // Genesis block
-                {100, uint256S("2db0fa314c6fd54713c2e6e0b8e6520f99fb4f990ce868c8844a594253bf6497")},    // Last Scrypt block
-                {125, uint256S("000000019636e23695c5e988165c749bde7d24251e34d4f1a0088c887137d298")},    // BIP34/BIP65/BIP66 activation
-                {208, uint256S("6c348097fba799a290f3c08ea17279874c4d4342164296e1454944ebed971a75")},    // Pre Hive-1.1 activation
-                {907, uint256S("a93cb08130810488c6b60943f8a3af6a4f1674994ce4a364daa16571724b1558")},
+                {100, uint256S("e0a6da3e883b1575ca681d1ae4090a9076f440bb3afa78d78677b6a1a3226323")},    // Last Scrypt block
+                {250, uint256S("000000006cc68f8e548b06e5ad3a65048ea142931b308c2a1abbc26c4e7d6e37")},
             }
         };
 
-        chainTxData = ChainTxData{  // As at 909
-            1620475928,
-            909,
+        chainTxData = ChainTxData{  // As at block 250
+            1624807399,
+            251,
             0.001
         };
     }

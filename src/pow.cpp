@@ -28,7 +28,6 @@ BeePopGraphPoint beePopGraph[1024*40];       // LitecoinCash: Hive
 // Algorithm by Zawy, a modification of WT-144 by Tom Harding
 // For updates see
 // https://github.com/zawy12/difficulty-algorithms/issues/3#issuecomment-442129791
-
 unsigned int GetNextWorkRequiredLWMA(const CBlockIndex* pindexLast, const CBlockHeader *pblock, const Consensus::Params& params, const POW_TYPE powType) {
     const bool verbose = LogAcceptCategory(BCLog::MINOTAURX);
     const arith_uint256 powLimit = UintToArith256(params.powTypeLimits[powType]);   // Max target limit (easiest diff)
@@ -55,7 +54,8 @@ unsigned int GetNextWorkRequiredLWMA(const CBlockIndex* pindexLast, const CBlock
     int64_t thisTimestamp, previousTimestamp;
     int64_t sumWeightedSolvetimes = 0, j = 0, blocksFound = 0;
 
-    // Find previousTimestamp (N blocks of this blocktype back) 
+    // Find previousTimestamp (N blocks of this blocktype back), and build list of wanted-type blocks as we go
+    std::vector<const CBlockIndex*> wantedBlocks;
     const CBlockIndex* blockPreviousTimestamp = pindexLast;
     while (blocksFound < N) {
         // Reached forkpoint before finding N blocks of correct powtype? Return min
@@ -71,6 +71,8 @@ unsigned int GetNextWorkRequiredLWMA(const CBlockIndex* pindexLast, const CBlock
             continue;
         }
     
+        wantedBlocks.push_back(blockPreviousTimestamp);
+
         blocksFound++;
         if (blocksFound == N)   // Don't step to next one if we're at the one we want
             break;
@@ -81,24 +83,13 @@ unsigned int GetNextWorkRequiredLWMA(const CBlockIndex* pindexLast, const CBlock
     previousTimestamp = blockPreviousTimestamp->GetBlockTime();
     if (verbose) LogPrintf("* GetNextWorkRequiredLWMA: previousTime: First in period is %s at height %i\n", blockPreviousTimestamp->GetBlockHeader().GetHash().ToString().c_str(), blockPreviousTimestamp->nHeight);
 
-    // Find N most recent blocks of wanted type
-    blocksFound = 0;
-    while (blocksFound < N) {
-        // Wrong block type? Skip
-        if (pindexLast->GetBlockHeader().IsHiveMined(params) || pindexLast->GetBlockHeader().GetPoWType() != powType) {
-            //if (verbose) LogPrintf("* GetNextWorkRequiredLWMA: Height %i: Skipping %s (wrong blocktype)\n", pindexLast->nHeight, pindexLast->GetBlockHeader().GetHash().ToString().c_str());
-            assert (pindexLast->pprev);
-            pindexLast = pindexLast->pprev;
-            continue;
-        }
-
-        const CBlockIndex* block = pindexLast;
-        blocksFound++;
-        //if (verbose) LogPrintf("* GetNextWorkRequiredLWMA: Height %i: Counting %s. Total %s blocks found now: %i.\n", pindexLast->nHeight, pindexLast->GetBlockHeader().GetHash().ToString().c_str(), POW_TYPE_NAMES[powType], blocksFound);
+    // Iterate forward from the oldest block (ie, reverse-iterate through the wantedBlocks vector)
+    for (auto it = wantedBlocks.rbegin(); it != wantedBlocks.rend(); ++it) {
+        const CBlockIndex* block = *it;
 
         // Prevent solvetimes from being negative in a safe way. It must be done like this. 
         // Do not attempt anything like  if (solvetime < 1) {solvetime=1;}
-        // The +1 ensures short chains do not calculate nextTarget = 0.
+        // The +1 ensures new coins do not calculate nextTarget = 0.
         thisTimestamp = (block->GetBlockTime() > previousTimestamp) ? block->GetBlockTime() : previousTimestamp + 1;
 
         // 6*T limit prevents large drops in diff from long solvetimes which would cause oscillations.
@@ -114,12 +105,9 @@ unsigned int GetNextWorkRequiredLWMA(const CBlockIndex* pindexLast, const CBlock
         arith_uint256 target;
         target.SetCompact(block->nBits);
         avgTarget += target / N / k; // Dividing by k here prevents an overflow below.
+    } 
 
-        // Now step!
-        assert (pindexLast->pprev);
-        pindexLast = pindexLast->pprev;            
-    }
-    nextTarget = avgTarget * sumWeightedSolvetimes; 
+    nextTarget = avgTarget * sumWeightedSolvetimes;
 
     if (nextTarget > powLimit) {
         if (verbose) LogPrintf("* GetNextWorkRequiredLWMA: Allowing %s pow limit (target too high)\n", POW_TYPE_NAMES[powType]);
