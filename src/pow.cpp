@@ -81,7 +81,7 @@ unsigned int GetNextWorkRequiredLWMA(const CBlockIndex* pindexLast, const CBlock
         blockPreviousTimestamp = blockPreviousTimestamp->pprev;
     }
     previousTimestamp = blockPreviousTimestamp->GetBlockTime();
-    if (verbose) LogPrintf("* GetNextWorkRequiredLWMA: previousTime: First in period is %s at height %i\n", blockPreviousTimestamp->GetBlockHeader().GetHash().ToString().c_str(), blockPreviousTimestamp->nHeight);
+    //if (verbose) LogPrintf("* GetNextWorkRequiredLWMA: previousTime: First in period is %s at height %i\n", blockPreviousTimestamp->GetBlockHeader().GetHash().ToString().c_str(), blockPreviousTimestamp->nHeight);
 
     // Iterate forward from the oldest block (ie, reverse-iterate through the wantedBlocks vector)
     for (auto it = wantedBlocks.rbegin(); it != wantedBlocks.rend(); ++it) {

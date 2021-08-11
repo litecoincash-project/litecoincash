@@ -59,7 +59,7 @@ struct TortureGarden {
 };
 
 // Get a 64-byte hash for given 64-byte input, using given TortureGarden contexts and given algo index
-uint512 GetHash(uint512 inputHash, TortureGarden *garden, unsigned int algo) {
+uint512 GetHash(uint512 inputHash, TortureGarden *garden, unsigned int algo, yespower_local_t *local) {
     uint512 outputHash;
     switch (algo) {
         case 0:
@@ -144,7 +144,11 @@ uint512 GetHash(uint512 inputHash, TortureGarden *garden, unsigned int algo) {
             break;
         // NB: The CPU-hard gate must be case MINOTAUR_ALGO_COUNT.
         case 16:
-            yespower_tls(inputHash.begin(), 64, &yespower_params, (yespower_binary_t*)outputHash.begin());
+            if (local == NULL)  // Self-manage storage on current thread
+                yespower_tls(inputHash.begin(), 64, &yespower_params, (yespower_binary_t*)outputHash.begin());
+            else                // Use provided thread-local storage
+                yespower(local, inputHash.begin(), 64, &yespower_params, (yespower_binary_t*)outputHash.begin());
+
             break;
         default:
             assert(false);
@@ -155,8 +159,8 @@ uint512 GetHash(uint512 inputHash, TortureGarden *garden, unsigned int algo) {
 }
 
 // Recursively traverse a given torture garden starting with a given hash and given node within the garden. The hash is overwritten with the final hash.
-uint512 TraverseGarden(TortureGarden *garden, uint512 hash, TortureNode *node) {
-    uint512 partialHash = GetHash(hash, garden, node->algo);
+uint512 TraverseGarden(TortureGarden *garden, uint512 hash, TortureNode *node, yespower_local_t *local) {
+    uint512 partialHash = GetHash(hash, garden, node->algo, local);
 
 #ifdef MINOTAUR_DEBUG
     printf("* Ran algo %d. Partial hash:\t%s\n", node->algo, partialHash.ToString().c_str());
@@ -165,10 +169,10 @@ uint512 TraverseGarden(TortureGarden *garden, uint512 hash, TortureNode *node) {
 
     if (partialHash.ByteAt(63) % 2 == 0) {      // Last byte of output hash is even
         if (node->childLeft != NULL)
-            return TraverseGarden(garden, partialHash, node->childLeft);
+            return TraverseGarden(garden, partialHash, node->childLeft, local);
     } else {                                    // Last byte of output hash is odd
         if (node->childRight != NULL)
-            return TraverseGarden(garden, partialHash, node->childRight);
+            return TraverseGarden(garden, partialHash, node->childRight, local);
     }
 
     return partialHash;
@@ -181,7 +185,9 @@ void LinkNodes(TortureNode *parent, TortureNode *childLeft, TortureNode *childRi
 }
 
 // Produce a Minotaur 32-byte hash from variable length data
-template<typename T> uint256 Minotaur(const T begin, const T end, bool minotaurX) {
+// Optionally, use the MinotaurX hardened hash.
+// Optionally, use provided thread-local memory for yespower.
+template<typename T> uint256 Minotaur(const T begin, const T end, bool minotaurX, yespower_local_t *local = NULL) {
     // Create torture garden nodes. Note that both sides of 19 and 20 lead to 21, and 21 has no children (to make traversal complete).
     // Every path through the garden stops at 7 nodes.
     TortureGarden garden;
@@ -230,7 +236,7 @@ template<typename T> uint256 Minotaur(const T begin, const T end, bool minotaurX
         garden.nodes[21].algo = MINOTAUR_ALGO_COUNT;
 
     // Send the initial hash through the torture garden
-    hash = TraverseGarden(&garden, hash, &garden.nodes[0]);
+    hash = TraverseGarden(&garden, hash, &garden.nodes[0], local);
 
 #ifdef MINOTAUR_DEBUG
     printf("** Final hash:\t\t\t%s\n", uint256(hash).ToString().c_str());

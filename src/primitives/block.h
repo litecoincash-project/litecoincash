@@ -9,6 +9,7 @@
 #include <primitives/transaction.h>
 #include <serialize.h>
 #include <uint256.h>
+#include <crypto/minotaurx/yespower/yespower.h>  // LitecoinCash: MinotaurX
 
 // LitecoinCash: MinotaurX: An impossible pow hash (can't meet any target)
 const uint256 HIGH_HASH = uint256S("0x0fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
@@ -84,8 +85,9 @@ public:
 
     uint256 GetPoWHash() const;
 
-    // LitecoinCash: MinotaurX
-    static uint256 MinotaurXHashArbitrary(const char* data);
+    // LitecoinCash: MinotaurX: Hashing utils
+    static uint256 MinotaurXHashArbitrary(const char* data);                                    // Hash arbitrary data, using internally-managed thread-local memory for YP
+    static uint256 MinotaurXHashStringWithLocal(std::string data, yespower_local_t *local);     // Hash a string, using provided YP thread-local memory
 
     int64_t GetBlockTime() const
     {
