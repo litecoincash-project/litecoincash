@@ -2865,11 +2865,16 @@ bool CWallet::CreateBeeTransaction(int beeCount, CWalletTx& wtxNew, CReserveKey&
 
     // Don't spend more than potential rewards in a single BCT
     // LitecoinCash: Hive 1.1: Use correct typical spacing
+    // LitecoinCash: MinotaurX: Get correct hive block reward
+    auto blockReward = GetBlockSubsidy(pindexPrev->nHeight, consensusParams);
+    if (IsMinotaurXEnabled(pindexPrev, consensusParams))
+        blockReward += blockReward >> 1;
+
     CAmount totalPotentialReward;
     if (IsHive11Enabled(pindexPrev, consensusParams))
-        totalPotentialReward = (consensusParams.beeLifespanBlocks * GetBlockSubsidy(pindexPrev->nHeight, consensusParams)) / consensusParams.hiveBlockSpacingTargetTypical_1_1;
+        totalPotentialReward = (consensusParams.beeLifespanBlocks * blockReward) / consensusParams.hiveBlockSpacingTargetTypical_1_1;
     else
-        totalPotentialReward = (consensusParams.beeLifespanBlocks * GetBlockSubsidy(pindexPrev->nHeight, consensusParams)) / consensusParams.hiveBlockSpacingTargetTypical;
+        totalPotentialReward = (consensusParams.beeLifespanBlocks * blockReward) / consensusParams.hiveBlockSpacingTargetTypical;
 
     if (totalPotentialReward < beeCost) {
         strFailReason = "Error: Bee creation would cost more than possible rewards";
@@ -2947,6 +2952,11 @@ bool CWallet::CreateBeeTransaction(int beeCount, CWalletTx& wtxNew, CReserveKey&
     scriptPubKeyBCF += scriptPubKeyFCA;
     CAmount beeCreationValue = totalBeeCost;
     CAmount donationValue = (CAmount)(totalBeeCost / consensusParams.communityContribFactor);
+    
+    // LitecoinCash: MinotaurX
+    if (IsMinotaurXEnabled(pindexPrev, consensusParams))
+        donationValue += donationValue >> 1;
+
     if(communityContrib)
         beeCreationValue -= donationValue;
     CRecipient recipientBCF = {scriptPubKeyBCF, beeCreationValue, false};

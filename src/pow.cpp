@@ -440,11 +440,16 @@ bool GetNetworkHiveInfo(int& immatureBees, int& immatureBCTs, int& matureBees, i
     assert(pindexPrev != nullptr);
     int tipHeight = pindexPrev->nHeight;
 
+    // LitecoinCash: MinotaurX: Get correct hive block reward
+    auto blockReward = GetBlockSubsidy(pindexPrev->nHeight, consensusParams);
+    if (IsMinotaurXEnabled(pindexPrev, consensusParams))
+        blockReward += blockReward >> 1;
+
     // LitecoinCash: Hive 1.1: Use correct typical spacing
     if (IsHive11Enabled(pindexPrev, consensusParams))
-        potentialLifespanRewards = (consensusParams.beeLifespanBlocks * GetBlockSubsidy(pindexPrev->nHeight, consensusParams)) / consensusParams.hiveBlockSpacingTargetTypical_1_1;
+        potentialLifespanRewards = (consensusParams.beeLifespanBlocks * blockReward) / consensusParams.hiveBlockSpacingTargetTypical_1_1;
     else
-        potentialLifespanRewards = (consensusParams.beeLifespanBlocks * GetBlockSubsidy(pindexPrev->nHeight, consensusParams)) / consensusParams.hiveBlockSpacingTargetTypical;
+        potentialLifespanRewards = (consensusParams.beeLifespanBlocks * blockReward) / consensusParams.hiveBlockSpacingTargetTypical;
 
     if (recalcGraph) {
         for (int i = 0; i < totalBeeLifespan; i++) {
@@ -481,6 +486,9 @@ bool GetNetworkHiveInfo(int& immatureBees, int& immatureBCTs, int& matureBees, i
                         if (tx->vout.size() > 1 && tx->vout[1].scriptPubKey == scriptPubKeyCF) {    // If it has a community fund contrib...
                             CAmount donationAmount = tx->vout[1].nValue;
                             CAmount expectedDonationAmount = (beeFeePaid + donationAmount) / consensusParams.communityContribFactor;  // ...check for valid donation amount
+                            // LitecoinCash: MinotaurX
+                            if (IsMinotaurXEnabled(pindexPrev, consensusParams))
+                                expectedDonationAmount += expectedDonationAmount >> 1;
                             if (donationAmount != expectedDonationAmount)
                                 continue;
                             beeFeePaid += donationAmount;                                           // Add donation amount back to total paid
@@ -772,6 +780,11 @@ bool CheckHiveProof(const CBlock* pblock, const Consensus::Params& consensusPara
 
             // Check for valid donation amount
             CAmount expectedDonationAmount = (bctValue + donationAmount) / consensusParams.communityContribFactor;
+
+            // LitecoinCash: MinotaurX
+            if (IsMinotaurXEnabled(pindexPrev, consensusParams))
+                expectedDonationAmount += expectedDonationAmount >> 1;
+
             if (donationAmount != expectedDonationAmount) {
                 LogPrintf("CheckHiveProof: BCT pays community fund incorrect amount %i (expected %i)\n", donationAmount, expectedDonationAmount);
                 return false;

@@ -573,6 +573,13 @@ UniValue createrawbct(const JSONRPCRequest& request)
     scriptPubKeyBCF += scriptPubKeyFCA;
     CAmount beeCreationValue = totalBeeCost;
     CAmount donationValue = (CAmount)(totalBeeCost / consensusParams.communityContribFactor);
+
+    // LitecoinCash: MinotaurX
+    CBlockIndex* pindexPrev = chainActive.Tip();
+    assert(pindexPrev != nullptr);    
+    if (IsMinotaurXEnabled(pindexPrev, consensusParams))
+        donationValue += donationValue >> 1;
+            
     if(communityContrib) {
         beeCreationValue -= donationValue;
     }

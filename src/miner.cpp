@@ -217,7 +217,12 @@ std::unique_ptr<CBlockTemplate> BlockAssembler::CreateNewBlock(const CScript& sc
 
         // vout[1]: Honey :)
         coinbaseTx.vout[1].scriptPubKey = scriptPubKeyIn;
-        coinbaseTx.vout[1].nValue = nFees + GetBlockSubsidy(nHeight, chainparams.GetConsensus());
+
+        // LitecoinCash: MinotaurX: Hive rewards are 150% of base block reward
+        coinbaseTx.vout[1].nValue = GetBlockSubsidy(nHeight, chainparams.GetConsensus());
+        if (IsMinotaurXEnabled(pindexPrev, chainparams.GetConsensus()))
+            coinbaseTx.vout[1].nValue += coinbaseTx.vout[1].nValue >> 1;
+        coinbaseTx.vout[1].nValue += nFees;
 
         // vout[2]: Coinbase commitment
         pblock->vtx[0] = MakeTransactionRef(std::move(coinbaseTx));
@@ -229,7 +234,13 @@ std::unique_ptr<CBlockTemplate> BlockAssembler::CreateNewBlock(const CScript& sc
         coinbaseTx.vin[0].prevout.SetNull();
         coinbaseTx.vout.resize(1);
         coinbaseTx.vout[0].scriptPubKey = scriptPubKeyIn;
-        coinbaseTx.vout[0].nValue = nFees + GetBlockSubsidy(nHeight, chainparams.GetConsensus());
+
+        // LitecoinCash: MinotaurX: Pow rewards are 50% of base block reward
+        coinbaseTx.vout[0].nValue = GetBlockSubsidy(nHeight, chainparams.GetConsensus());
+        if (IsMinotaurXEnabled(pindexPrev, chainparams.GetConsensus()))
+            coinbaseTx.vout[0].nValue = coinbaseTx.vout[0].nValue >> 1;
+        coinbaseTx.vout[0].nValue += nFees;
+
         coinbaseTx.vin[0].scriptSig = CScript() << nHeight << OP_0;
         pblock->vtx[0] = MakeTransactionRef(std::move(coinbaseTx));
         pblocktemplate->vchCoinbaseCommitment = GenerateCoinbaseCommitment(*pblock, pindexPrev, chainparams.GetConsensus());

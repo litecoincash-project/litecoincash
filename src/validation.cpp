@@ -1146,7 +1146,7 @@ CAmount GetBlockSubsidy(int nHeight, const Consensus::Params& consensusParams)
         return 0;
 
     CAmount nSubsidy = 50 * COIN * COIN_SCALE;
-    // Subsidy is cut in half every 210,000 blocks which will occur approximately every 4 years.
+    // Subsidy is cut in half every 840,000 blocks which will occur approximately every 4 years.
     nSubsidy >>= halvings;
 
     // LitecoinCash: Slow-start the first n blocks to prevent early miners having an unfair advantage
@@ -1165,6 +1165,7 @@ CAmount GetBeeCost(int nHeight, const Consensus::Params& consensusParams)
     if(nHeight >= consensusParams.totalMoneySupplyHeight)
         return consensusParams.minBeeCost;
 
+    // LitecoinCash: MinotaurX: Note that this doesn't change; bee cost remains calculated against the base subsidy. Great!
     CAmount blockReward = GetBlockSubsidy(nHeight, consensusParams);
     CAmount beeCost = blockReward / consensusParams.beeCostFactor;
     return beeCost <= consensusParams.minBeeCost ? consensusParams.minBeeCost : beeCost;
@@ -2002,7 +2003,16 @@ bool CChainState::ConnectBlock(const CBlock& block, CValidationState& state, CBl
     int64_t nTime3 = GetTimeMicros(); nTimeConnect += nTime3 - nTime2;
     LogPrint(BCLog::BENCH, "      - Connect %u transactions: %.2fms (%.3fms/tx, %.3fms/txin) [%.2fs (%.2fms/blk)]\n", (unsigned)block.vtx.size(), MILLI * (nTime3 - nTime2), MILLI * (nTime3 - nTime2) / block.vtx.size(), nInputs <= 1 ? 0 : MILLI * (nTime3 - nTime2) / (nInputs-1), nTimeConnect * MICRO, nTimeConnect * MILLI / nBlocksTotal);
 
-    CAmount blockReward = nFees + GetBlockSubsidy(pindex->nHeight, chainparams.GetConsensus());
+    // LitecoinCash: MinotaurX: Get correct block reward
+    CAmount blockReward = GetBlockSubsidy(pindex->nHeight, chainparams.GetConsensus());
+    if (IsMinotaurXEnabled(pindex, chainparams.GetConsensus())) {
+        if (block.IsHiveMined(chainparams.GetConsensus()))
+            blockReward += blockReward >> 1;
+        else
+            blockReward = blockReward >> 1;
+    }
+    blockReward += nFees;
+    
     if (block.vtx[0]->GetValueOut() > blockReward)
         return state.DoS(100,
                          error("ConnectBlock(): coinbase pays too much (actual=%d vs limit=%d)",
