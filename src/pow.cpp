@@ -668,7 +668,7 @@ bool CheckHiveProof(const CBlock* pblock, const Consensus::Params& consensusPara
             return false;
         }
     } else {
-        arith_uint256 beeHash(CBlockHeader::MinotaurXHashArbitrary(std::string(deterministicRandString + txidStr + std::to_string(beeNonce)).c_str()).ToString());
+        arith_uint256 beeHash(CBlockHeader::MinotaurHashArbitrary(std::string(deterministicRandString + txidStr + std::to_string(beeNonce)).c_str()).ToString());
         if (verbose)
             LogPrintf("CheckHive12Proof: beeHash           = %s\n", beeHash.GetHex());
         if (beeHash >= beeHashTarget) {

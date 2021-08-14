@@ -21,14 +21,25 @@ uint256 CBlockHeader::GetHash() const
     return SerializeHash(*this);
 }
 
+/*
 // LitecoinCash: MinotaurX: Hash arbitrary data, using internally-managed thread-local memory for YP
 uint256 CBlockHeader::MinotaurXHashArbitrary(const char* data) {
     return Minotaur(data, data + strlen(data), true);
 }
 
-// LitecoinCash: MinotaurX: Hash a string, using provided YP thread-local memory
+// LitecoinCash: MinotaurX: Hash a string with MinotaurX, using provided YP thread-local memory
 uint256 CBlockHeader::MinotaurXHashStringWithLocal(std::string data, yespower_local_t *local) {
     return Minotaur(data.begin(), data.end(), true, local);
+}*/
+
+// LitecoinCash: MinotaurX: Hash arbitrary data with classical Minotaur
+uint256 CBlockHeader::MinotaurHashArbitrary(const char* data) {
+    return Minotaur(data, data + strlen(data), false);
+}
+
+// LitecoinCash: MinotaurX: Hash a string with classical Minotaur
+uint256 CBlockHeader::MinotaurHashString(std::string data) {
+    return Minotaur(data.begin(), data.end(), false);
 }
 
 // LitecoinCash: MinotaurX: Get pow hash based on block type and UASF activation

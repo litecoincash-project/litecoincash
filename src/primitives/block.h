@@ -86,9 +86,12 @@ public:
     uint256 GetPoWHash() const;
 
     // LitecoinCash: MinotaurX: Hashing utils
-    static uint256 MinotaurXHashArbitrary(const char* data);                                    // Hash arbitrary data, using internally-managed thread-local memory for YP
-    static uint256 MinotaurXHashStringWithLocal(std::string data, yespower_local_t *local);     // Hash a string, using provided YP thread-local memory
-
+    /*
+    static uint256 MinotaurXHashArbitrary(const char* data);                                    // Hash arbitrary data with MinotaurX, using internally-managed thread-local memory for YP
+    static uint256 MinotaurXHashStringWithLocal(std::string data, yespower_local_t *local);     // Hash a string with MinotaurX, using provided YP thread-local memory
+    */
+    static uint256 MinotaurHashArbitrary(const char* data);                                     // Hash arbitrary data with classical Minotaur
+    static uint256 MinotaurHashString(std::string data);                                        // Hash a string with classical Minotaur
     int64_t GetBlockTime() const
     {
         return (int64_t)nTime;

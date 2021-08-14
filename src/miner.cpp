@@ -658,10 +658,12 @@ void CheckBin(int threadID, std::vector<CBeeRange> bin, std::string deterministi
 }
 
 // LitecoinCash: MinotaurX: Thread to check a single bee bin
-void CheckBinMinotaurX(int threadID, std::vector<CBeeRange> bin, std::string deterministicRandString, arith_uint256 beeHashTarget) {
+void CheckBinMinotaur(int threadID, std::vector<CBeeRange> bin, std::string deterministicRandString, arith_uint256 beeHashTarget) {
     // Create yespower thread-local storage
+    /*
     static __thread yespower_local_t local;
     yespower_init_local(&local);
+    */
 
     // Iterate over ranges in this bin
     int checkCount = 0;
@@ -674,7 +676,7 @@ void CheckBinMinotaurX(int threadID, std::vector<CBeeRange> bin, std::string det
             if(checkCount++ % 1000 == 0) {
                 if (solutionFound.load() || earlyAbort.load()) {
                     //LogPrintf("THREAD #%i: Solution found elsewhere or early abort requested, ending early\n", threadID);
-                    yespower_free_local(&local);
+                    //yespower_free_local(&local);
                     return;
                 }
             }
@@ -686,7 +688,7 @@ void CheckBinMinotaurX(int threadID, std::vector<CBeeRange> bin, std::string det
             buf << i;
             std::string hashString = buf.str();
 
-            uint256 beeHashUint = CBlockHeader::MinotaurXHashStringWithLocal(hashString, &local);
+            uint256 beeHashUint = CBlockHeader::MinotaurHashString(hashString);
             arith_uint256 beeHash(beeHashUint.ToString());
 
             // Compare to target and write out result if successful
@@ -696,7 +698,7 @@ void CheckBinMinotaurX(int threadID, std::vector<CBeeRange> bin, std::string det
                 solutionFound.store(true);
                 solvingRange = beeRange;
                 solvingBee = i;
-                yespower_free_local(&local);
+                //yespower_free_local(&local);
                 return;
             }
 
@@ -704,7 +706,7 @@ void CheckBinMinotaurX(int threadID, std::vector<CBeeRange> bin, std::string det
         }
     }
     //LogPrintf("THREAD #%i: Out of tasks\n", threadID);
-    yespower_free_local(&local);
+    //yespower_free_local(&local);
 }
 
 // LitecoinCash: Hive: Attempt to mint the next block
@@ -863,7 +865,7 @@ bool BusyBees(const Consensus::Params& consensusParams, int height) {
         if (!minotaurXEnabled)
             binThreads.push_back(boost::thread(CheckBin, binID++, beeBin, deterministicRandString, beeHashTarget));
         else
-            binThreads.push_back(boost::thread(CheckBinMinotaurX, binID++, beeBin, deterministicRandString, beeHashTarget));
+            binThreads.push_back(boost::thread(CheckBinMinotaur, binID++, beeBin, deterministicRandString, beeHashTarget));
 
         beeBinIterator++;
     }
