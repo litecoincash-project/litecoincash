@@ -30,6 +30,9 @@ static const int DEFAULT_HIVE_CHECK_DELAY = 1;
 static const int DEFAULT_HIVE_THREADS = -2;
 static const bool DEFAULT_HIVE_EARLY_OUT = true;
 
+// LitecoinCash: MinotaurX
+static const bool DEFAULT_HIVE_CONTRIB_CF = true;
+
 struct CBlockTemplate
 {
     CBlock block;

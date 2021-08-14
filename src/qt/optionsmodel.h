@@ -52,6 +52,7 @@ public:
         HiveCheckDelay,         // LitecoinCash: Hive: Mining optimisations (int)
         HiveCheckThreads,       // LitecoinCash: Hive: Mining optimisations (int)
         HiveCheckEarlyOut,      // LitecoinCash: Hive: Mining optimisations (bool)
+        HiveContribCF,          // LitecoinCash: MinotaurX
         OptionIDRowCount,
     };
 
@@ -73,6 +74,7 @@ public:
     bool getProxySettings(QNetworkProxy& proxy) const;
     bool getCoinControlFeatures() const { return fCoinControlFeatures; }
     const QString& getOverriddenByCommandLine() { return strOverriddenByCommandLine; }
+    bool getHiveContribCF() const { return fHiveContribCF; }    // LitecoinCash: MinotaurX
 
     /* Restart flag helper */
     void setRestartRequired(bool fRequired);
@@ -83,6 +85,8 @@ private:
     bool fHideTrayIcon;
     bool fMinimizeToTray;
     bool fMinimizeOnClose;
+    bool fHiveContribCF;    // LitecoinCash: MinotaurX
+
     QString language;
     int nDisplayUnit;
     QString strThirdPartyTxUrls;
