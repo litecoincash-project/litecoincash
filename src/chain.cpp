@@ -223,7 +223,7 @@ arith_uint256 GetBlockProof(const CBlockIndex& block)
 }
 
 // LitecoinCash: Hive: Use this to compute estimated hashes for GetNetworkHashPS()
-// LitecoinCash: MinotaurX: Only consider the requested powType
+// LitecoinCash: MinotaurX+Hive1.2: Only consider the requested powType
 arith_uint256 GetNumHashes(const CBlockIndex& block, POW_TYPE powType)
 {
     arith_uint256 bnTarget;
@@ -234,10 +234,10 @@ arith_uint256 GetNumHashes(const CBlockIndex& block, POW_TYPE powType)
     if (fNegative || fOverflow || bnTarget == 0 || block.GetBlockHeader().IsHiveMined(Params().GetConsensus()))
         return 0;
 
-    // LitecoinCash: MinotaurX: skip the wrong pow type
+    // LitecoinCash: MinotaurX+Hive1.2: skip the wrong pow type
     if (IsMinotaurXEnabled(&block, Params().GetConsensus()) && block.GetBlockHeader().GetPoWType() != powType)
         return 0;
-    // LitecoinCash: MinotaurX: if you ask for minotaurx hashes before it's enabled, there aren't any!
+    // LitecoinCash: MinotaurX+Hive1.2: if you ask for minotaurx hashes before it's enabled, there aren't any!
     if (!IsMinotaurXEnabled(&block, Params().GetConsensus()) && powType == POW_TYPE_MINOTAURX) 
         return 0;
  

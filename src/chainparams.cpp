@@ -112,7 +112,7 @@ public:
         consensus.vDeployments[Consensus::DEPLOYMENT_HIVE_1_1].nStartTime = 1568937600;  // Sept 20, 2019
         consensus.vDeployments[Consensus::DEPLOYMENT_HIVE_1_1].nTimeout = 1600560000;    // Sept 20, 2020
 
-        // LitecoinCash: MinotaurX / Hive 1.2: Deployment
+        // LitecoinCash: MinotaurX+Hive1.2 / Hive 1.2: Deployment
         consensus.vDeployments[Consensus::DEPLOYMENT_MINOTAURX].bit = 7;
         consensus.vDeployments[Consensus::DEPLOYMENT_MINOTAURX].nStartTime = 2208988800;  // Jan 1, 2040
         consensus.vDeployments[Consensus::DEPLOYMENT_MINOTAURX].nTimeout = 2208988800 + 31536000;  // Start + 1 year
@@ -153,7 +153,7 @@ public:
         consensus.maxConsecutiveHiveBlocks = 2;             // Maximum hive blocks that can occur consecutively before a PoW block is required
         consensus.hiveDifficultyWindow = 36;                // How many blocks the SMA averages over in hive difficulty adjust
 
-        // LitecoinCash: MinotaurX-related consensus fields
+        // LitecoinCash: MinotaurX+Hive1.2-related consensus fields
         consensus.lwmaAveragingWindow = 90;                 // Averaging window size for LWMA diff adjust
         consensus.powTypeLimits.emplace_back(uint256S("0x00000000ffffffffffffffffffffffffffffffffffffffffffffffffffffffff"));   // sha256d limit
         consensus.powTypeLimits.emplace_back(uint256S("0x000fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"));   // MinotaurX limit
@@ -243,7 +243,7 @@ public:
         consensus.nSubsidyHalvingInterval = 840000;
         consensus.BIP16Height = 0; // always enforce BIP16
         consensus.BIP34Height = 125;
-        consensus.BIP34Hash = uint256S("0x00000048f3a775a771193f269d16e63260af3754be38d0dfe0f5c970d3a83048"); // Block hash at block 125
+        consensus.BIP34Hash = uint256S("0x000000039a4ba6c3b57830718193fcbcd03d72060b45a50d23b87b779a0dbaed"); // Block hash at block 125
         consensus.BIP65Height = 125;
         consensus.BIP66Height = 125;
         consensus.powLimit = uint256S("00000fffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
@@ -251,8 +251,8 @@ public:
         consensus.nPowTargetSpacing = 2.5 * 60;
         consensus.fPowAllowMinDifficultyBlocks = true;
         consensus.fPowNoRetargeting = false;
-        consensus.nRuleChangeActivationThreshold = 30; // Require 75% of last 40 blocks to activate rulechanges
-        consensus.nMinerConfirmationWindow = 40;
+        consensus.nRuleChangeActivationThreshold = 15; // Require 75% of last 20 blocks to activate rulechanges
+        consensus.nMinerConfirmationWindow = 20;
         consensus.vDeployments[Consensus::DEPLOYMENT_TESTDUMMY].bit = 28;
         consensus.vDeployments[Consensus::DEPLOYMENT_TESTDUMMY].nStartTime = 1199145601; // January 1, 2008
         consensus.vDeployments[Consensus::DEPLOYMENT_TESTDUMMY].nTimeout = 1230767999; // December 31, 2008
@@ -274,17 +274,17 @@ public:
 
         // LitecoinCash: Hive 1.1: Deployment
         consensus.vDeployments[Consensus::DEPLOYMENT_HIVE_1_1].bit = 9;
-        consensus.vDeployments[Consensus::DEPLOYMENT_HIVE_1_1].nStartTime = 1624800581;  // June 27, 2021
-        consensus.vDeployments[Consensus::DEPLOYMENT_HIVE_1_1].nTimeout = 1624800581 + 31536000;  // Start + 1 year
+        consensus.vDeployments[Consensus::DEPLOYMENT_HIVE_1_1].nStartTime = 1629206247;  // Aug 17, 2021
+        consensus.vDeployments[Consensus::DEPLOYMENT_HIVE_1_1].nTimeout = 1629206247 + 31536000;  // Start + 1 year
 
-        // LitecoinCash: MinotaurX / Hive 1.2: Deployment
+        // LitecoinCash: MinotaurX+Hive1.2 / Hive 1.2: Deployment
         consensus.vDeployments[Consensus::DEPLOYMENT_MINOTAURX].bit = 7;
-        consensus.vDeployments[Consensus::DEPLOYMENT_MINOTAURX].nStartTime = 1624803331;  // Just 27, 2021 (later than above)
-        consensus.vDeployments[Consensus::DEPLOYMENT_MINOTAURX].nTimeout = 1624803331 + 31536000;  // Start + 1 year
+        consensus.vDeployments[Consensus::DEPLOYMENT_MINOTAURX].nStartTime = 1629210635;  // Aug 17, 2021 (later than above)
+        consensus.vDeployments[Consensus::DEPLOYMENT_MINOTAURX].nTimeout = 1629210635 + 31536000;  // Start + 1 year
 
         // LitecoinCash fields
-        consensus.powForkTime = 1624800218;                 // Time of PoW hash method change (block 100)
-        consensus.lastScryptBlock = 100;                    // Height of last scrypt block
+        consensus.powForkTime = 1629204885;                 // Time of PoW hash method change (block 50)
+        consensus.lastScryptBlock = 50;                     // Height of last scrypt block
         consensus.powLimitSHA = uint256S("000000ffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");   // Initial hash target at fork
         consensus.slowStartBlocks = 40;                     // Scale post-fork block reward up over this many blocks
         consensus.premineAmount = 550000;                   // Premine amount (less than 1% of issued currency at fork time)
@@ -301,7 +301,7 @@ public:
         consensus.beeGestationBlocks = 40;                  // The number of blocks for a new bee to mature
         consensus.beeLifespanBlocks = 48*24*14;             // The number of blocks a bee lives for after maturation
         consensus.powLimitHive = uint256S("0fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");  // Highest (easiest) bee hash target
-        consensus.minHiveCheckBlock = 100;                  // Don't bother checking below this height for Hive blocks (not used for consensus/validation checks, just efficiency when looking for potential BCTs)
+        consensus.minHiveCheckBlock = 50;                   // Don't bother checking below this height for Hive blocks (not used for consensus/validation checks, just efficiency when looking for potential BCTs)
         consensus.hiveTargetAdjustAggression = 30;          // Snap speed for bee hash target adjustment EMA
         consensus.hiveBlockSpacingTarget = 2;               // Target Hive block frequency (1 out of this many blocks should be Hivemined)
         consensus.hiveBlockSpacingTargetTypical = 3;        // Observed Hive block frequency (1 out of this many blocks are observed to be Hive)
@@ -318,16 +318,16 @@ public:
         consensus.maxConsecutiveHiveBlocks = 2;             // Maximum hive blocks that can occur consecutively before a PoW block is required
         consensus.hiveDifficultyWindow = 36;                // How many blocks the SMA averages over in hive difficulty adjust
 
-        // LitecoinCash: MinotaurX-related consensus fields
+        // LitecoinCash: MinotaurX+Hive1.2-related consensus fields
         consensus.lwmaAveragingWindow = 90;                 // Averaging window size for LWMA diff adjust
         consensus.powTypeLimits.emplace_back(uint256S("0x000000ffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"));   // sha256d limit
         consensus.powTypeLimits.emplace_back(uint256S("0x000fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"));   // MinotaurX limit
 
         // The best chain should have at least this much work.
-        consensus.nMinimumChainWork = uint256S("0x0000000000000000000000000000000000000000000000000000003a4bf5c679");  // Block 250
+        consensus.nMinimumChainWork = uint256S("0x0000000000000000000000000000000000000000000000000000002a6cc6caee");  // Block 341
 
         // By default assume that the signatures in ancestors of this block are valid.
-        consensus.defaultAssumeValid = uint256S("0x000000006cc68f8e548b06e5ad3a65048ea142931b308c2a1abbc26c4e7d6e37"); // Block 250
+        consensus.defaultAssumeValid = uint256S("0x287a12e6c26a33f113ed18c12ae8894e34b3a8f0cb6cbfc31d74dc34ab68ce95"); // Block 341
 
         pchMessageStart[0] = 0xb6;
         pchMessageStart[1] = 0xf5;
@@ -342,7 +342,7 @@ public:
         assert(genesis.hashMerkleRoot == uint256S("0x97ddfbbae6be97fd6cdf3e7ca13232a3afff2353e29badfab7f73011edd4ced9"));
 
         vFixedSeeds.clear();
-        vSeeds.emplace_back("testseeds.litecoinca.sh");
+        //vSeeds.emplace_back("testseeds.litecoinca.sh");
 
         base58Prefixes[PUBKEY_ADDRESS] = std::vector<unsigned char>(1,127);
         base58Prefixes[SCRIPT_ADDRESS] = std::vector<unsigned char>(1,196);
@@ -362,14 +362,14 @@ public:
         checkpointData = (CCheckpointData) {
             {
                 {0, uint256S("4966625a4b2851d9fdee139e56211a0d88575f59ed816ff5e6a63deb4e3e29a0")},      // Genesis block
-                {100, uint256S("e0a6da3e883b1575ca681d1ae4090a9076f440bb3afa78d78677b6a1a3226323")},    // Last Scrypt block
-                {250, uint256S("000000006cc68f8e548b06e5ad3a65048ea142931b308c2a1abbc26c4e7d6e37")},
+                {100, uint256S("7103bbc0b3f0f2cffc454c228b5d626d44aaab2308a7450241f116b3eda3cf6a")},    // Last Scrypt block
+                {341, uint256S("287a12e6c26a33f113ed18c12ae8894e34b3a8f0cb6cbfc31d74dc34ab68ce95")},*/
             }
         };
 
-        chainTxData = ChainTxData{  // As at block 250
-            1624807399,
-            251,
+        chainTxData = ChainTxData{  // As at block 341
+            1629297115,
+            344,
             0.001
         };
     }

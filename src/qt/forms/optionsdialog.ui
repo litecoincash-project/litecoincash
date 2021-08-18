@@ -750,9 +750,33 @@
         </layout>
        </item>
        <item>
+        <layout class="QHBoxLayout" name="horizontalLayout_1_Hive_4">
+         <item>
+          <widget class="QCheckBox" name="hiveContribCF">
+           <property name="text">
+            <string>Send 15% of bee fee to Community Fund (10% before Hive 1.2 activation)</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <spacer name="horizontalSpacer_5">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>40</width>
+             <height>20</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+        </layout>
+       </item>
+       <item>
         <widget class="QLabel" name="label_5">
          <property name="text">
-          <string>We recommend leaving the default settings for Hive Check Interval and Hive Early Abort, unless you observe performance degradation on your machine.</string>
+          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Contributing to the community fund does not affect the bee price or the number of bees received.&lt;/p&gt;&lt;p&gt;We recommend leaving the default settings for Hive Check Interval and Hive Early Abort, unless you observe performance degradation on your machine.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
          </property>
          <property name="wordWrap">
           <bool>true</bool>

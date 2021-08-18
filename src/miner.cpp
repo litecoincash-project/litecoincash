@@ -36,7 +36,7 @@
 #include <base58.h>         // LitecoinCash: Hive
 #include <sync.h>           // LitecoinCash: Hive
 #include <boost/thread.hpp> // LitecoinCash: Hive: Mining optimisations
-#include <crypto/minotaurx/yespower/yespower.h>  // LitecoinCash: MinotaurX
+#include <crypto/minotaurx/yespower/yespower.h>  // LitecoinCash: MinotaurX+Hive1.2
 
 
 static CCriticalSection cs_solution_vars;
@@ -125,7 +125,7 @@ void BlockAssembler::resetBlock()
 }
 
 // LitecoinCash: Hive: If hiveProofScript is passed, create a Hive block instead of a PoW block
-// LitecoinCash: MinotaurX: Accept POW_TYPE arg
+// LitecoinCash: MinotaurX+Hive1.2: Accept POW_TYPE arg
 std::unique_ptr<CBlockTemplate> BlockAssembler::CreateNewBlock(const CScript& scriptPubKeyIn, bool fMineWitnessTx, const CScript* hiveProofScript, const POW_TYPE powType)
 {
     int64_t nTimeStart = GetTimeMicros();
@@ -157,11 +157,11 @@ std::unique_ptr<CBlockTemplate> BlockAssembler::CreateNewBlock(const CScript& sc
 
     pblock->nVersion = ComputeBlockVersion(pindexPrev, chainparams.GetConsensus());
 
-    // LitecoinCash: MinotaurX: Refuse to attempt to create a non-sha256 block before activation
+    // LitecoinCash: MinotaurX+Hive1.2: Refuse to attempt to create a non-sha256 block before activation
     if (!IsMinotaurXEnabled(pindexPrev, chainparams.GetConsensus()) && powType != 0)
         throw std::runtime_error("Error: Won't attempt to create a non-sha256 block before MinotaurX activation");
 
-    // LitecoinCash: MinotaurX: If MinotaurX is enabled, and we're not creating a Hive block, encode desired pow type.
+    // LitecoinCash: MinotaurX+Hive1.2: If MinotaurX is enabled, and we're not creating a Hive block, encode desired pow type.
     if (!hiveProofScript && IsMinotaurXEnabled(pindexPrev, chainparams.GetConsensus())) {
         if (powType >= NUM_BLOCK_TYPES)
             throw std::runtime_error("Error: Unrecognised pow type requested");
@@ -217,7 +217,12 @@ std::unique_ptr<CBlockTemplate> BlockAssembler::CreateNewBlock(const CScript& sc
 
         // vout[1]: Honey :)
         coinbaseTx.vout[1].scriptPubKey = scriptPubKeyIn;
-        coinbaseTx.vout[1].nValue = nFees + GetBlockSubsidy(nHeight, chainparams.GetConsensus());
+
+        // LitecoinCash: MinotaurX+Hive1.2: Hive rewards are 150% of base block reward
+        coinbaseTx.vout[1].nValue = GetBlockSubsidy(nHeight, chainparams.GetConsensus());
+        if (IsMinotaurXEnabled(pindexPrev, chainparams.GetConsensus()))
+            coinbaseTx.vout[1].nValue += coinbaseTx.vout[1].nValue >> 1;
+        coinbaseTx.vout[1].nValue += nFees;
 
         // vout[2]: Coinbase commitment
         pblock->vtx[0] = MakeTransactionRef(std::move(coinbaseTx));
@@ -229,7 +234,14 @@ std::unique_ptr<CBlockTemplate> BlockAssembler::CreateNewBlock(const CScript& sc
         coinbaseTx.vin[0].prevout.SetNull();
         coinbaseTx.vout.resize(1);
         coinbaseTx.vout[0].scriptPubKey = scriptPubKeyIn;
-        coinbaseTx.vout[0].nValue = nFees + GetBlockSubsidy(nHeight, chainparams.GetConsensus());
+
+        // LitecoinCash: MinotaurX+Hive1.2: Pow rewards are 50% of base block reward
+        coinbaseTx.vout[0].nValue = GetBlockSubsidy(nHeight, chainparams.GetConsensus());
+        if (IsMinotaurXEnabled(pindexPrev, chainparams.GetConsensus()))
+            coinbaseTx.vout[0].nValue = coinbaseTx.vout[0].nValue >> 1;
+
+        coinbaseTx.vout[0].nValue += nFees;
+
         coinbaseTx.vin[0].scriptSig = CScript() << nHeight << OP_0;
         pblock->vtx[0] = MakeTransactionRef(std::move(coinbaseTx));
         pblocktemplate->vchCoinbaseCommitment = GenerateCoinbaseCommitment(*pblock, pindexPrev, chainparams.GetConsensus());
@@ -249,7 +261,7 @@ std::unique_ptr<CBlockTemplate> BlockAssembler::CreateNewBlock(const CScript& sc
     if (hiveProofScript)
         pblock->nBits = GetNextHiveWorkRequired(pindexPrev, chainparams.GetConsensus());
     else {
-        // LitecoinCash: MinotaurX: If MinotaurX is enabled, handle nBits with pow-specific diff algo
+        // LitecoinCash: MinotaurX+Hive1.2: If MinotaurX is enabled, handle nBits with pow-specific diff algo
         if (IsMinotaurXEnabled(pindexPrev, chainparams.GetConsensus()))
             pblock->nBits = GetNextWorkRequiredLWMA(pindexPrev, pblock, chainparams.GetConsensus(), powType);
         else
@@ -646,11 +658,13 @@ void CheckBin(int threadID, std::vector<CBeeRange> bin, std::string deterministi
     //LogPrintf("THREAD #%i: Out of tasks\n", threadID);
 }
 
-// LitecoinCash: MinotaurX: Thread to check a single bee bin
-void CheckBinMinotaurX(int threadID, std::vector<CBeeRange> bin, std::string deterministicRandString, arith_uint256 beeHashTarget) {
+// LitecoinCash: MinotaurX+Hive1.2: Thread to check a single bee bin
+void CheckBinMinotaur(int threadID, std::vector<CBeeRange> bin, std::string deterministicRandString, arith_uint256 beeHashTarget) {
     // Create yespower thread-local storage
+    /*
     static __thread yespower_local_t local;
     yespower_init_local(&local);
+    */
 
     // Iterate over ranges in this bin
     int checkCount = 0;
@@ -663,7 +677,7 @@ void CheckBinMinotaurX(int threadID, std::vector<CBeeRange> bin, std::string det
             if(checkCount++ % 1000 == 0) {
                 if (solutionFound.load() || earlyAbort.load()) {
                     //LogPrintf("THREAD #%i: Solution found elsewhere or early abort requested, ending early\n", threadID);
-                    yespower_free_local(&local);
+                    //yespower_free_local(&local);
                     return;
                 }
             }
@@ -675,7 +689,7 @@ void CheckBinMinotaurX(int threadID, std::vector<CBeeRange> bin, std::string det
             buf << i;
             std::string hashString = buf.str();
 
-            uint256 beeHashUint = CBlockHeader::MinotaurXHashStringWithLocal(hashString, &local);
+            uint256 beeHashUint = CBlockHeader::MinotaurHashString(hashString);
             arith_uint256 beeHash(beeHashUint.ToString());
 
             // Compare to target and write out result if successful
@@ -685,7 +699,7 @@ void CheckBinMinotaurX(int threadID, std::vector<CBeeRange> bin, std::string det
                 solutionFound.store(true);
                 solvingRange = beeRange;
                 solvingBee = i;
-                yespower_free_local(&local);
+                //yespower_free_local(&local);
                 return;
             }
 
@@ -693,7 +707,7 @@ void CheckBinMinotaurX(int threadID, std::vector<CBeeRange> bin, std::string det
         }
     }
     //LogPrintf("THREAD #%i: Out of tasks\n", threadID);
-    yespower_free_local(&local);
+    //yespower_free_local(&local);
 }
 
 // LitecoinCash: Hive: Attempt to mint the next block
@@ -835,7 +849,7 @@ bool BusyBees(const Consensus::Params& consensusParams, int height) {
     std::vector<boost::thread> binThreads;
     int64_t checkTime = GetTimeMillis();
     int binID = 0;
-    bool minotaurXEnabled = IsMinotaurXEnabled(pindexPrev, consensusParams);    // LitecoinCash: MinotaurX: Check if minotaurX enabled
+    bool minotaurXEnabled = IsMinotaurXEnabled(pindexPrev, consensusParams);    // LitecoinCash: MinotaurX+Hive1.2: Check if minotaurX enabled
     while (beeBinIterator != beeBins.end()) {
         std::vector<CBeeRange> beeBin = *beeBinIterator;
 
@@ -848,11 +862,11 @@ bool BusyBees(const Consensus::Params& consensusParams, int height) {
                 beeRangeIterator++;
             }
         }
-        // LitecoinCash: MinotaurX: Use correct inner hash
+        // LitecoinCash: MinotaurX+Hive1.2: Use correct inner hash
         if (!minotaurXEnabled)
             binThreads.push_back(boost::thread(CheckBin, binID++, beeBin, deterministicRandString, beeHashTarget));
         else
-            binThreads.push_back(boost::thread(CheckBinMinotaurX, binID++, beeBin, deterministicRandString, beeHashTarget));
+            binThreads.push_back(boost::thread(CheckBinMinotaur, binID++, beeBin, deterministicRandString, beeHashTarget));
 
         beeBinIterator++;
     }

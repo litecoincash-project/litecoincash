@@ -21,7 +21,7 @@
 
 BeePopGraphPoint beePopGraph[1024*40];       // LitecoinCash: Hive
 
-// LitecoinCash: MinotaurX: Diff adjustment for pow algos (post-MinotaurX activation)
+// LitecoinCash: MinotaurX+Hive1.2: Diff adjustment for pow algos (post-MinotaurX activation)
 // Modified LWMA-3
 // Copyright (c) 2017-2021 The Bitcoin Gold developers, Zawy, iamstenman (Microbitcoin), The Litecoin Cash developers
 // MIT License
@@ -288,7 +288,7 @@ bool CheckProofOfWork(uint256 hash, unsigned int nBits, const Consensus::Params&
 
     bnTarget.SetCompact(nBits, &fNegative, &fOverflow);
 
-    // LitecoinCash: MinotaurX: Use highest pow limit for limit check
+    // LitecoinCash: MinotaurX+Hive1.2: Use highest pow limit for limit check
     arith_uint256 powLimit = 0;
     for (int i = 0; i < NUM_BLOCK_TYPES; i++)
         if (UintToArith256(params.powTypeLimits[i]) > powLimit)
@@ -341,7 +341,7 @@ unsigned int GetNextHive11WorkRequired(const CBlockIndex* pindexLast, const Cons
     return beeHashTarget.GetCompact();
 }
 
-// LitecoinCash: MinotaurX: Reset Hive difficulty after MinotaurX enable
+// LitecoinCash: MinotaurX+Hive1.2: Reset Hive difficulty after MinotaurX enable
 unsigned int GetNextHive12WorkRequired(const CBlockIndex* pindexLast, const Consensus::Params& params) {
     const arith_uint256 bnPowLimit = UintToArith256(params.powLimitHive);
 
@@ -379,7 +379,7 @@ unsigned int GetNextHive12WorkRequired(const CBlockIndex* pindexLast, const Cons
 
 // LitecoinCash: Hive: Get the current Bee Hash Target (Hive 1.0)
 unsigned int GetNextHiveWorkRequired(const CBlockIndex* pindexLast, const Consensus::Params& params) {
-    // LitecoinCash: MinotaurX
+    // LitecoinCash: MinotaurX+Hive1.2
     if (IsMinotaurXEnabled(pindexLast, params))
         return GetNextHive12WorkRequired(pindexLast, params);
     // LitecoinCash: Hive 1.1: Use SMA diff adjust
@@ -440,11 +440,16 @@ bool GetNetworkHiveInfo(int& immatureBees, int& immatureBCTs, int& matureBees, i
     assert(pindexPrev != nullptr);
     int tipHeight = pindexPrev->nHeight;
 
+    // LitecoinCash: MinotaurX+Hive1.2: Get correct hive block reward
+    auto blockReward = GetBlockSubsidy(pindexPrev->nHeight, consensusParams);
+    if (IsMinotaurXEnabled(pindexPrev, consensusParams))
+        blockReward += blockReward >> 1;
+
     // LitecoinCash: Hive 1.1: Use correct typical spacing
     if (IsHive11Enabled(pindexPrev, consensusParams))
-        potentialLifespanRewards = (consensusParams.beeLifespanBlocks * GetBlockSubsidy(pindexPrev->nHeight, consensusParams)) / consensusParams.hiveBlockSpacingTargetTypical_1_1;
+        potentialLifespanRewards = (consensusParams.beeLifespanBlocks * blockReward) / consensusParams.hiveBlockSpacingTargetTypical_1_1;
     else
-        potentialLifespanRewards = (consensusParams.beeLifespanBlocks * GetBlockSubsidy(pindexPrev->nHeight, consensusParams)) / consensusParams.hiveBlockSpacingTargetTypical;
+        potentialLifespanRewards = (consensusParams.beeLifespanBlocks * blockReward) / consensusParams.hiveBlockSpacingTargetTypical;
 
     if (recalcGraph) {
         for (int i = 0; i < totalBeeLifespan; i++) {
@@ -481,6 +486,9 @@ bool GetNetworkHiveInfo(int& immatureBees, int& immatureBCTs, int& matureBees, i
                         if (tx->vout.size() > 1 && tx->vout[1].scriptPubKey == scriptPubKeyCF) {    // If it has a community fund contrib...
                             CAmount donationAmount = tx->vout[1].nValue;
                             CAmount expectedDonationAmount = (beeFeePaid + donationAmount) / consensusParams.communityContribFactor;  // ...check for valid donation amount
+                            // LitecoinCash: MinotaurX+Hive1.2
+                            if (IsMinotaurXEnabled(pindexPrev, consensusParams))
+                                expectedDonationAmount += expectedDonationAmount >> 1;
                             if (donationAmount != expectedDonationAmount)
                                 continue;
                             beeFeePaid += donationAmount;                                           // Add donation amount back to total paid
@@ -649,7 +657,7 @@ bool CheckHiveProof(const CBlock* pblock, const Consensus::Params& consensusPara
     if (verbose)
         LogPrintf("CheckHiveProof: beeHashTarget       = %s\n", beeHashTarget.ToString());
     
-    // LitecoinCash: MinotaurX: Use the correct inner Hive hash
+    // LitecoinCash: MinotaurX+Hive1.2: Use the correct inner Hive hash
     if (!IsMinotaurXEnabled(pindexPrev, consensusParams)) {
         std::string hashHex = (CHashWriter(SER_GETHASH, 0) << deterministicRandString << txidStr << beeNonce).GetHash().GetHex();
         arith_uint256 beeHash = arith_uint256(hashHex);
@@ -660,7 +668,7 @@ bool CheckHiveProof(const CBlock* pblock, const Consensus::Params& consensusPara
             return false;
         }
     } else {
-        arith_uint256 beeHash(CBlockHeader::MinotaurXHashArbitrary(std::string(deterministicRandString + txidStr + std::to_string(beeNonce)).c_str()).ToString());
+        arith_uint256 beeHash(CBlockHeader::MinotaurHashArbitrary(std::string(deterministicRandString + txidStr + std::to_string(beeNonce)).c_str()).ToString());
         if (verbose)
             LogPrintf("CheckHive12Proof: beeHash           = %s\n", beeHash.GetHex());
         if (beeHash >= beeHashTarget) {
@@ -711,6 +719,7 @@ bool CheckHiveProof(const CBlock* pblock, const Consensus::Params& consensusPara
     uint32_t bctFoundHeight;
     CAmount bctValue;
     CScript bctScriptPubKey;
+    bool bctWasMinotaurXEnabled;    // LitecoinCash: MinotaurX+Hive1.2: Track whether Hive 1.2 was enabled at BCT creation time
     {
         LOCK(cs_main);
 
@@ -726,6 +735,7 @@ bool CheckHiveProof(const CBlock* pblock, const Consensus::Params& consensusPara
             bctValue = coin.out.nValue;
             bctScriptPubKey = coin.out.scriptPubKey;
             bctFoundHeight = coin.nHeight;
+            bctWasMinotaurXEnabled = IsMinotaurXEnabled(chainActive[bctFoundHeight], consensusParams);  // LitecoinCash: MinotaurX+Hive1.2: Track whether Hive 1.2 was enabled at BCT creation time
         } else {                                                            // UTXO set isn't available when eg reindexing, so drill into block db (not too bad, since Alice put her BCT height in the coinbase tx)
             if (verbose)
                 LogPrintf("! CheckHiveProof: Warn: Using deep drill for outBeeCreation\n");
@@ -737,6 +747,7 @@ bool CheckHiveProof(const CBlock* pblock, const Consensus::Params& consensusPara
             bctFoundHeight = foundAt.nHeight;
             bctValue = bct->vout[0].nValue;
             bctScriptPubKey = bct->vout[0].scriptPubKey;
+            bctWasMinotaurXEnabled = IsMinotaurXEnabled(&foundAt, consensusParams); // LitecoinCash: MinotaurX+Hive1.2: Track whether Hive 1.2 was enabled at BCT creation time
         }
 
         if (communityContrib) {
@@ -772,6 +783,11 @@ bool CheckHiveProof(const CBlock* pblock, const Consensus::Params& consensusPara
 
             // Check for valid donation amount
             CAmount expectedDonationAmount = (bctValue + donationAmount) / consensusParams.communityContribFactor;
+
+            // LitecoinCash: MinotaurX+Hive1.2
+            if (bctWasMinotaurXEnabled)
+                expectedDonationAmount += expectedDonationAmount >> 1;
+
             if (donationAmount != expectedDonationAmount) {
                 LogPrintf("CheckHiveProof: BCT pays community fund incorrect amount %i (expected %i)\n", donationAmount, expectedDonationAmount);
                 return false;

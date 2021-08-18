@@ -12,26 +12,37 @@
 #include <crypto/scrypt.h>
 #include <chainparams.h>    // LitecoinCash: Hive
 
-#include <crypto/minotaurx/minotaur.h>  // LitecoinCash: MinotaurX
-#include <validation.h>                 // LitecoinCash: MinotaurX
-#include <util.h>                       // LitecoinCash: MinotaurX
+#include <crypto/minotaurx/minotaur.h>  // LitecoinCash: MinotaurX+Hive1.2
+#include <validation.h>                 // LitecoinCash: MinotaurX+Hive1.2
+#include <util.h>                       // LitecoinCash: MinotaurX+Hive1.2
 
 uint256 CBlockHeader::GetHash() const
 {
     return SerializeHash(*this);
 }
 
-// LitecoinCash: MinotaurX: Hash arbitrary data, using internally-managed thread-local memory for YP
+/*
+// LitecoinCash: MinotaurX+Hive1.2: Hash arbitrary data, using internally-managed thread-local memory for YP
 uint256 CBlockHeader::MinotaurXHashArbitrary(const char* data) {
     return Minotaur(data, data + strlen(data), true);
 }
 
-// LitecoinCash: MinotaurX: Hash a string, using provided YP thread-local memory
+// LitecoinCash: MinotaurX+Hive1.2: Hash a string with MinotaurX, using provided YP thread-local memory
 uint256 CBlockHeader::MinotaurXHashStringWithLocal(std::string data, yespower_local_t *local) {
     return Minotaur(data.begin(), data.end(), true, local);
+}*/
+
+// LitecoinCash: MinotaurX+Hive1.2: Hash arbitrary data with classical Minotaur
+uint256 CBlockHeader::MinotaurHashArbitrary(const char* data) {
+    return Minotaur(data, data + strlen(data), false);
 }
 
-// LitecoinCash: MinotaurX: Get pow hash based on block type and UASF activation
+// LitecoinCash: MinotaurX+Hive1.2: Hash a string with classical Minotaur
+uint256 CBlockHeader::MinotaurHashString(std::string data) {
+    return Minotaur(data.begin(), data.end(), false);
+}
+
+// LitecoinCash: MinotaurX+Hive1.2: Get pow hash based on block type and UASF activation
 uint256 CBlockHeader::GetPoWHash() const
 {
     // LitecoinCash: After powForkTime, the pow hash may be sha256 or MinotaurX
@@ -66,7 +77,7 @@ std::string CBlock::ToString() const
         isHive ? "hive" : "pow",
         GetHash().ToString(),
         GetPoWHash().ToString(),
-        isHive ? "n/a" : GetPoWTypeName(),  // LitecoinCash: MinotaurX: Include pow type name
+        isHive ? "n/a" : GetPoWTypeName(),  // LitecoinCash: MinotaurX+Hive1.2: Include pow type name
         nVersion,
         hashPrevBlock.ToString(),
         hashMerkleRoot.ToString(),

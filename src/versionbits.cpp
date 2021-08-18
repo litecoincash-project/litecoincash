@@ -4,7 +4,7 @@
 
 #include <versionbits.h>
 #include <consensus/params.h>
-#include <validation.h> // LitecoinCash: MinotaurX: For IsMinotaurXEnabled
+#include <validation.h> // LitecoinCash: MinotaurX+Hive1.2: For IsMinotaurXEnabled
 
 const struct VBDeploymentInfo VersionBitsDeploymentInfo[Consensus::MAX_VERSION_BITS_DEPLOYMENTS] = {
     {
@@ -29,9 +29,9 @@ const struct VBDeploymentInfo VersionBitsDeploymentInfo[Consensus::MAX_VERSION_B
         /*.name =*/ "hive_1_1",
         /*.gbt_force =*/ true,
     },
-    // LitecoinCash: MinotaurX: Deployment
+    // LitecoinCash: MinotaurX+Hive1.2: Deployment
     {
-        /*.name =*/ "minotaurx",
+        /*.name =*/ "minotaurx_and_hive_1_2",
         /*.gbt_force =*/ true,
     }
 };
@@ -207,7 +207,7 @@ protected:
 
     bool Condition(const CBlockIndex* pindex, const Consensus::Params& params) const override
     {
-        // LitecoinCash: MinotaurX: Versionbits always active since powforktime and high bits repurposed at minotaurx UASF activation;
+        // LitecoinCash: MinotaurX+Hive1.2: Versionbits always active since powforktime and high bits repurposed at minotaurx UASF activation;
         // So, don't use VERSIONBITS_TOP_MASK any time past powforktime
         if (pindex->nTime > params.powForkTime)
             return (pindex->nVersion & Mask(params)) != 0;
