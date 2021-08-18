@@ -363,7 +363,7 @@ public:
             {
                 {0, uint256S("4966625a4b2851d9fdee139e56211a0d88575f59ed816ff5e6a63deb4e3e29a0")},      // Genesis block
                 {100, uint256S("7103bbc0b3f0f2cffc454c228b5d626d44aaab2308a7450241f116b3eda3cf6a")},    // Last Scrypt block
-                {341, uint256S("287a12e6c26a33f113ed18c12ae8894e34b3a8f0cb6cbfc31d74dc34ab68ce95")},*/
+                {341, uint256S("287a12e6c26a33f113ed18c12ae8894e34b3a8f0cb6cbfc31d74dc34ab68ce95")},
             }
         };
 
