@@ -243,7 +243,7 @@ public:
         consensus.nSubsidyHalvingInterval = 840000;
         consensus.BIP16Height = 0; // always enforce BIP16
         consensus.BIP34Height = 125;
-        consensus.BIP34Hash = uint256S("0x00000048f3a775a771193f269d16e63260af3754be38d0dfe0f5c970d3a83048"); // Block hash at block 125
+        consensus.BIP34Hash = uint256S("0x000000039a4ba6c3b57830718193fcbcd03d72060b45a50d23b87b779a0dbaed"); // Block hash at block 125
         consensus.BIP65Height = 125;
         consensus.BIP66Height = 125;
         consensus.powLimit = uint256S("00000fffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
@@ -324,10 +324,10 @@ public:
         consensus.powTypeLimits.emplace_back(uint256S("0x000fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"));   // MinotaurX limit
 
         // The best chain should have at least this much work.
-        consensus.nMinimumChainWork = uint256S("0x0");  // Block 250
+        consensus.nMinimumChainWork = uint256S("0x0000000000000000000000000000000000000000000000000000002a6cc6caee");  // Block 341
 
         // By default assume that the signatures in ancestors of this block are valid.
-        consensus.defaultAssumeValid = uint256S("0x000000006cc68f8e548b06e5ad3a65048ea142931b308c2a1abbc26c4e7d6e37"); // Block 250
+        consensus.defaultAssumeValid = uint256S("0x287a12e6c26a33f113ed18c12ae8894e34b3a8f0cb6cbfc31d74dc34ab68ce95"); // Block 341
 
         pchMessageStart[0] = 0xb6;
         pchMessageStart[1] = 0xf5;
@@ -363,13 +363,13 @@ public:
             {
                 {0, uint256S("4966625a4b2851d9fdee139e56211a0d88575f59ed816ff5e6a63deb4e3e29a0")},      // Genesis block
                 {100, uint256S("7103bbc0b3f0f2cffc454c228b5d626d44aaab2308a7450241f116b3eda3cf6a")},    // Last Scrypt block
-                /*{250, uint256S("000000006cc68f8e548b06e5ad3a65048ea142931b308c2a1abbc26c4e7d6e37")},*/
+                {341, uint256S("287a12e6c26a33f113ed18c12ae8894e34b3a8f0cb6cbfc31d74dc34ab68ce95")},*/
             }
         };
 
-        chainTxData = ChainTxData{  // As at block 250
-            1624807399,
-            251,
+        chainTxData = ChainTxData{  // As at block 341
+            1629297115,
+            344,
             0.001
         };
     }
