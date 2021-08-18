@@ -15,7 +15,7 @@ static const int32_t VERSIONBITS_TOP_BITS = 0x20000000UL;
 /** What bitmask determines whether versionbits is in use */
 static const int32_t VERSIONBITS_TOP_MASK = 0xE0000000UL;
 /** Total bits available for versionbits */
-static const int32_t VERSIONBITS_NUM_BITS = 16; // LitecoinCash: MinotaurX: Only consider bottom 16 bits for UASF voting
+static const int32_t VERSIONBITS_NUM_BITS = 16; // LitecoinCash: MinotaurX+Hive1.2: Only consider bottom 16 bits for UASF voting
 
 enum ThresholdState {
     THRESHOLD_DEFINED,

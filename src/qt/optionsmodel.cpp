@@ -128,7 +128,7 @@ void OptionsModel::Init(bool resetSettings)
     if (!gArgs.SoftSetBoolArg("-hiveearlyout", settings.value("fHiveCheckEarlyOut").toBool()))
         addOverriddenOption("-hiveearlyout");
 
-    // LitecoinCash: MinotaurX
+    // LitecoinCash: MinotaurX+Hive1.2
     if (!settings.contains("fHiveContribCF"))
         settings.setValue("fHiveContribCF", DEFAULT_HIVE_CONTRIB_CF);
     fHiveContribCF = settings.value("fHiveContribCF").toBool();
@@ -301,7 +301,7 @@ QVariant OptionsModel::data(const QModelIndex & index, int role) const
         case HiveCheckEarlyOut:
             return settings.value("fHiveCheckEarlyOut");
 
-        // LitecoinCash: MinotaurX
+        // LitecoinCash: MinotaurX+Hive1.2
         case HiveContribCF:
             return settings.value("fHiveContribCF");
 #endif
@@ -439,7 +439,7 @@ bool OptionsModel::setData(const QModelIndex & index, const QVariant & value, in
             }
             break;
 
-        // LitecoinCash: MinotaurX
+        // LitecoinCash: MinotaurX+Hive1.2
         case HiveContribCF:
             fHiveContribCF = value.toBool();
             if (settings.value("fHiveContribCF") != value)

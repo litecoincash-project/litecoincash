@@ -9,21 +9,21 @@
 #include <primitives/transaction.h>
 #include <serialize.h>
 #include <uint256.h>
-#include <crypto/minotaurx/yespower/yespower.h>  // LitecoinCash: MinotaurX
+#include <crypto/minotaurx/yespower/yespower.h>  // LitecoinCash: MinotaurX+Hive1.2
 
-// LitecoinCash: MinotaurX: An impossible pow hash (can't meet any target)
+// LitecoinCash: MinotaurX+Hive1.2: An impossible pow hash (can't meet any target)
 const uint256 HIGH_HASH = uint256S("0x0fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
 
-// LitecoinCash: MinotaurX: Default value for -powalgo argument
+// LitecoinCash: MinotaurX+Hive1.2: Default value for -powalgo argument
 const std::string DEFAULT_POW_TYPE = "sha256d";
 
-// LitecoinCash: MinotaurX: Pow type names
+// LitecoinCash: MinotaurX+Hive1.2: Pow type names
 const std::string POW_TYPE_NAMES[] = {
     "sha256d",
     "minotaurx"
 };
 
-// LitecoinCash: MinotaurX: Pow type IDs
+// LitecoinCash: MinotaurX+Hive1.2: Pow type IDs
 enum POW_TYPE {
     POW_TYPE_SHA256,
     POW_TYPE_MINOTAURX,
@@ -85,7 +85,7 @@ public:
 
     uint256 GetPoWHash() const;
 
-    // LitecoinCash: MinotaurX: Hashing utils
+    // LitecoinCash: MinotaurX+Hive1.2: Hashing utils
     /*
     static uint256 MinotaurXHashArbitrary(const char* data);                                    // Hash arbitrary data with MinotaurX, using internally-managed thread-local memory for YP
     static uint256 MinotaurXHashStringWithLocal(std::string data, yespower_local_t *local);     // Hash a string with MinotaurX, using provided YP thread-local memory
@@ -102,12 +102,12 @@ public:
         return (nNonce == consensusParams.hiveNonceMarker);
     }
 
-    // LitecoinCash: MinotaurX: Get pow type from version bits
+    // LitecoinCash: MinotaurX+Hive1.2: Get pow type from version bits
     POW_TYPE GetPoWType() const {
         return (POW_TYPE)((nVersion >> 16) & 0xFF);
     }
 
-    // LitecoinCash: MinotaurX: Get pow type name
+    // LitecoinCash: MinotaurX+Hive1.2: Get pow type name
     std::string GetPoWTypeName() const {
         if (nVersion >= 0x20000000)
             return POW_TYPE_NAMES[0];

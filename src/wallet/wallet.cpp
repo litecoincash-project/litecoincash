@@ -2865,7 +2865,7 @@ bool CWallet::CreateBeeTransaction(int beeCount, CWalletTx& wtxNew, CReserveKey&
 
     // Don't spend more than potential rewards in a single BCT
     // LitecoinCash: Hive 1.1: Use correct typical spacing
-    // LitecoinCash: MinotaurX: Get correct hive block reward
+    // LitecoinCash: MinotaurX+Hive1.2: Get correct hive block reward
     auto blockReward = GetBlockSubsidy(pindexPrev->nHeight, consensusParams);
     if (IsMinotaurXEnabled(pindexPrev, consensusParams))
         blockReward += blockReward >> 1;
@@ -2953,7 +2953,7 @@ bool CWallet::CreateBeeTransaction(int beeCount, CWalletTx& wtxNew, CReserveKey&
     CAmount beeCreationValue = totalBeeCost;
     CAmount donationValue = (CAmount)(totalBeeCost / consensusParams.communityContribFactor);
     
-    // LitecoinCash: MinotaurX
+    // LitecoinCash: MinotaurX+Hive1.2
     if (IsMinotaurXEnabled(pindexPrev, consensusParams))
         donationValue += donationValue >> 1;
 

@@ -331,7 +331,7 @@ void HiveDialog::on_createBeesButton_clicked() {
 		WalletModel::UnlockContext ctx(model->requestUnlock());
 		if(!ctx.isValid())
 			return;     // Unlock wallet was cancelled
-        model->createBees(ui->beeCountSpinner->value(), clientModel->getOptionsModel()->getHiveContribCF(), this, beePopIndex); // LitecoinCash: MinotaurX
+        model->createBees(ui->beeCountSpinner->value(), clientModel->getOptionsModel()->getHiveContribCF(), this, beePopIndex); // LitecoinCash: MinotaurX+Hive1.2
     }
 }
 

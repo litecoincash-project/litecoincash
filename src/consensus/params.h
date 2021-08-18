@@ -23,7 +23,7 @@ enum DeploymentPos
     DEPLOYMENT_SEGWIT, // Deployment of BIP141, BIP143, and BIP147.
     DEPLOYMENT_HIVE,        // LitecoinCash: Hive: Deployment
     DEPLOYMENT_HIVE_1_1,    // LitecoinCash: Hive: 1.1 Deployment
-    DEPLOYMENT_MINOTAURX,   // LitecoinCash: MinotaurX: Deployment
+    DEPLOYMENT_MINOTAURX,   // LitecoinCash: MinotaurX+Hive1.2: Deployment
 
     // NOTE: Also add new deployments to VersionBitsDeploymentInfo in versionbits.cpp
     MAX_VERSION_BITS_DEPLOYMENTS
@@ -118,7 +118,7 @@ struct Params {
     int maxConsecutiveHiveBlocks;       // Maximum hive blocks that can occur consecutively before a PoW block is required
     int hiveDifficultyWindow;           // How many blocks the SMA averages over in hive difficulty adjust
 
-    // LitecoinCash: MinotaurX-related consensus fields
+    // LitecoinCash: MinotaurX+Hive1.2-related consensus fields
     int64_t lwmaAveragingWindow;        // Averaging window size for LWMA diff adjust
     std::vector<uint256> powTypeLimits; // Limits for each pow type (with future-proofing space; can't pick up NUM_BLOCK_TYPES here)
 };

@@ -188,7 +188,7 @@ void OptionsDialog::setMapper()
     mapper->addMapping(ui->hiveCheckDelay, OptionsModel::HiveCheckDelay);
     mapper->addMapping(ui->hiveCheckEarlyOut, OptionsModel::HiveCheckEarlyOut);
 
-    // LitecoinCash: MinotaurX
+    // LitecoinCash: MinotaurX+Hive1.2
     mapper->addMapping(ui->hiveContribCF, OptionsModel::HiveContribCF);
 
     /* Network */

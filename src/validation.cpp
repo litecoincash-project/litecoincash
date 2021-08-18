@@ -1165,7 +1165,7 @@ CAmount GetBeeCost(int nHeight, const Consensus::Params& consensusParams)
     if(nHeight >= consensusParams.totalMoneySupplyHeight)
         return consensusParams.minBeeCost;
 
-    // LitecoinCash: MinotaurX: Note that this doesn't change; bee cost remains calculated against the base subsidy. Great!
+    // LitecoinCash: MinotaurX+Hive1.2: Note that this doesn't change; bee cost remains calculated against the base subsidy. Great!
     CAmount blockReward = GetBlockSubsidy(nHeight, consensusParams);
     CAmount beeCost = blockReward / consensusParams.beeCostFactor;
     return beeCost <= consensusParams.minBeeCost ? consensusParams.minBeeCost : beeCost;
@@ -1711,7 +1711,7 @@ int32_t ComputeBlockVersion(const CBlockIndex* pindexPrev, const Consensus::Para
     LOCK(cs_main);
     int32_t nVersion = VERSIONBITS_TOP_BITS;
 
-    // LitecoinCash: MinotaurX: Set bit 29 to 0
+    // LitecoinCash: MinotaurX+Hive1.2: Set bit 29 to 0
     if (IsMinotaurXEnabled(pindexPrev, params))
         nVersion = 0;
 
@@ -1743,7 +1743,7 @@ public:
 
     bool Condition(const CBlockIndex* pindex, const Consensus::Params& params) const override
     {
-        // LitecoinCash: MinotaurX: Versionbits always active since powforktime and high bits repurposed at minotaurx UASF activation;
+        // LitecoinCash: MinotaurX+Hive1.2: Versionbits always active since powforktime and high bits repurposed at minotaurx UASF activation;
         // So, don't use VERSIONBITS_TOP_MASK any time past powforktime
         if (pindex->nTime > params.powForkTime)
             return ((pindex->nVersion >> bit) & 1) != 0 &&
@@ -2003,7 +2003,7 @@ bool CChainState::ConnectBlock(const CBlock& block, CValidationState& state, CBl
     int64_t nTime3 = GetTimeMicros(); nTimeConnect += nTime3 - nTime2;
     LogPrint(BCLog::BENCH, "      - Connect %u transactions: %.2fms (%.3fms/tx, %.3fms/txin) [%.2fs (%.2fms/blk)]\n", (unsigned)block.vtx.size(), MILLI * (nTime3 - nTime2), MILLI * (nTime3 - nTime2) / block.vtx.size(), nInputs <= 1 ? 0 : MILLI * (nTime3 - nTime2) / (nInputs-1), nTimeConnect * MICRO, nTimeConnect * MILLI / nBlocksTotal);
 
-    // LitecoinCash: MinotaurX: Get correct block reward
+    // LitecoinCash: MinotaurX+Hive1.2: Get correct block reward
     CAmount blockReward = GetBlockSubsidy(pindex->nHeight, chainparams.GetConsensus());
     if (IsMinotaurXEnabled(pindex->pprev, chainparams.GetConsensus())) {
         if (block.IsHiveMined(chainparams.GetConsensus()))
@@ -2230,7 +2230,7 @@ void static UpdateTip(const CBlockIndex *pindexNew, const CChainParams& chainPar
         for (int i = 0; i < 100 && pindex != nullptr; i++)
         {
             int32_t nExpectedVersion = ComputeBlockVersion(pindex->pprev, chainParams.GetConsensus());
-            // LitecoinCash: MinotaurX: Mask out blocktype before checking for possible unknown upgrade
+            // LitecoinCash: MinotaurX+Hive1.2: Mask out blocktype before checking for possible unknown upgrade
             if (IsMinotaurXEnabled(pindex, chainParams.GetConsensus())) {
                 if ((pindex->nVersion & 0xFF00FFFF) != nExpectedVersion && !pindex->GetBlockHeader().IsHiveMined(chainParams.GetConsensus()))
                     ++nUpgraded;
@@ -3118,7 +3118,7 @@ bool IsHive11Enabled(const CBlockIndex* pindexPrev, const Consensus::Params& par
     return (VersionBitsState(pindexPrev, params, Consensus::DEPLOYMENT_HIVE_1_1, versionbitscache) == THRESHOLD_ACTIVE);
 }
 
-// LitecoinCash: MinotaurX: Check if MinotaurX is activated at given point
+// LitecoinCash: MinotaurX+Hive1.2: Check if MinotaurX is activated at given point
 bool IsMinotaurXEnabled(const CBlockIndex* pindexPrev, const Consensus::Params& params)
 {
     LOCK(cs_main);
@@ -3259,7 +3259,7 @@ static bool ContextualCheckBlockHeader(const CBlockHeader& block, CValidationSta
         if (block.nBits != GetNextHiveWorkRequired(pindexPrev, consensusParams))
             return state.DoS(100, false, REJECT_INVALID, "bad-hive-diffbits", false, "incorrect hive difficulty in block");
     } else {
-        // LitecoinCash: MinotaurX: Handle pow type
+        // LitecoinCash: MinotaurX+Hive1.2: Handle pow type
         if (IsMinotaurXEnabled(pindexPrev, consensusParams)) {
             POW_TYPE powType = block.GetPoWType();
 
@@ -3288,12 +3288,12 @@ static bool ContextualCheckBlockHeader(const CBlockHeader& block, CValidationSta
         return state.Invalid(false, REJECT_INVALID, "time-too-old", "block's timestamp is too early");
 
     // Check timestamp
-    // LitecoinCash: MinotaurX: Use alternative MAX_FUTURE_BLOCK_TIME after fork
+    // LitecoinCash: MinotaurX+Hive1.2: Use alternative MAX_FUTURE_BLOCK_TIME after fork
     int64_t max_future_block_time = IsMinotaurXEnabled(pindexPrev, consensusParams) ? MAX_FUTURE_BLOCK_TIME_MINOTAURX : MAX_FUTURE_BLOCK_TIME;
     if (block.GetBlockTime() > nAdjustedTime + max_future_block_time)
         return state.Invalid(false, REJECT_INVALID, "time-too-new", "block timestamp too far in the future");
     
-    // LitecoinCash: MinotaurX: Handle nVersion differently after activation
+    // LitecoinCash: MinotaurX+Hive1.2: Handle nVersion differently after activation
     if (!IsMinotaurXEnabled(pindexPrev,consensusParams)) {
         // Reject outdated version blocks when 95% (75% on testnet) of the network has upgraded:
         // check for version 2, 3 and 4 upgrades

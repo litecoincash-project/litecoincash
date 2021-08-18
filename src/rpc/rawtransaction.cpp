@@ -574,7 +574,7 @@ UniValue createrawbct(const JSONRPCRequest& request)
     CAmount beeCreationValue = totalBeeCost;
     CAmount donationValue = (CAmount)(totalBeeCost / consensusParams.communityContribFactor);
 
-    // LitecoinCash: MinotaurX
+    // LitecoinCash: MinotaurX+Hive1.2
     CBlockIndex* pindexPrev = chainActive.Tip();
     assert(pindexPrev != nullptr);    
     if (IsMinotaurXEnabled(pindexPrev, consensusParams))

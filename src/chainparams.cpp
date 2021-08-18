@@ -112,7 +112,7 @@ public:
         consensus.vDeployments[Consensus::DEPLOYMENT_HIVE_1_1].nStartTime = 1568937600;  // Sept 20, 2019
         consensus.vDeployments[Consensus::DEPLOYMENT_HIVE_1_1].nTimeout = 1600560000;    // Sept 20, 2020
 
-        // LitecoinCash: MinotaurX / Hive 1.2: Deployment
+        // LitecoinCash: MinotaurX+Hive1.2 / Hive 1.2: Deployment
         consensus.vDeployments[Consensus::DEPLOYMENT_MINOTAURX].bit = 7;
         consensus.vDeployments[Consensus::DEPLOYMENT_MINOTAURX].nStartTime = 2208988800;  // Jan 1, 2040
         consensus.vDeployments[Consensus::DEPLOYMENT_MINOTAURX].nTimeout = 2208988800 + 31536000;  // Start + 1 year
@@ -153,7 +153,7 @@ public:
         consensus.maxConsecutiveHiveBlocks = 2;             // Maximum hive blocks that can occur consecutively before a PoW block is required
         consensus.hiveDifficultyWindow = 36;                // How many blocks the SMA averages over in hive difficulty adjust
 
-        // LitecoinCash: MinotaurX-related consensus fields
+        // LitecoinCash: MinotaurX+Hive1.2-related consensus fields
         consensus.lwmaAveragingWindow = 90;                 // Averaging window size for LWMA diff adjust
         consensus.powTypeLimits.emplace_back(uint256S("0x00000000ffffffffffffffffffffffffffffffffffffffffffffffffffffffff"));   // sha256d limit
         consensus.powTypeLimits.emplace_back(uint256S("0x000fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"));   // MinotaurX limit
@@ -277,7 +277,7 @@ public:
         consensus.vDeployments[Consensus::DEPLOYMENT_HIVE_1_1].nStartTime = 1629206247;  // Aug 17, 2021
         consensus.vDeployments[Consensus::DEPLOYMENT_HIVE_1_1].nTimeout = 1629206247 + 31536000;  // Start + 1 year
 
-        // LitecoinCash: MinotaurX / Hive 1.2: Deployment
+        // LitecoinCash: MinotaurX+Hive1.2 / Hive 1.2: Deployment
         consensus.vDeployments[Consensus::DEPLOYMENT_MINOTAURX].bit = 7;
         consensus.vDeployments[Consensus::DEPLOYMENT_MINOTAURX].nStartTime = 1629210635;  // Aug 17, 2021 (later than above)
         consensus.vDeployments[Consensus::DEPLOYMENT_MINOTAURX].nTimeout = 1629210635 + 31536000;  // Start + 1 year
@@ -318,7 +318,7 @@ public:
         consensus.maxConsecutiveHiveBlocks = 2;             // Maximum hive blocks that can occur consecutively before a PoW block is required
         consensus.hiveDifficultyWindow = 36;                // How many blocks the SMA averages over in hive difficulty adjust
 
-        // LitecoinCash: MinotaurX-related consensus fields
+        // LitecoinCash: MinotaurX+Hive1.2-related consensus fields
         consensus.lwmaAveragingWindow = 90;                 // Averaging window size for LWMA diff adjust
         consensus.powTypeLimits.emplace_back(uint256S("0x000000ffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"));   // sha256d limit
         consensus.powTypeLimits.emplace_back(uint256S("0x000fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"));   // MinotaurX limit
