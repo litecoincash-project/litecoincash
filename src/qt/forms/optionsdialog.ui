@@ -754,7 +754,7 @@
          <item>
           <widget class="QCheckBox" name="hiveContribCF">
            <property name="text">
-            <string>Send 15% of bee fee to Community Fund</string>
+            <string>Send 15% of bee fee to Community Fund (10% before Hive 1.2 activation)</string>
            </property>
           </widget>
          </item>

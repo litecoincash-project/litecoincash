@@ -31,7 +31,7 @@ const struct VBDeploymentInfo VersionBitsDeploymentInfo[Consensus::MAX_VERSION_B
     },
     // LitecoinCash: MinotaurX: Deployment
     {
-        /*.name =*/ "minotaurx",
+        /*.name =*/ "minotaurx_and_hive_1_2",
         /*.gbt_force =*/ true,
     }
 };

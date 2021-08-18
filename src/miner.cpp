@@ -239,6 +239,7 @@ std::unique_ptr<CBlockTemplate> BlockAssembler::CreateNewBlock(const CScript& sc
         coinbaseTx.vout[0].nValue = GetBlockSubsidy(nHeight, chainparams.GetConsensus());
         if (IsMinotaurXEnabled(pindexPrev, chainparams.GetConsensus()))
             coinbaseTx.vout[0].nValue = coinbaseTx.vout[0].nValue >> 1;
+
         coinbaseTx.vout[0].nValue += nFees;
 
         coinbaseTx.vin[0].scriptSig = CScript() << nHeight << OP_0;

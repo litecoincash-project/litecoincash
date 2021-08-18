@@ -2005,12 +2005,13 @@ bool CChainState::ConnectBlock(const CBlock& block, CValidationState& state, CBl
 
     // LitecoinCash: MinotaurX: Get correct block reward
     CAmount blockReward = GetBlockSubsidy(pindex->nHeight, chainparams.GetConsensus());
-    if (IsMinotaurXEnabled(pindex, chainparams.GetConsensus())) {
+    if (IsMinotaurXEnabled(pindex->pprev, chainparams.GetConsensus())) {
         if (block.IsHiveMined(chainparams.GetConsensus()))
             blockReward += blockReward >> 1;
         else
             blockReward = blockReward >> 1;
     }
+
     blockReward += nFees;
     
     if (block.vtx[0]->GetValueOut() > blockReward)

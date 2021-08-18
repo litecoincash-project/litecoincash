@@ -719,6 +719,7 @@ bool CheckHiveProof(const CBlock* pblock, const Consensus::Params& consensusPara
     uint32_t bctFoundHeight;
     CAmount bctValue;
     CScript bctScriptPubKey;
+    bool bctWasMinotaurXEnabled;
     {
         LOCK(cs_main);
 
@@ -734,6 +735,7 @@ bool CheckHiveProof(const CBlock* pblock, const Consensus::Params& consensusPara
             bctValue = coin.out.nValue;
             bctScriptPubKey = coin.out.scriptPubKey;
             bctFoundHeight = coin.nHeight;
+            bctWasMinotaurXEnabled = IsMinotaurXEnabled(chainActive[bctFoundHeight], consensusParams);
         } else {                                                            // UTXO set isn't available when eg reindexing, so drill into block db (not too bad, since Alice put her BCT height in the coinbase tx)
             if (verbose)
                 LogPrintf("! CheckHiveProof: Warn: Using deep drill for outBeeCreation\n");
@@ -745,6 +747,7 @@ bool CheckHiveProof(const CBlock* pblock, const Consensus::Params& consensusPara
             bctFoundHeight = foundAt.nHeight;
             bctValue = bct->vout[0].nValue;
             bctScriptPubKey = bct->vout[0].scriptPubKey;
+            bctWasMinotaurXEnabled = IsMinotaurXEnabled(&foundAt, consensusParams);
         }
 
         if (communityContrib) {
@@ -782,7 +785,7 @@ bool CheckHiveProof(const CBlock* pblock, const Consensus::Params& consensusPara
             CAmount expectedDonationAmount = (bctValue + donationAmount) / consensusParams.communityContribFactor;
 
             // LitecoinCash: MinotaurX
-            if (IsMinotaurXEnabled(pindexPrev, consensusParams))
+            if (bctWasMinotaurXEnabled)
                 expectedDonationAmount += expectedDonationAmount >> 1;
 
             if (donationAmount != expectedDonationAmount) {
