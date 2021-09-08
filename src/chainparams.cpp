@@ -112,10 +112,10 @@ public:
         consensus.vDeployments[Consensus::DEPLOYMENT_HIVE_1_1].nStartTime = 1568937600;  // Sept 20, 2019
         consensus.vDeployments[Consensus::DEPLOYMENT_HIVE_1_1].nTimeout = 1600560000;    // Sept 20, 2020
 
-        // LitecoinCash: MinotaurX+Hive1.2 / Hive 1.2: Deployment
+        // LitecoinCash: MinotaurX+Hive1.2: Deployment
         consensus.vDeployments[Consensus::DEPLOYMENT_MINOTAURX].bit = 7;
-        consensus.vDeployments[Consensus::DEPLOYMENT_MINOTAURX].nStartTime = 2208988800;  // Jan 1, 2040
-        consensus.vDeployments[Consensus::DEPLOYMENT_MINOTAURX].nTimeout = 2208988800 + 31536000;  // Start + 1 year
+        consensus.vDeployments[Consensus::DEPLOYMENT_MINOTAURX].nStartTime = 1631793600;  // 1200 UTC Sept 16, 2021
+        consensus.vDeployments[Consensus::DEPLOYMENT_MINOTAURX].nTimeout = 1631793600 + 31536000;  // Start + 1 year
 
         // LitecoinCash fields
         consensus.powForkTime = 1518982404;                 // Time of PoW hash method change
@@ -220,15 +220,16 @@ public:
                 {1371112, uint256S("0x00000000de1e4e93317241177b5f1d72fc151c6e76815e9b0be4961dfd309d60")},  // LitecoinCash: Premine block
                 {1695238, uint256S("0x00000000000000238fc08340331e2735a64ac2baccdc3db0984ef65c08f658b2")},
                 {1718000, uint256S("0x0000000000000059b656b7601a20df80912e6ab8bf83c63e221cdf460adebe7b")},
+                {2500000, uint256S("0x000000000000000ac539d58f1df2a1e8e72b5d3cc43355aed7aa19056e35a5e6")}
             }
         };
 
         chainTxData = ChainTxData{
-            // Data as of block c3b156fd45db915f60b139f251cddc3f403686b0eb82a5edf57408599fda44b9 (height 1867668).
-            1578837330, // * UNIX timestamp of last known number of transactions
-            22680508,   // * total number of transactions between genesis and that timestamp
+            // Data as of block 0000000000000012e28998c604bbfc58bc0ae30523bca8a2f41320f4db2655d1 (height 2511842).
+            1631099985, // * UNIX timestamp of last known number of transactions
+            23615824,   // * total number of transactions between genesis and that timestamp
                         //   (the tx=... number in the SetBestChain debug.log lines)
-            0.0170      // * estimated number of transactions per second after that timestamp
+            0.0151      // * estimated number of transactions per second after that timestamp
         };
     }
 };
@@ -277,7 +278,7 @@ public:
         consensus.vDeployments[Consensus::DEPLOYMENT_HIVE_1_1].nStartTime = 1629206247;  // Aug 17, 2021
         consensus.vDeployments[Consensus::DEPLOYMENT_HIVE_1_1].nTimeout = 1629206247 + 31536000;  // Start + 1 year
 
-        // LitecoinCash: MinotaurX+Hive1.2 / Hive 1.2: Deployment
+        // LitecoinCash: MinotaurX+Hive1.2: Deployment
         consensus.vDeployments[Consensus::DEPLOYMENT_MINOTAURX].bit = 7;
         consensus.vDeployments[Consensus::DEPLOYMENT_MINOTAURX].nStartTime = 1629210635;  // Aug 17, 2021 (later than above)
         consensus.vDeployments[Consensus::DEPLOYMENT_MINOTAURX].nTimeout = 1629210635 + 31536000;  // Start + 1 year
