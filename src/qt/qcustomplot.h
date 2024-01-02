@@ -93,6 +93,8 @@
 //#  include <QtPrintSupport/QtPrintSupport>
 #endif
 
+#include <QPainterPath>
+
 class QCPPainter;
 class QCustomPlot;
 class QCPLayerable;
