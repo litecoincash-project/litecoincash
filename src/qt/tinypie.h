@@ -7,6 +7,8 @@
 #include <QPainter>
 #include <QPaintEvent>
 
+#include <QPainterPath>
+
 class TinyPie : public QWidget
 {
 public:
