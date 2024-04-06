@@ -24,6 +24,7 @@ enum DeploymentPos
     DEPLOYMENT_HIVE,        // LitecoinCash: Hive: Deployment
     DEPLOYMENT_HIVE_1_1,    // LitecoinCash: Hive: 1.1 Deployment
     DEPLOYMENT_MINOTAURX,   // LitecoinCash: MinotaurX+Hive1.2: Deployment
+    DEPLOYMENT_RIALTO,      // LitecoinCash: Rialto: Deployment
 
     // NOTE: Also add new deployments to VersionBitsDeploymentInfo in versionbits.cpp
     MAX_VERSION_BITS_DEPLOYMENTS
@@ -121,6 +122,14 @@ struct Params {
     // LitecoinCash: MinotaurX+Hive1.2-related consensus fields
     int64_t lwmaAveragingWindow;        // Averaging window size for LWMA diff adjust
     std::vector<uint256> powTypeLimits; // Limits for each pow type (with future-proofing space; can't pick up NUM_BLOCK_TYPES here)
+
+    // LitecoinCash: Rialto-related consensus fields
+    std::string nickCreationAddress;    // Nick creation address
+    CAmount nickCreationCost3Char;      // Minimum costs to register a nick
+    CAmount nickCreationCost4Char;
+    CAmount nickCreationCostStandard;
+    CAmount nickCreationAntiDust;       // Portion of creation cost burnt in 2nd output
+    //uint256 firstRialtoBlock;         // First block to consider for Rialto registrations (only required if launching without a UASF)
 };
 } // namespace Consensus
 

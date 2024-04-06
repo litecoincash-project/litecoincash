@@ -40,7 +40,7 @@ extern CFeeRate payTxFee;
 extern unsigned int nTxConfirmTarget;
 extern bool bSpendZeroConfChange;
 extern bool fWalletRbf;
-extern bool fWalletUnlockHiveMiningOnly;  // LitecoinCash: Hive: Unlock for hive mining purposes only.
+extern bool fWalletUnlockWithoutTransactions;  // LitecoinCash: Hive: Unlock for hive mining purposes only.
 
 static const unsigned int DEFAULT_KEYPOOL_SIZE = 1000;
 //! -paytxfee default
@@ -1008,6 +1008,9 @@ public:
 
     // LitecoinCash: Hive: Return all BCTs known by this wallet, optionally including dead bees and optionally scanning for blocks minted by bees from each BCT
     std::vector<CBeeCreationTransactionInfo> GetBCTs(bool includeDead, bool scanRewards, const Consensus::Params& consensusParams, int minHoneyConfirmations = 1);
+
+    // LitecoinCash: Rialto: Create an NCT to register a given nickname
+    bool CreateNickRegistrationTransaction(std::string nickname, CWalletTx& wtxNew, CReserveKey& reservekeyChange, CReserveKey& reservekeyNickAddress, std::string nickAddress, std::string changeAddress, std::string& strFailReason, const Consensus::Params& consensusParams);
 
     /**
      * Insert additional inputs into the transaction by

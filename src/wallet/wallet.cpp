@@ -29,6 +29,7 @@
 #include <util.h>
 #include <utilmoneystr.h>
 #include <wallet/fees.h>
+#include <rialto.h>  // LitecoinCash: Rialto: For IsValidNick()
 
 #include <assert.h>
 #include <future>
@@ -2698,8 +2699,9 @@ OutputType CWallet::TransactionChangeType(OutputType change_type, const std::vec
     // else use g_address_type for change
     return g_address_type;
 }
-
-bool fWalletUnlockHiveMiningOnly = false;  // LitecoinCash: Hive: Unlock for hive mining purposes only.
+// LitecoinCash: Hive: Unlock for hive mining purposes only.
+// LitecoinCash: Rialto: Renamed from fWalletUnlockHiveOnly to reflect usage.
+bool fWalletUnlockWithoutTransactions = false;
 
 // LitecoinCash: Hive: Return info for a single BCT known by this wallet, optionally scanning for blocks minted by bees from this BCT
 CBeeCreationTransactionInfo CWallet::GetBCT(const CWalletTx& wtx, bool includeDead, bool scanRewards, const Consensus::Params& consensusParams, int minHoneyConfirmations) {
@@ -2938,7 +2940,7 @@ bool CWallet::CreateBeeTransaction(int beeCount, CWalletTx& wtxNew, CReserveKey&
         // Make sure it's a wallet address (otherwise the change won't make it back to us)
         isminetype isMine = ::IsMine((const CKeyStore&)*this, (const CTxDestination&)destinationChange, SIGVERSION_BASE);
         if (isMine != ISMINE_SPENDABLE) {
-            strFailReason = "Error: Wallet doesn't contain the private key for the honey address specified";
+            strFailReason = "Error: Wallet doesn't contain the private key for the change address specified";
             return false;
         }
 	}
@@ -2982,6 +2984,151 @@ bool CWallet::CreateBeeTransaction(int beeCount, CWalletTx& wtxNew, CReserveKey&
             strFailReason = "Error: Insufficient balance to cover bee creation fee and transaction fee";
         else
             strFailReason = "Error: Couldn't create BCT: " + strError;
+        return false;
+    }
+
+    return true;
+}
+
+// LitecoinCash: Rialto: Create an NCT to register a given nickname
+bool CWallet::CreateNickRegistrationTransaction(std::string nickname, CWalletTx& wtxNew, CReserveKey& reservekeyChange, CReserveKey& reservekeyNickAddress, std::string nickAddress, std::string changeAddress, std::string& strFailReason, const Consensus::Params& consensusParams) {
+    CBlockIndex* pindexPrev = chainActive.Tip();
+    assert(pindexPrev != nullptr);
+
+    if (!IsRialtoEnabled(pindexPrev, consensusParams)) {
+        strFailReason = "Error: Rialto has not yet been activated on the network";
+        return false;
+    }
+
+    // Validate nick
+    if (!RialtoIsValidNickFormat(nickname)) {
+        strFailReason = "Error: Invalid nickname format; must be 3-20 characters in length and consist of lowercase letters and underscores only.";
+        return false;
+    }
+
+    // Check for pre-existing nick
+    if (RialtoNickExists(nickname)) {
+        strFailReason = "Error: This nickname is already registered.";
+        return false;
+    }
+
+    // Check available balance (note: can't check fee at this point because we don't know the tx size)
+    CAmount registrationCost = consensusParams.nickCreationCostStandard;
+    if (nickname.length() == 3)
+        registrationCost = consensusParams.nickCreationCost3Char;
+    else if (nickname.length() == 4)
+        registrationCost = consensusParams.nickCreationCost4Char;
+
+    CAmount registrationAntiDust = consensusParams.nickCreationAntiDust;
+    CAmount curBalance = GetAvailableBalance();
+    if (registrationCost > curBalance) {
+        strFailReason = "Error: Insufficient balance to pay nickname registration fee";
+        return false;
+    }
+
+    // Create a new address to associate with the nick if needed, and get the pubkey
+    CTxDestination destinationNA;
+    CPubKey pubKey;
+    if (nickAddress.empty()) {
+        if (!IsLocked())
+            TopUpKeyPool();
+
+        if (!reservekeyNickAddress.GetReservedKey(pubKey, true)) {
+            strFailReason = "Error: Couldn't create a new pubkey";
+            return false;
+        }
+
+        std::string strLabel = "Rialto Nick Address for " + nickname;
+        LearnRelatedScripts(pubKey, OUTPUT_TYPE_LEGACY);
+        destinationNA = GetDestinationForKey(pubKey, OUTPUT_TYPE_LEGACY);
+        SetAddressBook(destinationNA, strLabel, "receive");
+    } else {
+        // If a nick address was passed in, make sure it decodes
+        destinationNA = DecodeDestination(nickAddress);
+        if (!IsValidDestination(destinationNA)) {
+            strFailReason = "Error: Invalid nick address specified";
+            return false;
+        }
+
+        // Make sure it's legacy format (TX_PUBKEYHASH)
+        std::vector<std::vector<unsigned char>> vSolutions;
+        txnouttype whichType;
+        if (!Solver(GetScriptForDestination(destinationNA), whichType, vSolutions)) {
+            strFailReason = "Error: Couldn't solve scriptPubKey for nick address";
+            return false;
+        }
+        if (whichType != TX_PUBKEYHASH) {
+            strFailReason = "Error: If specifying a nick address, it must be legacy format (TX_PUBKEYHASH)";
+            return false;
+        }
+
+        // Make sure it's a wallet address
+        isminetype isMine = ::IsMine((const CKeyStore&)*this, (const CTxDestination&)destinationNA, SIGVERSION_BASE);
+        if (isMine != ISMINE_SPENDABLE) {
+            strFailReason = "Error: Wallet doesn't contain the private key for the nick address specified";
+            return false;
+        }
+
+        // OK, let's get the pub key
+        const CKeyID *keyID = boost::get<CKeyID>(&destinationNA);
+        if (!keyID) {
+            strFailReason = "Error: Can't retrieve key ID for the nick address specified";
+            return false;
+        }
+        CKey key;
+        if (!GetKey(*keyID, key)) {
+            strFailReason = "Error: Can't retrieve key for the nick address specified";
+            return false;
+        }
+        pubKey = key.GetPubKey();
+    }
+
+    // Check the custom change address is valid and on-wallet
+    CTxDestination destinationChange;
+    if (!changeAddress.empty()) {
+        destinationChange = DecodeDestination(changeAddress);
+        if (!IsValidDestination(destinationChange)) {
+            strFailReason = "Error: Invalid change address specified";
+            return false;
+        }
+
+        // Make sure it's a wallet address (otherwise the change won't make it back to us)
+        isminetype isMine = ::IsMine((const CKeyStore&)*this, (const CTxDestination&)destinationChange, SIGVERSION_BASE);
+        if (isMine != ISMINE_SPENDABLE) {
+            strFailReason = "Error: Wallet doesn't contain the private key for the change address specified";
+            return false;
+        }
+    }
+
+    // Create the registration fee output (vout[0])
+    std::vector<CRecipient> vecSend;
+    CTxDestination destinationNCF = DecodeDestination(consensusParams.nickCreationAddress);
+    CScript scriptPubKeyNCF = GetScriptForDestination(destinationNCF);
+    CRecipient recipientNCF = {scriptPubKeyNCF, registrationCost - registrationAntiDust, false};   // Subtract a small amount that will burn to make vout[1] valid
+    vecSend.push_back(recipientNCF);
+
+    // Create the reg info output (vout[1])
+    std::vector<unsigned char> nicknameBytes(nickname.begin(), nickname.end());
+    std::vector<unsigned char> pubKeyBytes(pubKey.begin(), pubKey.end());
+    CScript scriptPubKeyNA;
+    scriptPubKeyNA << OP_RETURN << pubKeyBytes << OP_NICK_CREATE << nicknameBytes;
+
+    CRecipient recipientNA = {scriptPubKeyNA, registrationAntiDust, false};    // Burn the small amount. This means non-upgraded nodes will see the transaction as valid (not dust).
+    vecSend.push_back(recipientNA);
+
+    // Create the NCT with our specified outputs, adding change address to coin control if set
+    CAmount feeRequired;
+    int changePos = 2;      // Always put any change in the last output
+    std::string strError;
+    CCoinControl coinControl;
+    if (!changeAddress.empty())
+        coinControl.destChange = destinationChange;
+
+    if (!CreateTransaction(vecSend, wtxNew, reservekeyChange, feeRequired, changePos, strError, coinControl, true)) {
+        if (registrationCost + feeRequired > curBalance)   // Now we know fee requirement, check balance fail again
+            strFailReason = "Error: Insufficient balance to cover nick registration fee and transaction fee";
+        else
+            strFailReason = "Error: Couldn't create NCT: " + strError;
         return false;
     }
 

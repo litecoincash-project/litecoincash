@@ -117,6 +117,11 @@ public:
         consensus.vDeployments[Consensus::DEPLOYMENT_MINOTAURX].nStartTime = 1631793600;  // 1200 UTC Sept 16, 2021
         consensus.vDeployments[Consensus::DEPLOYMENT_MINOTAURX].nTimeout = 1631793600 + 31536000;  // Start + 1 year
 
+        // LitecoinCash: Rialto: Deployment
+        consensus.vDeployments[Consensus::DEPLOYMENT_RIALTO].bit = 9;
+        consensus.vDeployments[Consensus::DEPLOYMENT_RIALTO].nStartTime = 2000000000;               // Far future (2033)
+        consensus.vDeployments[Consensus::DEPLOYMENT_RIALTO].nTimeout = 2000000000 + 31536000;      // Start + 1 year
+
         // LitecoinCash fields
         consensus.powForkTime = 1518982404;                 // Time of PoW hash method change
         consensus.lastScryptBlock = 1371111;                // Height of last scrypt block
@@ -157,6 +162,14 @@ public:
         consensus.lwmaAveragingWindow = 90;                 // Averaging window size for LWMA diff adjust
         consensus.powTypeLimits.emplace_back(uint256S("0x00000000ffffffffffffffffffffffffffffffffffffffffffffffffffffffff"));   // sha256d limit
         consensus.powTypeLimits.emplace_back(uint256S("0x000fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"));   // MinotaurX limit
+
+        // LitecoinCash: Rialto-related consensus fields
+        // Note: These are *NOT* finalised.
+        consensus.nickCreationAddress       = "CashCFfv8CmdWo6wyMGQWtmQnaToyhgsWr";     // Nick creation address
+        consensus.nickCreationCost3Char     = 1000000000000;                            // Minimum costs to register a nick
+        consensus.nickCreationCost4Char     = 100000000000;
+        consensus.nickCreationCostStandard  = 1000000000;
+        consensus.nickCreationAntiDust      = 10000;                                    // Portion of creation cost burnt in 2nd output
 
         // The best chain should have at least this much work.
         consensus.nMinimumChainWork = uint256S("0x00000000000000000000000000000000000000000000ba12a25c1f2da751fc96");  // LitecoinCash: 1695238
@@ -243,10 +256,10 @@ public:
         strNetworkID = "test";
         consensus.nSubsidyHalvingInterval = 840000;
         consensus.BIP16Height = 0; // always enforce BIP16
-        consensus.BIP34Height = 125;
-        consensus.BIP34Hash = uint256S("0x000000039a4ba6c3b57830718193fcbcd03d72060b45a50d23b87b779a0dbaed"); // Block hash at block 125
-        consensus.BIP65Height = 125;
-        consensus.BIP66Height = 125;
+        consensus.BIP34Height = 48;
+        consensus.BIP34Hash = uint256S("0x00000025140b1236292bc21b2afa9f3bd5c3d4a8cc1d0e3d1ba0ba7fdefc92eb"); // Block hash at block 48
+        consensus.BIP65Height = 48;
+        consensus.BIP66Height = 48;
         consensus.powLimit = uint256S("00000fffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
         consensus.nPowTargetTimespan = 3.5 * 24 * 60 * 60; // 3.5 days
         consensus.nPowTargetSpacing = 2.5 * 60;
@@ -260,32 +273,37 @@ public:
 
         // Deployment of BIP68, BIP112, and BIP113.
         consensus.vDeployments[Consensus::DEPLOYMENT_CSV].bit = 0;
-        consensus.vDeployments[Consensus::DEPLOYMENT_CSV].nStartTime = 1620393210; // May 7, 2021
-        consensus.vDeployments[Consensus::DEPLOYMENT_CSV].nTimeout = 1620393210 + 31536000; // Start + 1 year
+        consensus.vDeployments[Consensus::DEPLOYMENT_CSV].nStartTime = 1707828286;                  // Feb 13, 2024
+        consensus.vDeployments[Consensus::DEPLOYMENT_CSV].nTimeout = 1707828286 + 31536000;         // Start + 1 year
 
         // Deployment of SegWit (BIP141, BIP143, and BIP147)
         consensus.vDeployments[Consensus::DEPLOYMENT_SEGWIT].bit = 1;
-        consensus.vDeployments[Consensus::DEPLOYMENT_SEGWIT].nStartTime = 1620393210; // May 7, 2021
-        consensus.vDeployments[Consensus::DEPLOYMENT_SEGWIT].nTimeout = 1620393210 + 31536000; // Start + 1 year
+        consensus.vDeployments[Consensus::DEPLOYMENT_SEGWIT].nStartTime = 1707828286;               // Feb 13, 2024
+        consensus.vDeployments[Consensus::DEPLOYMENT_SEGWIT].nTimeout = 1707828286 + 31536000;      // Start + 1 year
 
         // LitecoinCash: Hive: Deployment
         consensus.vDeployments[Consensus::DEPLOYMENT_HIVE].bit = 7;
-        consensus.vDeployments[Consensus::DEPLOYMENT_HIVE].nStartTime = 1620393210; // May 7, 2021
-        consensus.vDeployments[Consensus::DEPLOYMENT_HIVE].nTimeout = 1620393210 + 31536000; // Start + 1 year
+        consensus.vDeployments[Consensus::DEPLOYMENT_HIVE].nStartTime = 1707828286;                 // Feb 13, 2024
+        consensus.vDeployments[Consensus::DEPLOYMENT_HIVE].nTimeout = 1707828286 + 31536000;        // Start + 1 year
 
         // LitecoinCash: Hive 1.1: Deployment
         consensus.vDeployments[Consensus::DEPLOYMENT_HIVE_1_1].bit = 9;
-        consensus.vDeployments[Consensus::DEPLOYMENT_HIVE_1_1].nStartTime = 1629206247;  // Aug 17, 2021
-        consensus.vDeployments[Consensus::DEPLOYMENT_HIVE_1_1].nTimeout = 1629206247 + 31536000;  // Start + 1 year
+        consensus.vDeployments[Consensus::DEPLOYMENT_HIVE_1_1].nStartTime = 1707828695;             // Feb 13, 2024 (but later than the above 3)
+        consensus.vDeployments[Consensus::DEPLOYMENT_HIVE_1_1].nTimeout = 1707828695 + 31536000;    // Start + 1 year
 
         // LitecoinCash: MinotaurX+Hive1.2: Deployment
         consensus.vDeployments[Consensus::DEPLOYMENT_MINOTAURX].bit = 7;
-        consensus.vDeployments[Consensus::DEPLOYMENT_MINOTAURX].nStartTime = 1629210635;  // Aug 17, 2021 (later than above)
-        consensus.vDeployments[Consensus::DEPLOYMENT_MINOTAURX].nTimeout = 1629210635 + 31536000;  // Start + 1 year
+        consensus.vDeployments[Consensus::DEPLOYMENT_MINOTAURX].nStartTime = 1707829366;            // Feb 13, 2024 (but later than the above 4!)
+        consensus.vDeployments[Consensus::DEPLOYMENT_MINOTAURX].nTimeout = 1707829366 + 31536000;   // Start + 1 year
+
+        // LitecoinCash: Rialto: Deployment
+        consensus.vDeployments[Consensus::DEPLOYMENT_RIALTO].bit = 9;
+        consensus.vDeployments[Consensus::DEPLOYMENT_RIALTO].nStartTime = 1707923363;               // Feb 14, 2024
+        consensus.vDeployments[Consensus::DEPLOYMENT_RIALTO].nTimeout = 1707923363 + 31536000;      // Start + 1 year
 
         // LitecoinCash fields
-        consensus.powForkTime = 1629204885;                 // Time of PoW hash method change (block 50)
-        consensus.lastScryptBlock = 50;                     // Height of last scrypt block
+        consensus.powForkTime = 1707828195;                 // Time of PoW hash method change (block 50)
+        consensus.lastScryptBlock = 10;                     // Height of last scrypt block
         consensus.powLimitSHA = uint256S("000000ffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");   // Initial hash target at fork
         consensus.slowStartBlocks = 40;                     // Scale post-fork block reward up over this many blocks
         consensus.premineAmount = 550000;                   // Premine amount (less than 1% of issued currency at fork time)
@@ -324,11 +342,19 @@ public:
         consensus.powTypeLimits.emplace_back(uint256S("0x000000ffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"));   // sha256d limit
         consensus.powTypeLimits.emplace_back(uint256S("0x000fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"));   // MinotaurX limit
 
+        // LitecoinCash: Rialto-related consensus fields
+        consensus.nickCreationAddress = "tKJjaPcSS3nXYBN4QmmYnSanr9oUhSXAZB";        // Nick creation address
+        consensus.nickCreationCost3Char     = 100000000000; // Minimum costs to register a nick
+        consensus.nickCreationCost4Char     = 5000000000;
+        consensus.nickCreationCostStandard  = 100000000;
+        consensus.nickCreationAntiDust      = 10000;        // Portion of creation cost burnt in 2nd output
+        //consensus.firstRialtoBlock = uint256S("0xb602f3f5093626bea32c5b9cf499de562e7a364dbe55ee3d34211e7f15502a7e");   // Block 500: First block to consider for Rialto registrations (only required if launching without a UASF)
+
         // The best chain should have at least this much work.
-        consensus.nMinimumChainWork = uint256S("0x0000000000000000000000000000000000000000000000000000002a6cc6caee");  // Block 341
+        consensus.nMinimumChainWork = uint256S("0x00000000000000000000000000000000000000000000000000000058c519899a");  // Block 412
 
         // By default assume that the signatures in ancestors of this block are valid.
-        consensus.defaultAssumeValid = uint256S("0x287a12e6c26a33f113ed18c12ae8894e34b3a8f0cb6cbfc31d74dc34ab68ce95"); // Block 341
+        consensus.defaultAssumeValid = uint256S("0x56d2eddb8cff67769e5c01eb30baa4897cc90c6c00f579a890adc8adfd608614"); // Block 412
 
         pchMessageStart[0] = 0xb6;
         pchMessageStart[1] = 0xf5;
@@ -363,14 +389,14 @@ public:
         checkpointData = (CCheckpointData) {
             {
                 {0, uint256S("4966625a4b2851d9fdee139e56211a0d88575f59ed816ff5e6a63deb4e3e29a0")},      // Genesis block
-                {100, uint256S("7103bbc0b3f0f2cffc454c228b5d626d44aaab2308a7450241f116b3eda3cf6a")},    // Last Scrypt block
-                {341, uint256S("287a12e6c26a33f113ed18c12ae8894e34b3a8f0cb6cbfc31d74dc34ab68ce95")},
+                {10, uint256S("894eeba00e8837c2d46687960596f8781f47d6aeb27a94eafb923547c053c2f8")},     // Last Scrypt block
+                {412, uint256S("56d2eddb8cff67769e5c01eb30baa4897cc90c6c00f579a890adc8adfd608614")},    // After MinotaurX+Hive1.2
             }
         };
 
-        chainTxData = ChainTxData{  // As at block 341
-            1629297115,
-            344,
+        chainTxData = ChainTxData{  // As at block 412
+            1707835909,
+            415,
             0.001
         };
     }

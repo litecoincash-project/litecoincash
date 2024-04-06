@@ -237,6 +237,9 @@ extern const char *GETBLOCKTXN;
  * @since protocol version 70014 as described by BIP 152
  */
 extern const char *BLOCKTXN;
+
+// LitecoinCash: Rialto: A Rialto message, sent in response to a getdata request.
+extern const char *RIALTO;
 };
 
 /* Get a vector of all valid message types (see above) */
@@ -263,6 +266,10 @@ enum ServiceFlags : uint64_t {
     // NODE_XTHIN means the node supports Xtreme Thinblocks
     // If this is turned off then the node will not service nor make xthin requests
     NODE_XTHIN = (1 << 4),
+
+    // LitecoinCash: Rialto: NODE_RIALTO means the node supports propagation of Rialto messages
+    NODE_RIALTO = (1 << 5),
+
     // NODE_NETWORK_LIMITED means the same as NODE_NETWORK with the limitation of only
     // serving the last 288 (2 day) blocks
     // See BIP159 for details on how this is implemented.
@@ -377,6 +384,8 @@ enum GetDataMsg
     MSG_WITNESS_BLOCK = MSG_BLOCK | MSG_WITNESS_FLAG, //!< Defined in BIP144
     MSG_WITNESS_TX = MSG_TX | MSG_WITNESS_FLAG,       //!< Defined in BIP144
     MSG_FILTERED_WITNESS_BLOCK = MSG_FILTERED_BLOCK | MSG_WITNESS_FLAG,
+
+    MSG_RIALTO = 5, // LitecoinCash: Rialto message
 };
 
 /** inv message data */

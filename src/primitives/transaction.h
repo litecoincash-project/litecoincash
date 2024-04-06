@@ -349,6 +349,9 @@ public:
     // LitecoinCash: Hive: Check if this transaction is a Bee Creation Transaction, and if so return the total bee fee paid via beeFeePaid and honey scriptPubKey via scriptPubKeyHoney
     bool IsBCT(const Consensus::Params& consensusParams, CScript scriptPubKeyBCF, CAmount* beeFeePaid = nullptr, CScript* scriptPubKeyHoney = nullptr) const;
 
+    // LitecoinCash: Rialto: Check if this transaction is a valid nick creation transaction, and optionally extract the nick and pubkey
+    bool IsNCT(const Consensus::Params& consensusParams, CScript scriptPubKeyNCF, std::string* pubKey = nullptr, std::string* nickname = nullptr) const;
+
     friend bool operator==(const CTransaction& a, const CTransaction& b)
     {
         return a.hash == b.hash;

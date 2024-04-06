@@ -105,6 +105,7 @@ namespace BCLog {
         LEVELDB     = (1 << 20),
         HIVE        = (1 << 21),    // LitecoinCash: Hive logging
         MINOTAURX   = (1 << 22),    // LitecoinCash: MinotaurX+Hive1.2
+        RIALTO      = (1 << 23),    // LitecoinCash: Rialto
         ALL         = ~(uint32_t)0,
     };
 }

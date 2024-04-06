@@ -142,6 +142,9 @@ const char* GetOpName(opcodetype opcode)
     // LitecoinCash: Hive
     case OP_BEE                    : return "OP_BEE";
 
+    // LitecoinCash: Rialto
+    case OP_NICK_CREATE            : return "OP_NICK_CREATE";
+
     case OP_INVALIDOPCODE          : return "OP_INVALIDOPCODE";
 
     // Note:

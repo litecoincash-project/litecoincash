@@ -921,6 +921,9 @@ QString formatServicesStr(quint64 mask)
             case NODE_WITNESS:
                 strList.append("WITNESS");
                 break;
+            case NODE_RIALTO:       // LitecoinCash: Rialto service bit
+                strList.append("RIALTO");
+                break;
             case NODE_XTHIN:
                 strList.append("XTHIN");
                 break;

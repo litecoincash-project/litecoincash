@@ -88,6 +88,10 @@ enum RPCErrorCode
 
     // LitecoinCash: Hive: RPC errors
     RPC_WALLET_BCT_FAIL             = -64,  // Wallet couldn't create a BCT (not enough funds, etc)
+
+    // LitecoinCash: Rialto: RPC errors
+    RPC_WALLET_NCT_FAIL             = -65,  // Wallet couldn't create an NCT (not enough funds, etc)
+    RPC_RIALTO_ERROR                = -66,  // General Rialto error (not activated yet, etc)
 };
 
 UniValue JSONRPCRequestObj(const std::string& strMethod, const UniValue& params, const UniValue& id);

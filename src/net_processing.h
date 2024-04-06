@@ -9,6 +9,7 @@
 #include <net.h>
 #include <validationinterface.h>
 #include <consensus/params.h>
+#include <rialto.h> // LitecoinCash: Rialto
 
 /** Default for -maxorphantx, maximum number of orphan transactions kept in memory */
 static const unsigned int DEFAULT_MAX_ORPHAN_TRANSACTIONS = 100;
@@ -80,5 +81,8 @@ struct CNodeStateStats {
 bool GetNodeStateStats(NodeId nodeid, CNodeStateStats &stats);
 /** Increase a node's misbehavior score. */
 void Misbehaving(NodeId nodeid, int howmuch);
+
+// LitecoinCash: Rialto: Relay a Rialto message to the network (apart from the origin node)
+void RelayRialtoMessage(const CRialtoMessage message, CConnman* connman, CNode* originNode = nullptr);
 
 #endif // BITCOIN_NET_PROCESSING_H

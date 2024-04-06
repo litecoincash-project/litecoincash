@@ -193,6 +193,19 @@ void OverviewPage::setBalance(const CAmount& balance, const CAmount& unconfirmed
     ui->labelWatchImmature->setVisible(showWatchOnlyImmature); // show watch-only immature balance
 }
 
+// LitecoinCash: Rialto
+void OverviewPage::setEncryptionStatus(int status) {
+    switch(status) {
+        case WalletModel::Unencrypted:
+        case WalletModel::Unlocked:
+            ui->unlockWalletButton->hide();
+            break;
+        case WalletModel::Locked:
+            ui->unlockWalletButton->show();
+            break;
+    }
+}
+
 // show/hide watch-only labels
 void OverviewPage::updateWatchOnlyLabels(bool showWatchOnly)
 {
@@ -247,6 +260,11 @@ void OverviewPage::setWalletModel(WalletModel *model)
 
         // LitecoinCash: Hive: Connect summary updater
         connect(model, SIGNAL(newHiveSummaryAvailable()), this, SLOT(updateHiveSummary()));
+
+        // LitecoinCash: Rialto: Connect wallet unlock button
+        if (model->getEncryptionStatus() != WalletModel::Locked)
+            ui->unlockWalletButton->hide();
+        connect(model, SIGNAL(encryptionStatusChanged(int)), this, SLOT(setEncryptionStatus(int)));
     }
 
     // update the display unit, to not use the default ("BTC")
@@ -338,4 +356,10 @@ void OverviewPage::showOutOfSyncWarning(bool fShow)
 // LitecoinCash: Hive: Handle bee button click
 void OverviewPage::on_beeButton_clicked() {
     Q_EMIT beeButtonClicked();
+}
+
+// LitecoinCash: Rialto: Handle unlock wallet button click
+void OverviewPage::on_unlockWalletButton_clicked() {
+    if(walletModel)
+        walletModel->requestUnlock(true);
 }

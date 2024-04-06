@@ -734,6 +734,36 @@ background-position:bottom right;}</string>
         </widget>
        </item>
        <item>
+        <widget class="QPushButton" name="unlockWalletButton">
+         <property name="minimumSize">
+          <size>
+           <width>100</width>
+           <height>0</height>
+          </size>
+         </property>
+         <property name="font">
+          <font>
+           <weight>75</weight>
+           <bold>true</bold>
+          </font>
+         </property>
+         <property name="toolTip">
+          <string>Click to unlock your wallet for Hive Mining and Rialto messaging. Note that this doesn't unlock the wallet for transactions; you must
+still fully unlock it to send funds.</string>
+         </property>
+         <property name="styleSheet">
+          <string notr="true">color:red;</string>
+         </property>
+         <property name="text">
+          <string>WALLET IS LOCKED: Unlock for Rialto and Hive</string>
+         </property>
+         <property name="icon">
+          <iconset resource="../bitcoin.qrc">
+           <normaloff>:/icons/lock_closed</normaloff>:/icons/lock_closed</iconset>
+         </property>
+        </widget>
+       </item>
+       <item>
         <spacer name="verticalSpacer">
          <property name="orientation">
           <enum>Qt::Vertical</enum>

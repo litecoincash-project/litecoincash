@@ -28,6 +28,8 @@
 #include <wallet/wallet.h>
 #include <wallet/walletdb.h>
 #include <wallet/walletutil.h>
+#include <rialto.h>             // LitcoinCash: Rialto
+#include <net_processing.h>     // LitcoinCash: Rialto
 
 #include <init.h>  // For StartShutdown
 
@@ -88,8 +90,8 @@ void EnsureWalletIsUnlocked(CWallet * const pwallet)
         throw JSONRPCError(RPC_WALLET_UNLOCK_NEEDED, "Error: Please enter the wallet passphrase with walletpassphrase first.");
     }
     // LitecoinCash: Hive
-    if (fWalletUnlockHiveMiningOnly) {
-        throw JSONRPCError(RPC_WALLET_UNLOCK_NEEDED, "Error: Wallet is unlocked for hive mining only, please enter the wallet passphrase with walletpassphrase first.");
+    if (fWalletUnlockWithoutTransactions) {
+        throw JSONRPCError(RPC_WALLET_UNLOCK_NEEDED, "Error: Wallet is unlocked for Hive Mining and Rialto Messaging only, please fully unlock it first.");
     }
 }
 
@@ -594,8 +596,8 @@ UniValue createbees(const JSONRPCRequest& request)
             "\nArguments:\n"
             "1. bee_count              (numeric, required) The number of bees to create.\n"
             "2. community_contrib      (boolean, optional, default=true) If true, a small percentage of bee creation cost will be paid to a community fund.\n"
-            "3. \"honey_address\"        (string, optional) The LCC address to receive rewards for blocks mined by bee(s) created in this transaction.\n"
-			"4. \"change_address\"       (string, optional, default pool address) The LCC address to receive the change.\n"
+            "3. \"honey_address\"        (string, optional) The " + CURRENCY_UNIT + " address to receive rewards for blocks mined by bee(s) created in this transaction.\n"
+			"4. \"change_address\"       (string, optional, default pool address) The " + CURRENCY_UNIT + " address to receive the change.\n"
             "\nResult:\n"
             "\"txid\"                    (string) The transaction id.\n"
             "\nExamples:\n"
@@ -649,6 +651,570 @@ UniValue createbees(const JSONRPCRequest& request)
         throw JSONRPCError(RPC_WALLET_BCT_FAIL, strError);
 }
 
+// LitecoinCash: Rialto: Register Nick
+UniValue rialtoregisternick(const JSONRPCRequest& request) {
+    CWallet * const pwallet = GetWalletForJSONRPCRequest(request);
+    if (!EnsureWalletIsAvailable(pwallet, request.fHelp))
+        return NullUniValue;
+
+    const Consensus::Params& consensusParams = Params().GetConsensus();
+
+    if (request.fHelp || request.params.size() < 1 || request.params.size() > 3)
+        throw std::runtime_error(
+            "rialtoregisternick \"nickname\" ( \"nick_address\", \"change_address\" )\n"
+            "\nRegister a nickname and associated public key in the Rialto White Pages.\n"
+            "\n"
+            "Nickname registration fees are:\n"
+            "\n"
+            "5-20 characters: " + ValueFromAmount(consensusParams.nickCreationCostStandard).getValStr() + " " + CURRENCY_UNIT + "\n"
+            "4 characters: " + ValueFromAmount(consensusParams.nickCreationCost4Char).getValStr() + " " + CURRENCY_UNIT + "\n"
+            "3 characters: " + ValueFromAmount(consensusParams.nickCreationCost3Char).getValStr() + " " + CURRENCY_UNIT + "\n"
+            + HelpRequiringPassphrase(pwallet) +
+            "\nArguments:\n"
+            "1. \"nickname\"             (string, required) The nickname to register. Must be 3-20 characters, and only lower case letters and underscores.\n"
+            "2. \"nick_address\"         (string, optional) " + CURRENCY_UNIT + " address to associate with the nickname. If not provided, a new address will be generated.\n"
+            "3. \"change_address\"       (string, optional, default pool address) The " + CURRENCY_UNIT + " address to receive the change from the registration transaction.\n"
+            "\nResult:\n"
+            "\"txid\"                    (string) The transaction id of the nick registration transaction.\n"
+            "\nExamples:\n"
+            + HelpExampleCli("rialtoregisternick", "\"b0ssman\"")
+            + HelpExampleCli("rialtoregisternick", "\"b0ssman\" \"Cfkv9pniUJ2UoWvaukgD5Ksqx5EsVLzsCk\"")
+            + HelpExampleRpc("rialtoregisternick", "\"b0ssman\"")
+            + HelpExampleRpc("rialtoregisternick", "\"b0ssman\" \"Cfkv9pniUJ2UoWvaukgD5Ksqx5EsVLzsCk\"")
+        );
+
+    RPCTypeCheckArgument(request.params[0], UniValue::VSTR);
+    std::string nickname = request.params[0].get_str();
+
+    std::string nickAddress;
+    if (!request.params[1].isNull()) {
+        RPCTypeCheckArgument(request.params[1], UniValue::VSTR);
+        if (!request.params[1].get_str().empty())
+            nickAddress = request.params[1].get_str();
+    }
+
+    std::string changeAddress;
+    if (!request.params[2].isNull()) {
+        RPCTypeCheckArgument(request.params[2], UniValue::VSTR);
+        if (!request.params[2].get_str().empty())
+            changeAddress = request.params[2].get_str();
+    }
+
+    pwallet->BlockUntilSyncedToCurrentChain();
+    LOCK2(cs_main, pwallet->cs_wallet);
+
+    CWalletTx wtxNew;
+    std::string strError;
+
+    EnsureWalletIsUnlocked(pwallet);
+
+    CReserveKey reservekeyChange(pwallet);
+    CReserveKey reservekeyNickAddress(pwallet);
+    if (pwallet->CreateNickRegistrationTransaction(nickname, wtxNew, reservekeyChange, reservekeyNickAddress, nickAddress, changeAddress, strError, Params().GetConsensus())) {
+        CValidationState state;
+        if (nickAddress.empty()) // If not using a custom nick address, keep the nick address key
+            reservekeyNickAddress.KeepKey();
+        if (!pwallet->CommitTransaction(wtxNew, reservekeyChange, g_connman.get(), state))
+            throw JSONRPCError(RPC_WALLET_NCT_FAIL, "Error: Nick creation transaction was rejected. Reason given: " + state.GetRejectReason());
+
+        return wtxNew.GetHash().GetHex();
+    } else
+        throw JSONRPCError(RPC_WALLET_NCT_FAIL, strError);
+}
+
+// LitecoinCash: Rialto: Check if a nick is registered
+UniValue rialtoisnickregistered(const JSONRPCRequest& request) {
+    CWallet * const pwallet = GetWalletForJSONRPCRequest(request);
+    if (!EnsureWalletIsAvailable(pwallet, request.fHelp))
+        return NullUniValue;
+
+    if (request.fHelp || request.params.size() != 1)
+        throw std::runtime_error(
+            "rialtoisnickregistered \"nickname\"\n"
+            "\nCheck if a given nickname is registered in the Rialto White Pages.\n"
+            + HelpRequiringPassphrase(pwallet) +
+            "\nArguments:\n"
+            "1. \"nickname\"             (string, required) The nickname to look up.\n"
+            "\nResult:\n"
+            "true|false                  (boolean) true if the nickname is registered.\n"
+            "\nExamples:\n"
+            + HelpExampleCli("rialtoisnickregistered", "\"b0ssman\"")
+            + HelpExampleRpc("rialtoisnickregistered", "\"b0ssman\"")
+        );
+
+    const Consensus::Params& consensusParams = Params().GetConsensus();
+    CBlockIndex* pindexPrev = chainActive.Tip();
+    assert(pindexPrev != nullptr);
+
+    if (!IsRialtoEnabled(pindexPrev, consensusParams))
+        throw JSONRPCError(RPC_RIALTO_ERROR, "Error: Rialto is not yet enabled on the network");
+
+    RPCTypeCheckArgument(request.params[0], UniValue::VSTR);
+    const std::string nickname = request.params[0].get_str();
+
+    return RialtoNickExists(nickname);
+}
+
+/*
+// LitecoinCash: Rialto: Retrieve a Rialto pubkey for a given nick from the White Pages DB
+UniValue rialtogetpubkey(const JSONRPCRequest& request) {
+    CWallet * const pwallet = GetWalletForJSONRPCRequest(request);
+    if (!EnsureWalletIsAvailable(pwallet, request.fHelp))
+        return NullUniValue;
+
+    if (request.fHelp || request.params.size() != 1)
+        throw std::runtime_error(
+            "rialtogetpubkey \"nickname\"\n"
+            "\nLook up a given nickname in the Rialto White Pages, and return the nick's Rialto address if found.\n"
+            + HelpRequiringPassphrase(pwallet) +
+            "\nArguments:\n"
+            "1. \"nickname\"             (string, required) The nickname to look up.\n"
+            "\nResult:\n"
+            "\"address\"                 (string) The Rialto address for the nickname.\n"
+            "\nExamples:\n"
+            + HelpExampleCli("rialtogetpubkey", "\"b0ssman\"")
+            + HelpExampleRpc("rialtogetpubkey", "\"b0ssman\"")
+        );
+
+    const Consensus::Params& consensusParams = Params().GetConsensus();
+    CBlockIndex* pindexPrev = chainActive.Tip();
+    assert(pindexPrev != nullptr);
+
+    if (!IsRialtoEnabled(pindexPrev, consensusParams))
+        throw JSONRPCError(RPC_RIALTO_ERROR, "Error: Rialto is not yet enabled on the network");
+
+    RPCTypeCheckArgument(request.params[0], UniValue::VSTR);
+    const std::string nickname = request.params[0].get_str();
+
+    // Do white pages lookup
+    std::string nickPubKey;
+    if (!RialtoGetGlobalPubKeyForNick(nickname, nickPubKey))
+        throw JSONRPCError(RPC_RIALTO_ERROR, "Error: That nickname is not registered.");
+
+    return nickPubKey;
+}
+*/
+
+// LitecoinCash: Rialto: List our own Rialto nicks from the local white pages
+UniValue rialtogetmynicks(const JSONRPCRequest& request) {
+    CWallet * const pwallet = GetWalletForJSONRPCRequest(request);
+    if (!EnsureWalletIsAvailable(pwallet, request.fHelp))
+        return NullUniValue;
+
+    if (request.fHelp || request.params.size() != 0)
+        throw std::runtime_error(
+            "rialtogetmynicks\n"
+            "\nList Rialto nicknames for which this wallet has private keys.\n"
+            "\nResult:\n"
+            "[\n"
+            "    \"nickname\"        (string) Rialto nickname\n"
+            "]\n"
+            "\nExamples:\n"
+            + HelpExampleCli("rialtogetmynicks", "")
+            + HelpExampleRpc("rialtogetmynicks", "")
+        );
+
+    const Consensus::Params& consensusParams = Params().GetConsensus();
+    CBlockIndex* pindexPrev = chainActive.Tip();
+    assert(pindexPrev != nullptr);
+
+    if (!IsRialtoEnabled(pindexPrev, consensusParams))
+        throw JSONRPCError(RPC_RIALTO_ERROR, "Error: Rialto is not yet enabled on the network");
+
+    // Do local white pages lookup
+    std::vector<std::pair<std::string, std::string>> nicks = RialtoGetAllLocal();
+
+    UniValue nickList(UniValue::VARR);
+    for (auto n : nicks)
+        nickList.push_back(n.first);
+
+    return nickList;
+}
+
+// LitecoinCash: Rialto: Rebuild the Rialto white pages databases by replaying since first Rialto block.
+UniValue rialtorebuildwhitepages(const JSONRPCRequest& request) {
+    CWallet * const pwallet = GetWalletForJSONRPCRequest(request);
+
+    if (!EnsureWalletIsAvailable(pwallet, request.fHelp))
+        return NullUniValue;
+
+    if (request.fHelp || request.params.size() != 0) {
+        throw std::runtime_error(
+            "rialtorebuildwhitepages\n"
+            "\nReplay the local blockchain from the first Rialto block, to catch missing registrations.\n"
+            "\nShould only be required if you have upgraded from 0.16.3 after Rialto activation.\n"
+            "\nResult:\n"
+            "\"ok\"                      (string) Confirmation the rebuild has finished.\n"
+            "\nExamples:\n"
+            + HelpExampleCli("rialtorebuildwhitepages", "")
+            + HelpExampleRpc("rialtorebuildwhitepages", "")
+        );
+    }
+    const Consensus::Params& consensusParams = Params().GetConsensus();
+    CBlockIndex* pindexPrev = chainActive.Tip();
+    assert(pindexPrev != nullptr);
+
+    if (!IsRialtoEnabled(pindexPrev, consensusParams))
+        throw JSONRPCError(RPC_RIALTO_ERROR, "Error: Rialto is not yet enabled on the network");
+
+    //uint256 hash = consensusParams.firstRialtoBlock;    // (Only required if launching without a UASF)
+    int activationHeight = VersionBitsTipStateSinceHeight(consensusParams, Consensus::DEPLOYMENT_RIALTO);
+    CBlockIndex* pblockindex = chainActive[activationHeight];
+    uint256 hash = pblockindex->GetBlockHash();
+
+    CValidationState state;
+
+    // Invalidate back to the first Rialto block...
+    {
+        LOCK(cs_main);
+        if (mapBlockIndex.count(hash) == 0)
+            throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Block not found");
+
+        CBlockIndex* pblockindex = mapBlockIndex[hash];
+        InvalidateBlock(state, Params(), pblockindex);
+    }
+
+    if (state.IsValid())
+        ActivateBestChain(state, Params());
+
+    if (!state.IsValid())
+        throw JSONRPCError(RPC_DATABASE_ERROR, state.GetRejectReason());
+
+    // ...and re-evaluate with the new rules
+    {
+        LOCK(cs_main);
+        if (mapBlockIndex.count(hash) == 0)
+            throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Block not found");
+
+        CBlockIndex* pblockindex = mapBlockIndex[hash];
+        ResetBlockFailureFlags(pblockindex);
+    }
+
+    CValidationState newState;
+    ActivateBestChain(newState, Params());
+
+    if (!newState.IsValid())
+        throw JSONRPCError(RPC_DATABASE_ERROR, newState.GetRejectReason());
+
+    return "ok";
+}
+
+// LitecoinCash: Rialto: Block a nick
+UniValue rialtoblocknick(const JSONRPCRequest& request) {
+   if (request.fHelp || request.params.size() != 1)
+        throw std::runtime_error(
+            "rialtoblocknick \"nickname\"\n"
+            "\nBlock a Rialto nick. All messages from that nick will be ignored.\n"
+            "\nArguments:\n"
+            "1. \"nickname\"             (string, required) The destination nickname.\n"
+            "\nResult:\n"
+            "true|false                  (boolean) true if successful.\n"
+            "\nExamples:\n"
+            + HelpExampleCli("rialtoblocknick", "b0ssman")
+            + HelpExampleRpc("rialtoblocknick", "b0ssman")
+       );
+
+    const Consensus::Params& consensusParams = Params().GetConsensus();
+    CBlockIndex* pindexPrev = chainActive.Tip();
+    assert(pindexPrev != nullptr);
+
+    if (!IsRialtoEnabled(pindexPrev, consensusParams))
+        throw JSONRPCError(RPC_RIALTO_ERROR, "Error: Rialto is not yet enabled on the network");
+
+    RPCTypeCheckArgument(request.params[0], UniValue::VSTR);
+    const std::string nickname = request.params[0].get_str();
+
+    if (RialtoNickIsLocal(nickname))
+        throw JSONRPCError(RPC_RIALTO_ERROR, "Error: Can't block one of your own nicks.");
+
+    return RialtoBlockNick(nickname);
+}
+
+// LitecoinCash: Rialto: Unblock a nick
+UniValue rialtounblocknick(const JSONRPCRequest& request) {
+   if (request.fHelp || request.params.size() != 1)
+        throw std::runtime_error(
+            "rialtounblocknick \"nickname\"\n"
+            "\nUnblock a Rialto nick. Messages from that nick will no longer be ignored.\n"
+            "\nArguments:\n"
+            "1. \"nickname\"             (string, required) The destination nickname.\n"
+            "\nResult:\n"
+            "true|false                  (boolean) true if successful.\n"
+            "\nExamples:\n"
+            + HelpExampleCli("rialtounblocknick", "b0ssman")
+            + HelpExampleRpc("rialtounblocknick", "b0ssman")
+       );
+
+    const Consensus::Params& consensusParams = Params().GetConsensus();
+    CBlockIndex* pindexPrev = chainActive.Tip();
+    assert(pindexPrev != nullptr);
+
+    if (!IsRialtoEnabled(pindexPrev, consensusParams))
+        throw JSONRPCError(RPC_RIALTO_ERROR, "Error: Rialto is not yet enabled on the network");
+
+    RPCTypeCheckArgument(request.params[0], UniValue::VSTR);
+    const std::string nickname = request.params[0].get_str();
+
+    return RialtoUnblockNick(nickname);
+}
+
+// LitecoinCash: Rialto: Check if given nick is blocked
+UniValue rialtoisnickblocked(const JSONRPCRequest& request) {
+    if (request.fHelp || request.params.size() != 1)
+        throw std::runtime_error(
+            "rialtoisnickblocked \"nickname\"\n"
+            "\nCheck whether a Rialto nick is locally blocked.\n"
+            "\nArguments:\n"
+            "1. \"nickname\"             (string, required) The destination nickname.\n"
+            "\nResult:\n"
+            "true|false                  (boolean) true if nick is blocked, false if not.\n"
+            "\nExamples:\n"
+            + HelpExampleCli("rialtoisnickblocked", "b0ssman")
+            + HelpExampleRpc("rialtoisnickblocked", "b0ssman")
+       );
+
+    const Consensus::Params& consensusParams = Params().GetConsensus();
+    CBlockIndex* pindexPrev = chainActive.Tip();
+    assert(pindexPrev != nullptr);
+
+    if (!IsRialtoEnabled(pindexPrev, consensusParams))
+        throw JSONRPCError(RPC_RIALTO_ERROR, "Error: Rialto is not yet enabled on the network");
+
+    RPCTypeCheckArgument(request.params[0], UniValue::VSTR);
+    const std::string nickname = request.params[0].get_str();
+
+    return RialtoNickIsBlocked(nickname);
+}
+
+// LitecoinCash: Rialto: Get all blocked nicks
+UniValue rialtogetblockednicks(const JSONRPCRequest& request) {
+    CWallet * const pwallet = GetWalletForJSONRPCRequest(request);
+    if (!EnsureWalletIsAvailable(pwallet, request.fHelp))
+        return NullUniValue;
+
+    if (request.fHelp || request.params.size() != 0)
+        throw std::runtime_error(
+            "rialtogetblockednicks\n"
+            "\nList all Rialto nicknames that are locally blocked.\n"
+            "\nResult:\n"
+            "[\n"
+            "    \"nickname\"        (string) Rialto nickname\n"
+            "]\n"
+            "\nExamples:\n"
+            + HelpExampleCli("rialtogetblockednicks", "")
+        );
+
+    const Consensus::Params& consensusParams = Params().GetConsensus();
+    CBlockIndex* pindexPrev = chainActive.Tip();
+    assert(pindexPrev != nullptr);
+
+    if (!IsRialtoEnabled(pindexPrev, consensusParams))
+        throw JSONRPCError(RPC_RIALTO_ERROR, "Error: Rialto is not yet enabled on the network");
+
+    // Do local white pages lookup
+    std::vector<std::string> nicks = RialtoGetBlockedNicks();
+
+    UniValue nickList(UniValue::VARR);
+    for (auto n : nicks)
+        nickList.push_back(n);
+    return nickList;
+}
+
+// LitecoinCash: Rialto: Get all incoming messages (longpoll)
+UniValue rialtogetincomingmessages(const JSONRPCRequest& request) {
+    CWallet * const pwallet = GetWalletForJSONRPCRequest(request);
+    if (!EnsureWalletIsAvailable(pwallet, request.fHelp))
+        return NullUniValue;
+
+    if (request.fHelp || request.params.size() != 0)
+        throw std::runtime_error(
+            "rialtogetincomingmessages\n"
+            "\nRetrieve all incoming Rialto messages since the last call.\n"
+            "\nMessages will then be deleted.\n"
+            "\nNote that this RPC call is designed to be longpolled. It won't\n"
+            "return until a message arrives, or a network timeout occurs.\n"
+            "\nResult:\n"
+            "[\n"
+            "  [\n"
+            "    timestamp,          (numeric) The amount in " + CURRENCY_UNIT + "\n"
+            "    \"from_nick\",      (string) The sender's Rialto nickname\n"
+            "    \"to_nick\",        (string) The recipient's Rialto nickname (you)\n"
+            "    \"message\"         (string) The plaintext message\n"
+            "  ]\n"
+            "  ,...\n"
+            "]\n"
+            "\nExamples:\n"
+            + HelpExampleCli("rialtogetincomingmessages", "")
+            + HelpExampleRpc("rialtogetincomingmessages", "")
+        );
+
+    const Consensus::Params& consensusParams = Params().GetConsensus();
+    CBlockIndex* pindexPrev = chainActive.Tip();
+    assert(pindexPrev != nullptr);
+
+    if (!IsRialtoEnabled(pindexPrev, consensusParams))
+        throw JSONRPCError(RPC_RIALTO_ERROR, "Error: Rialto is not yet enabled on the network");
+
+    // Get the messages (will block until one or more arrive)
+    std::vector<RialtoQueuedMessage> messages = RialtoGetQueuedMessages();
+
+    UniValue jsonResults(UniValue::VARR);
+    for (RialtoQueuedMessage& msg : messages) {
+        UniValue message(UniValue::VOBJ);
+
+        message.push_back(Pair("timestamp", (int64_t)msg.timestamp));
+
+        std::string fromNickStr(msg.fromNick.begin(), msg.fromNick.end());
+        std::string toNickStr(msg.toNick.begin(), msg.toNick.end());
+        std::string messageStr(msg.message.begin(), msg.message.end());
+        memory_cleanse(msg.fromNick.data(), msg.fromNick.size());
+        memory_cleanse(msg.toNick.data(), msg.toNick.size());
+        memory_cleanse(msg.message.data(), msg.message.size());
+
+        message.push_back(Pair("from_nick", fromNickStr));
+        message.push_back(Pair("to_nick", toNickStr));
+        message.push_back(Pair("message", messageStr));
+
+        jsonResults.push_back(message);
+    }
+
+    return jsonResults;
+}
+
+// LitecoinCash: Rialto: Encrypt a message
+UniValue rialtoencrypt(const JSONRPCRequest& request) {
+    CWallet * const pwallet = GetWalletForJSONRPCRequest(request);
+
+    if (!EnsureWalletIsAvailable(pwallet, request.fHelp))
+        return NullUniValue;
+
+    if (request.fHelp || request.params.size() != 3)
+        throw std::runtime_error(
+            "rialtoencrypt \"from_nick\" \"to_nick\" \"message\"\n"
+            "\nEncrypt and transmit a message to a given recipient.\n"
+            "\nNote: You must have first registered your own nick.\n"
+            + HelpRequiringPassphrase(pwallet) +
+            "\nArguments:\n"
+            "1. \"from_nick\"            (string, required) Your nickname.\n"
+            "2. \"to_nick\"              (string, required) Recipient nickname.\n"
+            "3. \"message\"              (string, required) The message to encrypt.\n"
+            "\nResult:\n"
+            "\"timestamp\"               (numeric) Sent timestamp as encoded in Rialto envelopes.\n"
+            "\nExamples:\n"
+            + HelpExampleCli("rialtoencrypt", "\"b0ssman\" \"very secret message\"")
+        );
+
+    // Check we're connected
+    if (!g_connman)
+        throw JSONRPCError(RPC_CLIENT_P2P_DISABLED, "Error: Peer-to-peer functionality missing or disabled");
+
+    if (g_connman->GetNodeCount(CConnman::CONNECTIONS_ALL) == 0)
+        throw JSONRPCError(RPC_CLIENT_NOT_CONNECTED, "LitecoinCash is not connected!");
+
+    // Check Rialto's activated
+    const Consensus::Params& consensusParams = Params().GetConsensus();
+    CBlockIndex* pindexPrev = chainActive.Tip();
+    assert(pindexPrev != nullptr);
+
+    if (!IsRialtoEnabled(pindexPrev, consensusParams))
+        throw JSONRPCError(RPC_RIALTO_ERROR, "Error: Rialto is not yet enabled on the network");
+
+    // Check that we're supporting Rialto relaying
+    if ((g_connman->GetLocalServices() & NODE_RIALTO) != NODE_RIALTO)
+        throw JSONRPCError(RPC_RIALTO_ERROR, "Error: Rialto relay is not enabled on this node.");
+
+    // Check we have Rialto-supporting peers
+    bool rialtoPeers = false;
+    g_connman->ForEachNode([&](CNode* pnode) {
+        if ((pnode->nServices & NODE_RIALTO) == NODE_RIALTO) {
+            rialtoPeers = true;
+            return;
+        }
+    });
+    if (!rialtoPeers)
+        throw JSONRPCError(RPC_RIALTO_ERROR, "Error: No connected peers support Rialto relaying.");
+
+    // Check if wallet's locked
+    if (pwallet->IsLocked())
+        throw JSONRPCError(RPC_RIALTO_ERROR, "Error: Can't encrypt messages with locked wallet; unlock it first.");
+
+    // Get sender and recipient nick
+    RPCTypeCheckArgument(request.params[0], UniValue::VSTR);
+    const std::string nickFrom = request.params[0].get_str();
+    if (nickFrom == "")
+        throw JSONRPCError(RPC_RIALTO_ERROR, "Error: No sender nick provided.");
+
+    RPCTypeCheckArgument(request.params[1], UniValue::VSTR);
+    const std::string nickTo = request.params[1].get_str();
+    if (nickTo == "")
+        throw JSONRPCError(RPC_RIALTO_ERROR, "Error: No destination nick provided.");
+
+    // Check destination nick exists
+    if (!RialtoNickExists(nickTo))
+        throw JSONRPCError(RPC_RIALTO_ERROR, "Error: Recipient's nickname is not registered.");
+
+    RPCTypeCheckArgument(request.params[2], UniValue::VSTR);
+    const std::string message = request.params[2].get_str();
+    if (message == "")
+        throw JSONRPCError(RPC_RIALTO_ERROR, "Error: No message provided.");
+
+    // Looks good, let's go!
+    std::string ciphertext;
+    std::string err;
+    uint32_t timestamp;
+    if (!RialtoEncryptMessage(nickFrom, nickTo, message, ciphertext, timestamp, err))
+        throw JSONRPCError(RPC_RIALTO_ERROR, "Error: Couldn't encrypt: " + err);
+
+    // ... and broadcast.
+    CRialtoMessage msg(ciphertext);
+    RelayRialtoMessage(msg, g_connman.get());
+
+    return (int64_t)timestamp;
+}
+
+/*
+// LitecoinCash: Rialto: Decrypt a message
+UniValue rialtodecrypt(const JSONRPCRequest& request) {
+    CWallet * const pwallet = GetWalletForJSONRPCRequest(request);
+
+    if (!EnsureWalletIsAvailable(pwallet, request.fHelp))
+        return NullUniValue;
+
+    if (request.fHelp || request.params.size() != 1)
+        throw std::runtime_error(
+            "rialtodecrypt \"hexstring\"\n"
+            "\nTry and decrypt a Rialto message with all local Rialto keys. If successful,\n"
+            "message will be added to local received message queue, ready to retrieve with\n"
+            "rialtogetincomingmessages.\n"
+            + HelpRequiringPassphrase(pwallet) +
+            "\nArguments:\n"
+            "1. \"hex\"                  (string, required) The encrypted message.\n"
+            "\nExamples:\n"
+            + HelpExampleCli("rialtodecrypt", "\"448fd4a36c59ce96b2d7ea3dc9cdcf5a023b71895f44e0c88f2b48f36d8ef660e3e16fd03cf9a9c7fa4b7f4db56636f4aa51ad748db68b5476e50cc69749b8748a3081b929c920aa5fdcd3235c977c9122ba9d97b8d6478dd17aeeacb3169e6c9e\"")
+        );
+
+    if (pwallet->IsLocked())
+        throw JSONRPCError(RPC_RIALTO_ERROR, "Error: Can't decrypt messages with locked wallet; unlock it first.");
+
+    const Consensus::Params& consensusParams = Params().GetConsensus();
+    CBlockIndex* pindexPrev = chainActive.Tip();
+    assert(pindexPrev != nullptr);
+
+    if (!IsRialtoEnabled(pindexPrev, consensusParams))
+        throw JSONRPCError(RPC_RIALTO_ERROR, "Error: Rialto is not yet enabled on the network");
+
+    RPCTypeCheckArgument(request.params[0], UniValue::VSTR);
+    const std::string message = request.params[0].get_str();
+
+    std::string err;
+    if (RialtoDecryptMessage(message, err))
+        return NullUniValue;
+    else
+        return err;
+
+    throw JSONRPCError(RPC_RIALTO_ERROR, "Error: Couldn't decrypt.");
+}
+*/
 
 // LitecoinCash: Hive: Get network hive info
 UniValue getnetworkhiveinfo(const JSONRPCRequest& request)
@@ -2755,7 +3321,7 @@ static void LockWallet(CWallet* pWallet)
 // LitecoinCash: Hive: Callback to set the wallet back to unlocked only for hive on walletpassphrase timeout
 static void SetHiveOnly()
 {
-	fWalletUnlockHiveMiningOnly = true;
+	fWalletUnlockWithoutTransactions = true;
 }
 
 UniValue walletpassphrase(const JSONRPCRequest& request)
@@ -2815,7 +3381,7 @@ UniValue walletpassphrase(const JSONRPCRequest& request)
 
 	// LitecoinCash: Hive: Support locked wallets
 	bool wasUnLockedHiveOnly = false;
-	if (!pwallet->IsLocked() && fWalletUnlockHiveMiningOnly) {
+	if (!pwallet->IsLocked() && fWalletUnlockWithoutTransactions) {
 		pwallet->Lock();
 		wasUnLockedHiveOnly = true;
 	}
@@ -2833,7 +3399,7 @@ UniValue walletpassphrase(const JSONRPCRequest& request)
 
     pwallet->TopUpKeyPool();
 	
-	fWalletUnlockHiveMiningOnly = false;	
+	fWalletUnlockWithoutTransactions = false;
 	
 	// LitecoinCash: Hive: Support locked wallets
 	if (!wasUnLockedHiveOnly) {
@@ -2846,9 +3412,10 @@ UniValue walletpassphrase(const JSONRPCRequest& request)
     return NullUniValue;
 }
 
-
 // LitecoinCash: Hive: Unlock wallet for hiving only (Prevent trivial sendmoney attack if user OS account compromised)
-UniValue walletpassphrasehiveonly(const JSONRPCRequest& request)
+// LitecoinCash: Rialto: Change name to walletpassphrase_hive_rialto, and update description.
+// Leave walletpassphrasehiveonly as a synonym for backwards compatibility.
+UniValue walletpassphrase_hive_rialto(const JSONRPCRequest& request)
 {
     CWallet * const pwallet = GetWalletForJSONRPCRequest(request);
     if (!EnsureWalletIsAvailable(pwallet, request.fHelp)) {
@@ -2857,19 +3424,20 @@ UniValue walletpassphrasehiveonly(const JSONRPCRequest& request)
 
     if (request.fHelp || request.params.size() != 1) {
         throw std::runtime_error(
-            "walletpassphrasehiveonly \"passphrase\"\n"
-            "\nStores the wallet decryption key in memory indefinitely for hive mining use only.\n"
-            "This is needed to enable the hive mining thread to run. Performing other transactions related to\n" 
-			"private keys such as sending litecoincash, is not enabled and will require you to run\n"
-			"walletpassphrase separately.\n"
+            "walletpassphrase_hive_rialto \"passphrase\"\n"
+            "\nStores the wallet decryption key in memory indefinitely for hive mining and Rialto use only.\n"
+            "This is needed to enable the hive mining thread to run, and to decrypt Rialto messages.\n"
+            "\n"
+            "Performing other transactions related to private keys, such as sending " + CURRENCY_UNIT + ", is not enabled\n"
+            "and will require you to run walletpassphrase separately.\n"
             "\nArguments:\n"
             "1. \"passphrase\"       (string, required) The wallet passphrase\n"
             
             "\nExamples:\n"
-            "\nUnlock the wallet for hive mining only\n"
-            + HelpExampleCli("walletpassphrasehiveonly", "\"my pass phrase\"") +
+            "\nUnlock the wallet for hive mining and Rialto only\n"
+            + HelpExampleCli("walletpassphrase_hive_rialto", "\"my pass phrase\"") +
             "\nAs json rpc call\n"
-            + HelpExampleRpc("walletpassphrasehiveonly", "\"my pass phrase\"")
+            + HelpExampleRpc("walletpassphrase_hive_rialto", "\"my pass phrase\"")
         );
     }
 
@@ -2878,7 +3446,7 @@ UniValue walletpassphrasehiveonly(const JSONRPCRequest& request)
     if (request.fHelp)
         return true;
     if (!pwallet->IsCrypted()) {
-        throw JSONRPCError(RPC_WALLET_WRONG_ENC_STATE, "Error: running with an unencrypted wallet, but walletpassphrasehiveonly was called.");
+        throw JSONRPCError(RPC_WALLET_WRONG_ENC_STATE, "Error: running with an unencrypted wallet, but walletpassphrase_hive_rialto was called.");
     }
 
     // Note that the walletpassphrase is stored in request.params[0] which is not mlock()ed
@@ -2896,11 +3464,11 @@ UniValue walletpassphrasehiveonly(const JSONRPCRequest& request)
     }
     else
         throw std::runtime_error(
-            "walletpassphrasehiveonly <passphrase>\n"
-            "Stores the wallet decryption key in memory indefinitely for hive mining use only.");
+            "walletpassphrase_hive_rialto <passphrase>\n"
+            "Stores the wallet decryption key in memory indefinitely for hive mining and Rialto use only.");
 
     pwallet->TopUpKeyPool();
-	fWalletUnlockHiveMiningOnly = true;
+	fWalletUnlockWithoutTransactions = true;
 
     return NullUniValue;
 }
@@ -2954,6 +3522,40 @@ UniValue walletpassphrasechange(const JSONRPCRequest& request)
     }
 
     return NullUniValue;
+}
+
+// LitecoinCash: Rialto: Get the current wallet lock status
+UniValue walletcandecryptrialto(const JSONRPCRequest& request)
+{
+    CWallet * const pwallet = GetWalletForJSONRPCRequest(request);
+    if (!EnsureWalletIsAvailable(pwallet, request.fHelp)) {
+        return NullUniValue;
+    }
+
+    if (request.fHelp || request.params.size() != 0) {
+        throw std::runtime_error(
+            "walletcandecryptrialto\n"
+            "\nChecks if the wallet can decrypt Rialto messages (is\n"
+            "unencrypted, or is fully unlocked, or is unlocked\n"
+            "for Hive Mining and Rialto only).\n"
+            "\nResult:\n"
+            "true|false                  (boolean) Whether the command was successful or not\n"
+
+            "\nExamples:\n"
+            + HelpExampleCli("walletcandecryptrialto", "")
+            + HelpExampleRpc("walletcandecryptrialto", "")
+        );
+    }
+
+    LOCK2(cs_main, pwallet->cs_wallet);
+
+    if (request.fHelp)
+        return true;
+
+    if (!pwallet->IsCrypted())
+        return true;
+
+    return (!pwallet->IsLocked());
 }
 
 
@@ -4064,6 +4666,18 @@ static const CRPCCommand commands[] =
     { "wallet",             "getnetworkhiveinfo",       &getnetworkhiveinfo,       {"include_graph"} },                                     // LitecoinCash: Hive: Get current bee populations across whole network
     { "wallet",             "getbeecreationtxid",       &getbeecreationtxid,       {"honey_txid"} },                                        // LitecoinCash: Hive: Return BCT tx id for a honey transaction in this wallet
     { "wallet",             "getbctinfo",               &getbctinfo,               {"bct_txid","min_honey_confirms"} },                     // LitecoinCash: Hive: Return hive info for a single BCT
+    { "wallet",             "rialtoregisternick",       &rialtoregisternick,       {"nickname","nick_address","change_address"} },          // LitecoinCash: Rialto: Register a nick
+//    { "wallet",             "rialtogetpubkey",          &rialtogetpubkey,          {"nickname"} },                                          // LitecoinCash: Rialto: Get a Rialto pubkey
+    { "wallet",             "rialtoisnickregistered",   &rialtoisnickregistered,   {"nickname"} },                                          // LitecoinCash: Rialto: Check if given nick is registered
+    { "wallet",             "rialtogetmynicks",         &rialtogetmynicks,         {} },                                                    // LitecoinCash: Rialto: Get my Rialto addresses for outgoing messages
+    { "wallet",             "rialtorebuildwhitepages",  &rialtorebuildwhitepages,  {} },                                                    // LitecoinCash: Rialto: Rebuild the Rialto white pages DBs
+    { "wallet",             "rialtoencrypt",            &rialtoencrypt,            {"sender_nick","destination_nick","message"} },          // LitecoinCash: Rialto: Encrypt a message
+//    { "wallet",             "rialtodecrypt",            &rialtodecrypt,            {"hexstring"} },                                         // LitecoinCash: Rialto: Try to decrypt a message with all available Rialto private keys
+    { "wallet",             "rialtoblocknick",          &rialtoblocknick,          {"nickname"} },                                          // LitecoinCash: Rialto: Block given nick
+    { "wallet",             "rialtounblocknick",        &rialtounblocknick,        {"nickname"} },                                          // LitecoinCash: Rialto: Unblock given nick
+    { "wallet",             "rialtoisnickblocked",      &rialtoisnickblocked,      {"nickname"} },                                          // LitecoinCash: Rialto: Check if given nick is blocked
+    { "wallet",             "rialtogetblockednicks",    &rialtogetblockednicks,    {} },                                                    // LitecoinCash: Rialto: Get all blocked nicks
+    { "wallet",             "rialtogetincomingmessages",&rialtogetincomingmessages,{} },                                                    // LitecoinCash: Rialto: Get incoming messages
     { "rawtransactions",    "fundrawtransaction",       &fundrawtransaction,       {"hexstring","options","iswitness"} },
     { "hidden",             "resendwallettransactions", &resendwallettransactions, {} },
     { "wallet",             "abandontransaction",       &abandontransaction,       {"txid"} },
@@ -4110,10 +4724,12 @@ static const CRPCCommand commands[] =
     { "wallet",             "setaccount",               &setaccount,               {"address","account"} },
     { "wallet",             "settxfee",                 &settxfee,                 {"amount"} },
     { "wallet",             "signmessage",              &signmessage,              {"address","message"} },
+    { "wallet",             "walletcandecryptrialto",   &walletcandecryptrialto,   {} },                            // LitecoinCash: Rialto: Get wallet lock status
     { "wallet",             "walletlock",               &walletlock,               {} },
     { "wallet",             "walletpassphrasechange",   &walletpassphrasechange,   {"oldpassphrase","newpassphrase"} },
     { "wallet",             "walletpassphrase",         &walletpassphrase,         {"passphrase","timeout"} },
-	{ "wallet",             "walletpassphrasehiveonly", &walletpassphrasehiveonly, {"passphrase"} },
+	{ "wallet",             "walletpassphrasehiveonly", &walletpassphrase_hive_rialto, {"passphrase"} },            // LitecoinCash: Rialto: Renamed for hive and rialto
+	{ "wallet",             "walletpassphrase_hive_rialto", &walletpassphrase_hive_rialto, {"passphrase"} },        // LitecoinCash: Rialto: Leaving old synonym for backwards compat
     { "wallet",             "removeprunedfunds",        &removeprunedfunds,        {"txid"} },
     { "wallet",             "rescanblockchain",         &rescanblockchain,         {"start_height", "stop_height"} },
 

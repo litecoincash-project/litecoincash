@@ -679,9 +679,11 @@ public:
 
     // inventory based relay
     CRollingBloomFilter filterInventoryKnown;
+    CRollingBloomFilter filterInventoryKnownRialto; // LitecoinCash: Rialto
     // Set of transaction ids we still have to announce.
     // They are sorted by the mempool before relay, so the order is not important.
     std::set<uint256> setInventoryTxToSend;
+    std::set<uint256> rialtoInventoryToSend; // LitecoinCash: Rialto
     // List of block ids we still have announce.
     // There is no final sorting before sending, as they are always sent immediately
     // and in the order requested.
@@ -824,6 +826,11 @@ public:
         if (inv.type == MSG_TX) {
             if (!filterInventoryKnown.contains(inv.hash)) {
                 setInventoryTxToSend.insert(inv.hash);
+            }
+        // LitecoinCash: Rialto
+        } else if (inv.type == MSG_RIALTO) {
+            if (!filterInventoryKnownRialto.contains(inv.hash)) {
+                rialtoInventoryToSend.insert(inv.hash);
             }
         } else if (inv.type == MSG_BLOCK) {
             vInventoryBlockToSend.push_back(inv.hash);

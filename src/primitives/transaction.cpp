@@ -8,6 +8,7 @@
 #include <hash.h>
 #include <tinyformat.h>
 #include <utilstrencodings.h>
+#include <pubkey.h> // LitecoinCash: Rialto
 
 std::string COutPoint::ToString() const
 {
@@ -124,6 +125,69 @@ bool CTransaction::IsBCT(const Consensus::Params& consensusParams, CScript scrip
     // Grab fee
     if (beeFeePaid)
         *beeFeePaid = vout[0].nValue;
+
+    return true;
+}
+
+// LitecoinCash: Rialto: Check if this transaction is a valid nick creation transaction, and optionally extract the nick and pubkey
+bool CTransaction::IsNCT(const Consensus::Params& consensusParams, CScript scriptPubKeyNCF, std::string* pubKey, std::string* nickname) const {
+    // Enough outputs?
+    if (vout.size() < 2)
+        return false;
+
+    // vout[0] pays to nick creation address?
+    if (vout[0].scriptPubKey != scriptPubKeyNCF)
+        return false;
+
+    // vout[1] burns enough?
+    if (vout[1].nValue < consensusParams.nickCreationAntiDust)
+        return false;
+
+    // Check for vout[1] correct size
+    if (vout[1].scriptPubKey.size() < 40)   // Minimum size for OP_RETURN <byte count> <pubKey[33]> OP_NICK_CREATE <byte count> <nick[3]>
+        return false;
+
+    // Check OP_RETURN and OP_NICK_CREATE are in the right place
+    if (vout[1].scriptPubKey[0] != OP_RETURN || vout[1].scriptPubKey[35] != OP_NICK_CREATE)
+        return false;
+
+    // Grab pubkey
+    CScript s(&vout[1].scriptPubKey[2], &vout[1].scriptPubKey[35]);
+    std::string p = HexStr(s);
+
+    // Check pubkey is valid
+    CPubKey k(ParseHex(p));
+    if (!k.IsFullyValid())
+        return false;
+
+    // Grab nickname
+    std::string n = std::string(vout[1].scriptPubKey.begin() + 37, vout[1].scriptPubKey.end());
+
+    // Too short/long?
+    if (n.length() < 3 || n.length() > 20)
+        return false;
+
+    // Has anything other than lowercase letters and underscores?
+    for (char c : n)
+        if ((c < 'a' || c > 'z') && c != '_')
+            return false;
+
+    // vout[0] pays enough?
+    CAmount registrationCost = consensusParams.nickCreationCostStandard;
+    if (n.length() == 3)
+        registrationCost = consensusParams.nickCreationCost3Char;
+    else if (n.length() == 4)
+        registrationCost = consensusParams.nickCreationCost4Char;
+
+    if (vout[0].nValue < registrationCost - consensusParams.nickCreationAntiDust)
+        return false;
+
+    // Pass to calling code if wanted
+    if (nickname)
+        *nickname = n;
+
+    if (pubKey)
+        *pubKey = p;
 
     return true;
 }

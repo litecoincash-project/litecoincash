@@ -19,6 +19,7 @@ public:
     {
         CSerializedNetMsg msg;
         msg.command = std::move(sCommand);
+        // First 3 bytes: fd  42  01
         CVectorWriter{ SER_NETWORK, nFlags | nVersion, msg.data, 0, std::forward<Args>(args)... };
         return msg;
     }

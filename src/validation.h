@@ -34,6 +34,7 @@ class CBlockIndex;
 class CBlockTreeDB;
 class CChainParams;
 class CCoinsViewDB;
+class CRialtoWhitePagesDB;    // Litecoin Cash: Rialto
 class CInv;
 class CConnman;
 class CScriptCheck;
@@ -145,6 +146,8 @@ static const unsigned int MAX_BLOCKS_TO_ANNOUNCE = 8;
 static const int MAX_UNCONNECTING_HEADERS = 10;
 
 static const bool DEFAULT_PEERBLOOMFILTERS = true;
+
+static const bool DEFAULT_RIALTO_SUPPORT = true; // LitecoinCash: Rialto
 
 /** Default for -stopatheight */
 static const int DEFAULT_STOPATHEIGHT = 0;
@@ -417,6 +420,21 @@ bool IsHive11Enabled(const CBlockIndex* pindexPrev, const Consensus::Params& par
 // LitecoinCash: MinotaurX+Hive1.2: Check if MinotaurX is activated at given point
 bool IsMinotaurXEnabled(const CBlockIndex* pindexPrev, const Consensus::Params& params);
 
+// LitecoinCash: Rialto: Check if Rialto is activated at given point
+bool IsRialtoEnabled(const CBlockIndex* pindexPrev, const Consensus::Params& params);
+
+// LitecoinCash: Rialto: Helpers to provide access to the white pages instance)
+bool RialtoNickExists(const std::string nick);                                      // Check if a nick is already registered in global white pages
+bool RialtoNickIsLocal(const std::string nick);                                     // Check if a nick is ours
+bool RialtoGetGlobalPubKeyForNick(const std::string nick, std::string &pubKey);     // Grab rialto pubkey for given nick from global white pages
+//bool RialtoGetLocalPubKeyForNick(const std::string nick, std::string &pubKey);      // Grab rialto pubkey for given nick from local white pages
+std::vector<std::pair<std::string, std::string>> RialtoGetAllLocal();               // Get all local nick/pubkey pairs
+bool RialtoNickIsBlocked(const std::string nick);                                   // Check if a given nick is blocked
+bool RialtoBlockNick(const std::string nick);                                       // Block given nick
+bool RialtoUnblockNick(const std::string nick);                                     // Unblock given nick
+std::vector<std::string> RialtoGetBlockedNicks();                                   // Get all blocked nicks
+bool RialtoGetLocalPrivKeyForNick(const std::string nick, unsigned char* privKey);  // Get privkey for given nick from local wallet. Should only be used with a secure allocator!
+
 // LitecoinCash: Hive: Get the well-rooted deterministic random string (see whitepaper section 4.1)
 std::string GetDeterministicRandString(const CBlockIndex* pindexPrev);
 
@@ -466,6 +484,15 @@ extern std::unique_ptr<CCoinsViewCache> pcoinsTip;
 
 /** Global variable that points to the active block tree (protected by cs_main) */
 extern std::unique_ptr<CBlockTreeDB> pblocktree;
+
+// LitecoinCash: Rialto: Global variable that points to the active global whitepages DB (protected by cs_main)
+extern std::unique_ptr<CRialtoWhitePagesDB> pwhitepages;
+
+// LitecoinCash: Rialto: Global variable that points to the active DB of our nicks (protected by cs_main)
+extern std::unique_ptr<CRialtoWhitePagesDB> pmynicks;
+
+// LitecoinCash: Rialto: Global variable that points to the active DB of blocked nicks (protected by cs_main)
+extern std::unique_ptr<CRialtoWhitePagesDB> pblockednicks;
 
 /**
  * Return the spend height, which is one more than the inputs.GetBestBlock().

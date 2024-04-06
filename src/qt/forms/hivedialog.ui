@@ -72,7 +72,7 @@
         <string/>
        </property>
        <property name="pixmap">
-        <pixmap resource="//wsl$/Ubuntu-20.04/home/fell/litecoincash/src/qt/bitcoin.qrc">:/icons/warning</pixmap>
+        <pixmap>:/icons/warning</pixmap>
        </property>
        <property name="scaledContents">
         <bool>true</bool>
@@ -284,7 +284,7 @@ background-color:white;}</string>
            <string>Create bees</string>
           </property>
           <property name="icon">
-           <iconset resource="//wsl$/Ubuntu-20.04/home/fell/litecoincash/src/qt/bitcoin.qrc">
+           <iconset>
             <normaloff>:/icons/bee</normaloff>:/icons/bee</iconset>
           </property>
          </widget>
@@ -304,17 +304,17 @@ background-color:white;}</string>
            </font>
           </property>
           <property name="toolTip">
-           <string>Click to unlock your wallet so that your bees can work. Note this only unlocks the wallet for hivemining; you must
+           <string>Click to unlock your wallet for Hive Mining and Rialto messaging. Note that this doesn't unlock the wallet for transactions; you must
 still fully unlock it to send funds.</string>
           </property>
           <property name="styleSheet">
            <string notr="true">color:red;</string>
           </property>
           <property name="text">
-           <string>WALLET IS LOCKED: Unlock for hive mining</string>
+           <string>WALLET IS LOCKED: Unlock for Rialto and Hive</string>
           </property>
           <property name="icon">
-           <iconset resource="//wsl$/Ubuntu-20.04/home/fell/litecoincash/src/qt/bitcoin.qrc">
+           <iconset>
             <normaloff>:/icons/lock_closed</normaloff>:/icons/lock_closed</iconset>
           </property>
          </widget>
@@ -334,7 +334,7 @@ still fully unlock it to send funds.</string>
            <string>Hive mining options</string>
           </property>
           <property name="icon">
-           <iconset resource="//wsl$/Ubuntu-20.04/home/fell/litecoincash/src/qt/bitcoin.qrc">
+           <iconset>
             <normaloff>:/icons/options</normaloff>:/icons/options</iconset>
           </property>
          </widget>
@@ -751,7 +751,7 @@ to make back their cost. At values below 100, it is expected at all bees will be
             <string>Refresh</string>
            </property>
            <property name="icon">
-            <iconset resource="//wsl$/Ubuntu-20.04/home/fell/litecoincash/src/qt/bitcoin.qrc">
+            <iconset>
              <normaloff>:/icons/refresh</normaloff>:/icons/refresh</iconset>
            </property>
           </widget>
@@ -1312,7 +1312,7 @@ your hive's chance of mining any given hivemineable block.</string>
   </customwidget>
  </customwidgets>
  <resources>
-  <include location="//wsl$/Ubuntu-20.04/home/fell/litecoincash/src/qt/bitcoin.qrc"/>
+  <include location="../../../../../../wsl$/Ubuntu-20.04/home/fell/litecoincash/src/qt/bitcoin.qrc"/>
  </resources>
  <connections/>
 </ui>

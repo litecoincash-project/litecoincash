@@ -127,6 +127,10 @@ bool IsStandardTx(const CTransaction& tx, std::string& reason, const bool witnes
         if (CScript::IsBCTScript(txout.scriptPubKey, scriptPubKeyBCF))      // LitecoinCash: Hive
             return true;                                                    // LitecoinCash: Hive
 
+        // LitecoinCash: Rialto: Not needed :) Nick registrations are valid transactions to unupgraded clients.
+        //if (tx.IsNCT(consensusParams, scriptPubKeyNCF))                   // LitecoinCash: Rialto
+        //    return true;                                                  // LitecoinCash: Rialto
+
         if (!::IsStandard(txout.scriptPubKey, whichType, witnessEnabled)) {
             reason = "scriptpubkey";
             return false;

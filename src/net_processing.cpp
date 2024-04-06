@@ -29,6 +29,7 @@
 #include <util.h>
 #include <utilmoneystr.h>
 #include <utilstrencodings.h>
+#include <rialto.h> // LitecoinCash: Rialto
 
 #if defined(NDEBUG)
 # error "LitecoinCash cannot be compiled without assertions."
@@ -135,6 +136,13 @@ namespace {
     MapRelay mapRelay;
     /** Expiration-time ordered list of (expire time, relay map entry) pairs, protected by cs_main). */
     std::deque<std::pair<int64_t, MapRelay::iterator>> vRelayExpiration;
+
+    // LitecoinCash: Rialto
+    // Message relay map, protected by cs_main
+    typedef std::map<uint256, std::string> MapMessageRelay;
+    MapMessageRelay mapMessageRelay;
+    // Expiration-time ordered list of (expire time, message relay map entry) pairs, protected by cs_main.
+    std::deque<std::pair<int64_t, MapMessageRelay::iterator>> vMessageRelayExpiration;
 } // namespace
 
 namespace {
@@ -988,6 +996,9 @@ bool static AlreadyHave(const CInv& inv) EXCLUSIVE_LOCKS_REQUIRED(cs_main)
     case MSG_BLOCK:
     case MSG_WITNESS_BLOCK:
         return mapBlockIndex.count(inv.hash);
+    // LitecoinCash: Rialto
+    case MSG_RIALTO:
+        return (mapMessageRelay.count(inv.hash) > 0);
     }
     // Don't know what it is, just say we already got one
     return true;
@@ -1000,6 +1011,35 @@ static void RelayTransaction(const CTransaction& tx, CConnman* connman)
     {
         pnode->PushInventory(inv);
     });
+}
+
+// LitecoinCash: Rialto: Relay a Rialto message by adding to Rialto inventory for all peers apart from origin
+void RelayRialtoMessage(const CRialtoMessage message, CConnman* connman, CNode* originNode)
+{
+    if ((connman->GetLocalServices() & NODE_RIALTO) != NODE_RIALTO) {
+        LogPrint(BCLog::RIALTO, "Not relaying Rialto message as we don't support relaying.\n");
+        return;
+    }
+
+    // Push the message to all peer inventories
+    uint256 hash = message.GetHash();
+    CInv inv(MSG_RIALTO, hash);
+    connman->ForEachNode([&inv, originNode](CNode* pnode)
+    {
+        // Only push if not the origin, and the peer supports Rialto relaying
+        if (pnode != originNode && (pnode->nServices & NODE_RIALTO) == NODE_RIALTO) {
+            LogPrint(BCLog::RIALTO, "Relaying Rialto message to peer=%d\n", pnode->GetId());
+            pnode->PushInventory(inv);
+        }
+    });
+
+    // Add to mapMessageRelay now
+    int64_t nNow = GetTime();
+
+    LOCK(cs_main);
+    auto ret = mapMessageRelay.insert(std::make_pair(hash, message.GetMessage()));
+    if (ret.second)
+        vMessageRelayExpiration.push_back(std::make_pair(nNow + RIALTO_MESSAGE_TTL, ret.first));
 }
 
 static void RelayAddress(const CAddress& addr, bool fReachable, CConnman* connman)
@@ -1190,7 +1230,9 @@ void static ProcessGetData(CNode* pfrom, const Consensus::Params& consensusParam
     {
         LOCK(cs_main);
 
-        while (it != pfrom->vRecvGetData.end() && (it->type == MSG_TX || it->type == MSG_WITNESS_TX)) {
+        // LitecoinCash: Rialto
+        //while (it != pfrom->vRecvGetData.end() && (it->type == MSG_TX || it->type == MSG_WITNESS_TX)) {
+        while (it != pfrom->vRecvGetData.end() && (it->type == MSG_TX || it->type == MSG_WITNESS_TX || it->type == MSG_RIALTO)) {
             if (interruptMsgProc)
                 return;
             // Don't bother if send buffer is too full to respond anyway
@@ -1200,24 +1242,34 @@ void static ProcessGetData(CNode* pfrom, const Consensus::Params& consensusParam
             const CInv &inv = *it;
             it++;
 
-            // Send stream from relay memory
-            bool push = false;
-            auto mi = mapRelay.find(inv.hash);
-            int nSendFlags = (inv.type == MSG_TX ? SERIALIZE_TRANSACTION_NO_WITNESS : 0);
-            if (mi != mapRelay.end()) {
-                connman->PushMessage(pfrom, msgMaker.Make(nSendFlags, NetMsgType::TX, *mi->second));
-                push = true;
-            } else if (pfrom->timeLastMempoolReq) {
-                auto txinfo = mempool.info(inv.hash);
-                // To protect privacy, do not answer getdata using the mempool when
-                // that TX couldn't have been INVed in reply to a MEMPOOL request.
-                if (txinfo.tx && txinfo.nTime <= pfrom->timeLastMempoolReq) {
-                    connman->PushMessage(pfrom, msgMaker.Make(nSendFlags, NetMsgType::TX, *txinfo.tx));
-                    push = true;
+            if (inv.type == MSG_RIALTO) {
+                // Send stream from message relay memory
+                auto mi = mapMessageRelay.find(inv.hash);
+                if (mi != mapMessageRelay.end()) {
+                    connman->PushMessage(pfrom, msgMaker.Make(NetMsgType::RIALTO, mi->second));
+                } else {
+                    vNotFound.push_back(inv);
                 }
-            }
-            if (!push) {
-                vNotFound.push_back(inv);
+            } else {
+                // Send stream from relay memory
+                bool push = false;
+                auto mi = mapRelay.find(inv.hash);
+                int nSendFlags = (inv.type == MSG_TX ? SERIALIZE_TRANSACTION_NO_WITNESS : 0);
+                if (mi != mapRelay.end()) {
+                    connman->PushMessage(pfrom, msgMaker.Make(nSendFlags, NetMsgType::TX, *mi->second));
+                    push = true;
+                } else if (pfrom->timeLastMempoolReq) {
+                    auto txinfo = mempool.info(inv.hash);
+                    // To protect privacy, do not answer getdata using the mempool when
+                    // that TX couldn't have been INVed in reply to a MEMPOOL request.
+                    if (txinfo.tx && txinfo.nTime <= pfrom->timeLastMempoolReq) {
+                        connman->PushMessage(pfrom, msgMaker.Make(nSendFlags, NetMsgType::TX, *txinfo.tx));
+                        push = true;
+                    }
+                }
+                if (!push) {
+                    vNotFound.push_back(inv);
+                }
             }
 
             // Track requests for our stuff.
@@ -1900,7 +1952,14 @@ bool static ProcessMessage(CNode* pfrom, const std::string& strCommand, CDataStr
             else
             {
                 pfrom->AddInventoryKnown(inv);
-                if (fBlocksOnly) {
+                // LitecoinCash: Rialto: Don't allow Rialto messages from peers claiming to not support relaying, or unsolicited Rialto invs if we're not supporting relaying
+                if ((connman->GetLocalServices() & NODE_RIALTO) != NODE_RIALTO) {
+                    LogPrint(BCLog::NET, "rialto message (%s) inv sent, but we're not relaying. peer=%d\n", inv.hash.ToString(), pfrom->GetId());
+                    Misbehaving(pfrom->GetId(), 20);
+                } else if (inv.type == MSG_RIALTO && (pfrom->nServices & NODE_RIALTO) != NODE_RIALTO) {
+                    LogPrint(BCLog::NET, "rialto message (%s) inv sent, but they're not relaying. peer=%d\n", inv.hash.ToString(), pfrom->GetId());
+                        Misbehaving(pfrom->GetId(), 20);
+                } else if (fBlocksOnly) {
                     LogPrint(BCLog::NET, "transaction (%s) inv sent in violation of protocol peer=%d\n", inv.hash.ToString(), pfrom->GetId());
                 } else if (!fAlreadyHave && !fImporting && !fReindex && !IsInitialBlockDownload()) {
                     pfrom->AskFor(inv);
@@ -2848,6 +2907,37 @@ bool static ProcessMessage(CNode* pfrom, const std::string& strCommand, CDataStr
         // message would be undesirable as we transmit it ourselves.
     }
 
+    // LitecoinCash: Rialto
+    else if (strCommand == NetMsgType::RIALTO) {
+        // Check if Rialto enabled on this node
+        if ((g_connman->GetLocalServices() & NODE_RIALTO) != NODE_RIALTO) {
+            LogPrintf("Rialto: Message received from peer=%d, but Rialto is not enabled on this node. Punishing peer.\n", pfrom->GetId());
+            Misbehaving(pfrom->GetId(), 20);
+            return true;
+        }
+
+        std::string strMsg;
+        vRecv >> LIMITED_STRING(strMsg, (RIALTO_L3_MAX_LENGTH * 2));    // (2x for hex encoding)
+
+        // Check envelope validity
+        std::string err;
+        if (!RialtoParseLayer3Envelope(strMsg, err)) {
+            LogPrintf("Rialto: Invalid message received from peer=%d; punishing. Error: %s\n", pfrom->GetId(), err);
+            Misbehaving(pfrom->GetId(), 20);
+            return true;
+        }
+
+        // Valid: Try to decrypt.
+        if (RialtoDecryptMessage(strMsg, err))
+            LogPrint(BCLog::RIALTO, "Rialto: Message added to receive queue\n");
+        else
+            LogPrint(BCLog::RIALTO, "Rialto: Message decrypt error: %s\n", err);
+
+        // ... and innocently relay
+        CRialtoMessage message(strMsg);
+        RelayRialtoMessage(message, connman, pfrom);
+    }
+
     else {
         // Ignore unknown commands for extensibility
         LogPrint(BCLog::NET, "Unknown command \"%s\" from peer=%d\n", SanitizeString(strCommand), pfrom->GetId());
@@ -3420,6 +3510,20 @@ bool PeerLogicValidation::SendMessages(CNode* pto, std::atomic<bool>& interruptM
         {
             LOCK(pto->cs_inventory);
             vInv.reserve(std::max<size_t>(pto->vInventoryBlockToSend.size(), INVENTORY_BROADCAST_MAX));
+
+            // LitecoinCash: Rialto: Add messages (Note: We already gated on their NODE_RIALTO support when adding to the inventory)
+            for (const uint256& hash : pto->rialtoInventoryToSend)
+                vInv.push_back(CInv(MSG_RIALTO, hash));
+            pto->rialtoInventoryToSend.clear();
+
+            // Expire old relay messages
+            // LitecoinCash: Rialto: TODO: Maybe not here though? Also figure out why joining clients don't get these (we never add to their inventories I guess)
+            /*
+            while (!vMessageRelayExpiration.empty() && vMessageRelayExpiration.front().first < nNow)
+            {
+                mapMessageRelay.erase(vMessageRelayExpiration.front().second);
+                vMessageRelayExpiration.pop_front();
+            }*/
 
             // Add blocks
             for (const uint256& hash : pto->vInventoryBlockToSend) {

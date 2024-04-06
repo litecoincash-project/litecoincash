@@ -40,6 +40,7 @@ public:
 public Q_SLOTS:
     void setBalance(const CAmount& balance, const CAmount& unconfirmedBalance, const CAmount& immatureBalance,
                     const CAmount& watchOnlyBalance, const CAmount& watchUnconfBalance, const CAmount& watchImmatureBalance);
+    void setEncryptionStatus(int status);       // LitecoinCash: Rialto
 
 Q_SIGNALS:
     void transactionClicked(const QModelIndex &index);
@@ -69,6 +70,7 @@ private Q_SLOTS:
     void handleOutOfSyncWarningClicks();
     void on_beeButton_clicked();                // LitecoinCash: Hive: Bee button handler
     void updateHiveSummary();                   // LitecoinCash: Hive: Update hive summary
+    void on_unlockWalletButton_clicked();       // LitecoinCash: Rialto: Unlock wallet button handler
 };
 
 #endif // BITCOIN_QT_OVERVIEWPAGE_H

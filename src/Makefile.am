@@ -74,6 +74,7 @@ endif
 
 .PHONY: FORCE check-symbols check-security
 # bitcoin core #
+# LitecoinCash: Rialto: Added rialto.h
 BITCOIN_CORE_H = \
   addrdb.h \
   addrman.h \
@@ -174,7 +175,8 @@ BITCOIN_CORE_H = \
   zmq/zmqabstractnotifier.h \
   zmq/zmqconfig.h\
   zmq/zmqnotificationinterface.h \
-  zmq/zmqpublishnotifier.h
+  zmq/zmqpublishnotifier.h \
+  rialto.h
 
 
 obj/build.h: FORCE
@@ -184,6 +186,7 @@ obj/build.h: FORCE
 libbitcoin_util_a-clientversion.$(OBJEXT): obj/build.h
 
 # server: shared between bitcoind and bitcoin-qt
+# LitecoinCash: Rialto: Added rialto.cpp
 libbitcoin_server_a_CPPFLAGS = $(AM_CPPFLAGS) $(BITCOIN_INCLUDES) $(MINIUPNPC_CPPFLAGS) $(EVENT_CFLAGS) $(EVENT_PTHREADS_CFLAGS)
 libbitcoin_server_a_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
 libbitcoin_server_a_SOURCES = \
@@ -225,6 +228,7 @@ libbitcoin_server_a_SOURCES = \
   validation.cpp \
   validationinterface.cpp \
   versionbits.cpp \
+  rialto.cpp \
   $(BITCOIN_CORE_H)
 
 if ENABLE_ZMQ

@@ -18,7 +18,7 @@
 #include <QMessageBox>
 #include <QPushButton>
 
-extern bool fWalletUnlockHiveMiningOnly;   // LitecoinCash: Hive: Encrypted wallet support
+extern bool fWalletUnlockWithoutTransactions;   // LitecoinCash: Hive: Encrypted wallet support
 
 AskPassphraseDialog::AskPassphraseDialog(Mode _mode, QWidget *parent) :
     QDialog(parent),
@@ -44,7 +44,7 @@ AskPassphraseDialog::AskPassphraseDialog(Mode _mode, QWidget *parent) :
 
 	// LitecoinCash: Hive: Support unlocking for hive only
 	ui->hiveOnlyLabel->hide();
-	fHiveOnly = fWalletUnlockHiveMiningOnly;
+	fHiveOnly = fWalletUnlockWithoutTransactions;
 
     switch(mode)
     {
@@ -171,7 +171,7 @@ void AskPassphraseDialog::accept()
         }
         else
         {
-            fWalletUnlockHiveMiningOnly = fHiveOnly;   // LitecoinCash: Hive: Support locked wallets
+            fWalletUnlockWithoutTransactions = fHiveOnly;   // LitecoinCash: Hive: Support locked wallets
             QDialog::accept(); // Success
         }
         break;

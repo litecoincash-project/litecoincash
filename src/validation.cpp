@@ -39,6 +39,11 @@
 #include <utilstrencodings.h>
 #include <validationinterface.h>
 #include <warnings.h>
+#include <rialto.h>         // LitecoinCash: Rialto
+#include <script/ismine.h>  // LitecoinCash: Rialto
+#include <rpc/server.h>     // LitecoinCash: Rialto
+#include <wallet/wallet.h>  // LitecoinCash: Rialto
+#include <base58.h>         // LitecoinCash: Rialto: for DecodeDestination()
 
 #include <future>
 #include <sstream>
@@ -282,6 +287,9 @@ CBlockIndex* FindForkInGlobalIndex(const CChain& chain, const CBlockLocator& loc
 std::unique_ptr<CCoinsViewDB> pcoinsdbview;
 std::unique_ptr<CCoinsViewCache> pcoinsTip;
 std::unique_ptr<CBlockTreeDB> pblocktree;
+std::unique_ptr<CRialtoWhitePagesDB> pwhitepages;     // LitecoinCash: Rialto: Global white pages
+std::unique_ptr<CRialtoWhitePagesDB> pmynicks;        // LitecoinCash: Rialto: Our own nicks
+std::unique_ptr<CRialtoWhitePagesDB> pblockednicks;   // LitecoinCash: Rialto: Blocked nicks we'll ignore messages from
 
 enum FlushStateMode {
     FLUSH_STATE_NONE,
@@ -2232,7 +2240,8 @@ void static UpdateTip(const CBlockIndex *pindexNew, const CChainParams& chainPar
             int32_t nExpectedVersion = ComputeBlockVersion(pindex->pprev, chainParams.GetConsensus());
             // LitecoinCash: MinotaurX+Hive1.2: Mask out blocktype before checking for possible unknown upgrade
             if (IsMinotaurXEnabled(pindex, chainParams.GetConsensus())) {
-                if ((pindex->nVersion & 0xFF00FFFF) != nExpectedVersion && !pindex->GetBlockHeader().IsHiveMined(chainParams.GetConsensus()))
+                // LitecoinCash: Rialto: Added explicit cast to prevent compile warning
+                if ((pindex->nVersion & (int32_t)0xFF00FFFF) != nExpectedVersion && !pindex->GetBlockHeader().IsHiveMined(chainParams.GetConsensus()))
                     ++nUpgraded;
             } else {
                 // LitecoinCash: Hive: Don't warn about unexpected version in Hivemined blocks
@@ -2282,6 +2291,27 @@ bool CChainState::DisconnectTip(CValidationState& state, const CChainParams& cha
     // Apply the block atomically to the chain state.
     int64_t nStart = GetTimeMicros();
     {
+        // LitecoinCash: Rialto
+        // This could be annoying IF we allow a change-of-key operation on a per-nick basis, but it's otherwise safe to just delete from the White Pages
+        CScript scriptPubKeyNCF = GetScriptForDestination(DecodeDestination(chainparams.GetConsensus().nickCreationAddress));
+
+        // undo transactions in reverse order
+        for (int i = block.vtx.size() - 1; i >= 0; i--) {
+            const CTransaction &tx = *(block.vtx[i]);
+            std::string nick;
+            if (tx.IsNCT(chainparams.GetConsensus(), scriptPubKeyNCF, nullptr, &nick)) {
+                if (pwhitepages->NickExists(nick)) {
+                    pwhitepages->RemoveNick(nick);
+                    LogPrint(BCLog::RIALTO, "Rialto: Removed nick %s from global white pages (disconnected tip)\n", nick);
+                }
+
+                if (pmynicks->NickExists(nick)) {
+                    pmynicks->RemoveNick(nick);
+                    LogPrint(BCLog::RIALTO, "Rialto: Removed nick %s from local white pages (disconnected tip)\n", nick);
+                }
+            }
+        }
+
         CCoinsViewCache view(pcoinsTip.get());
         assert(view.GetBestBlock() == pindexDelete->GetBlockHash());
         if (DisconnectBlock(block, pindexDelete, view) != DISCONNECT_OK)
@@ -2436,6 +2466,60 @@ bool CChainState::ConnectTip(CValidationState& state, const CChainParams& chainp
     // Remove conflicting transactions from the mempool.;
     mempool.removeForBlock(blockConnecting.vtx, pindexNew->nHeight);
     disconnectpool.removeForBlock(blockConnecting.vtx);
+
+    // LitecoinCash: Rialto: Check for nick creation txs
+    if (IsRialtoEnabled(pindexNew, chainparams.GetConsensus())) {
+        CScript scriptPubKeyNCF = GetScriptForDestination(DecodeDestination(chainparams.GetConsensus().nickCreationAddress));
+
+        for (unsigned long int i = 0; i < blockConnecting.vtx.size(); i++) {
+            const CTransaction &tx = *(blockConnecting.vtx[i]);
+            std::string nickname;
+            std::string pubKeyStr;
+            if (tx.IsNCT(chainparams.GetConsensus(), scriptPubKeyNCF, &pubKeyStr, &nickname)) {
+                if (pwhitepages->NickExists(nickname)) {
+                    // If they're trying to overwrite an existing nick, disallow it.
+                    // Potentially in the future, we could allow them to change their pubkey
+                    // if they sign an intent with the previous (existing) key.
+                    LogPrint(BCLog::RIALTO, "Rialto: Ignoring duplicate registration for nick %s\n", nickname);
+                } else {
+                    CPubKey pubKey(ParseHex(pubKeyStr));
+                    CTxDestination rialtoDestination = GetDestinationForKey(pubKey, OUTPUT_TYPE_LEGACY);
+                    //std::string addr = EncodeDestination(rialtoDestination);
+
+                    // Add to white pages
+                    pwhitepages->SetPubKeyForNick(nickname, pubKeyStr);
+                    LogPrint(BCLog::RIALTO, "Rialto: Added nick %s to global whitepages\n", nickname);
+
+                    // Check if it's one of OUR nicks, and add to local WP if so
+                    const CKeyID *keyID = boost::get<CKeyID>(&rialtoDestination);
+                    if (keyID) {
+                        CKey key;
+
+                        JSONRPCRequest request;
+                        CWallet * const pwallet = GetWalletForJSONRPCRequest(request);
+                        if (!EnsureWalletIsAvailable(pwallet, true)) {
+                            LogPrintf("Rialto: ERROR: Can't check if nick %s is local; wallet unavailable\n", nickname);
+                            continue;
+                        }
+
+                        if (pwallet->IsLocked()) {
+                            LogPrintf("Rialto: ERROR: Can't check if nick %s is local; wallet locked\n", nickname);
+                            continue;
+                        }
+
+                        if (pwallet->GetKey(*keyID, key)) {
+                            pmynicks->SetPubKeyForNick(nickname, pubKeyStr);
+                            LogPrint(BCLog::RIALTO, "Rialto: Added our nick %s to local whitepages\n", nickname);
+                        } else {
+                            // Don't report an error if it's not one of our nicks
+                            //LogPrintf("~ Rialto: ERROR: Couldn't get priv key for our nick %s; NOT added to local whitepages.\n", nickname);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     // Update chainActive & related variables.
     chainActive.SetTip(pindexNew);
     UpdateTip(pindexNew, chainparams);
@@ -3123,6 +3207,109 @@ bool IsMinotaurXEnabled(const CBlockIndex* pindexPrev, const Consensus::Params& 
 {
     LOCK(cs_main);
     return (VersionBitsState(pindexPrev, params, Consensus::DEPLOYMENT_MINOTAURX, versionbitscache) == THRESHOLD_ACTIVE);
+}
+
+// LitecoinCash: Rialto: Check if Rialto is activated at given point
+bool IsRialtoEnabled(const CBlockIndex* pindexPrev, const Consensus::Params& params) {
+    LOCK(cs_main);
+    return (VersionBitsState(pindexPrev, params, Consensus::DEPLOYMENT_RIALTO, versionbitscache) == THRESHOLD_ACTIVE);
+}
+
+// LitecoinCash: Rialto: Check if a nick is already registered (helper to provide access to White Pages DB)
+bool RialtoNickExists(const std::string nick) {
+    LOCK(cs_main);
+    return pwhitepages->NickExists(nick);
+}
+
+// LitecoinCash: Rialto: Check if a nick is ours
+bool RialtoNickIsLocal(const std::string nick) {
+    LOCK(cs_main);
+    return pmynicks->NickExists(nick);
+}
+
+// LitecoinCash: Rialto: Grab rialto pubkey for given nick, using global White Pages
+bool RialtoGetGlobalPubKeyForNick(const std::string nick, std::string &pubKey) {
+    LOCK(cs_main);
+    return pwhitepages->GetPubKeyForNick(nick, pubKey);
+}
+
+/*
+// LitecoinCash: Rialto: Grab rialto pubkey for given nick, using local White Pages
+bool RialtoGetLocalPubKeyForNick(const std::string nick, std::string &pubKey) {
+    LOCK(cs_main);
+    return pmynicks->GetPubKeyForNick(nick, pubKey);
+}
+*/
+
+// LitecoinCash: Rialto: Get all local nick/pubkey pairs
+std::vector<std::pair<std::string, std::string>> RialtoGetAllLocal() {
+    LOCK(cs_main);
+    return pmynicks->GetAll();
+}
+
+// LitecoinCash: Rialto: Check if a given nick is blocked
+bool RialtoNickIsBlocked(const std::string nick) {
+    LOCK(cs_main);
+    return pblockednicks->NickExists(nick);
+}
+
+// LitecoinCash: Rialto: Block given nick
+bool RialtoBlockNick(const std::string nick) {
+    LOCK(cs_main);
+    return pblockednicks->SetPubKeyForNick(nick, "blocked");
+}
+
+// LitecoinCash: Rialto: Unblock given nick
+bool RialtoUnblockNick(const std::string nick) {
+    LOCK(cs_main);
+    return pblockednicks->RemoveNick(nick);
+}
+
+// LitecoinCash: Rialto: Get all blocked nicks
+std::vector<std::string> RialtoGetBlockedNicks() {
+    LOCK(cs_main);
+    std::vector<std::pair<std::string, std::string>> blockedNickPairs = pblockednicks->GetAll();
+
+    std::vector<std::string> blockedNicks;
+    for (const auto& pair : blockedNickPairs)
+        blockedNicks.push_back(pair.first);
+
+    return blockedNicks;
+}
+
+// LitecoinCash: Rialto: Grab rialto privkey for given nick, using local White Pages and wallet.
+// Should only be used to get a privkey into a buffer secured with a secure memory allocator.
+bool RialtoGetLocalPrivKeyForNick(const std::string nick, unsigned char* privKey) {
+    LOCK(cs_main);
+
+    // Get the pubkey for the given nick
+    std::string pubKeyStr;
+    if (!pmynicks->GetPubKeyForNick(nick, pubKeyStr))
+        return false;
+
+    // Get the privkey for the given pubkey
+    CPubKey pubKey(ParseHex(pubKeyStr));
+    CTxDestination destination = GetDestinationForKey(pubKey, OUTPUT_TYPE_LEGACY);
+
+    const CKeyID *keyID = boost::get<CKeyID>(&destination);
+    if (!keyID)
+        return false;
+
+    JSONRPCRequest request;
+    CWallet * const pwallet = GetWalletForJSONRPCRequest(request);
+    if (!EnsureWalletIsAvailable(pwallet, true))
+        return false;
+
+    if (pwallet->IsLocked())
+        return false;
+
+    CKey key;
+    if (pwallet->GetKey(*keyID, key)) {
+        memcpy(privKey, key.begin(), 32);
+        return true;
+    }
+
+    return false;
 }
 
 // LitecoinCash: Hive: Get the well-rooted deterministic random string (see whitepaper section 4.1)

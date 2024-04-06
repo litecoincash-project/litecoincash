@@ -184,6 +184,9 @@ enum opcodetype
     // LitecoinCash: Hive
     OP_BEE = 0xbe,
 
+    // LitecoinCash: Rialto
+    OP_NICK_CREATE = 0xbf,
+
     // template matching params
     OP_SMALLINTEGER = 0xfa,
     OP_PUBKEYS = 0xfb,
@@ -194,7 +197,7 @@ enum opcodetype
 };
 
 // Maximum value that an opcode can be
-static const unsigned int MAX_OPCODE = OP_NOP10;
+static const unsigned int MAX_OPCODE = OP_NICK_CREATE;  // LitecoinCash: Rialto
 
 const char* GetOpName(opcodetype opcode);
 

@@ -43,6 +43,7 @@
 #include <util.h>
 #include <utilmoneystr.h>
 #include <validationinterface.h>
+#include <rialto.h>   // LitecoinCash: Rialto
 #ifdef ENABLE_WALLET
 #include <wallet/init.h>
 #endif
@@ -399,6 +400,7 @@ std::string HelpMessage(HelpMessageMode mode)
     strUsage += HelpMessageOpt("-onion=<ip:port>", strprintf(_("Use separate SOCKS5 proxy to reach peers via Tor hidden services (default: %s)"), "-proxy"));
     strUsage += HelpMessageOpt("-onlynet=<net>", _("Only connect to nodes in network <net> (ipv4, ipv6 or onion)"));
     strUsage += HelpMessageOpt("-permitbaremultisig", strprintf(_("Relay non-P2SH multisig (default: %u)"), DEFAULT_PERMIT_BAREMULTISIG));
+    strUsage += HelpMessageOpt("-rialto", strprintf(_("Support Rialto message propagration (default: %u)"), DEFAULT_RIALTO_SUPPORT));   // LitecoinCash: Rialto
     strUsage += HelpMessageOpt("-peerbloomfilters", strprintf(_("Support filtering of blocks and transaction with bloom filters (default: %u)"), DEFAULT_PEERBLOOMFILTERS));
     strUsage += HelpMessageOpt("-port=<port>", strprintf(_("Listen for connections on <port> (default: %u or testnet: %u)"), defaultChainParams->GetDefaultPort(), testnetChainParams->GetDefaultPort()));
     strUsage += HelpMessageOpt("-proxy=<ip:port>", _("Connect through SOCKS5 proxy"));
@@ -1116,6 +1118,10 @@ bool AppInitParameterInteraction()
     if (gArgs.GetBoolArg("-peerbloomfilters", DEFAULT_PEERBLOOMFILTERS))
         nLocalServices = ServiceFlags(nLocalServices | NODE_BLOOM);
 
+    // LitecoinCash: Rialto
+    if (gArgs.GetBoolArg("-rialto", DEFAULT_RIALTO_SUPPORT))
+        nLocalServices = ServiceFlags(nLocalServices | NODE_RIALTO);
+
     if (gArgs.GetArg("-rpcserialversion", DEFAULT_RPC_SERIALIZE_VERSION) < 0)
         return InitError("rpcserialversion must be non-negative.");
 
@@ -1448,6 +1454,19 @@ bool AppInitMain()
                 // fails if it's still open from the previous loop. Close it first:
                 pblocktree.reset();
                 pblocktree.reset(new CBlockTreeDB(nBlockTreeDBCache, false, fReset));
+
+                // LitecoinCash: Rialto
+                pwhitepages.reset();                                                            // Close in case it's open
+                pwhitepages.reset(new CRialtoWhitePagesDB("whitepages", 2 * 1048576, false, fReset)); // Create or open the global whitepages database
+
+                pmynicks.reset();                                                               // Close in case it's open
+                pmynicks.reset(new CRialtoWhitePagesDB("mynicks", 1048576, false, fReset));           // Create or open the local whitepages database
+
+                pblockednicks.reset();                                                          // Close in case it's open
+                pblockednicks.reset(new CRialtoWhitePagesDB("blocklist", 1048576, false, fReset));    // Create or open the local blocked nicks database
+
+                // LitecoinCash: Rialto: MAYBEDO: Have an allow list too. The first message(s) we get from a contact, hold until we allow.
+                // This, along with the normal CHAT notifications, depends on being able to push to the client....
 
                 if (fReset) {
                     pblocktree->WriteReindexing(true);
