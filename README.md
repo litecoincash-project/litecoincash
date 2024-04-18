@@ -1,12 +1,13 @@
 Litecoin Cash Core integration/staging tree
 ===========================================
-
-What is Litecoin Cash?
-----------------------
-
-Litecoin Cash is a fork of Litecoin supporting SHA256 PoW and Hive Mining. For full details, as well as prebuilt binaries for Windows, Mac and Linux, please visit our website at https://litecoinca.sh.
+## What is Litecoin Cash?
+<img src="https://static.coinpaprika.com/coin/lcc-litecoin-cash/logo.png?rev=10557741" width="150">
+Litecoin Cash (LCC) is a cryptocurrency forked from Litecoin Coin. Users are able to generate LCC through the process of mining: both Pow SHA256  MinotaurX and Hive Mining, an agent-based mining system, which requires no specialized hardware: anything from a Raspberry Pi to your normal desktop PC is fine. Existing SHA256 miners and pools are not affected. Proof-of-work blocks are accepted by the network at any time, so SHA256 mining hardware never needs to stand idle. 51% network attacks are rendered ineffective. Worker bees won't mint blocks on an attacker's private chain, so they cannot accumulate enough chain work to perform a 51% hashpower attack. The mining process will be democratized, as any LCC holder can become a beekeeper.
+Litecoin Cash is a fork of Litecoin supporting SHA256 MinotaurX PoW and Hive Mining. For full details, as well as prebuilt binaries for Windows, Mac and Linux, please visit our website at https://litecoinca.sh.
 
 Litecoin Cash Core is the full node software that makes up the backbone of the LCC network.
+
+### Join our <a href="https://discordapp.com/invite/F2nZXnW"><img src="https://img.shields.io/discord/406306237618061313.svg?style=flat&label=Discord%20Community&color=7289DA" alt="Discord"/></a>
 
 License
 -------
